@@ -1,0 +1,591 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Plus, Filter, Download, FileText, RotateCcw, Edit, Calendar } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import OrderForm from './OrderForm';
+import OrderFormEdit from './OrderFormEdit';
+import toast from 'react-hot-toast';
+import DataTable from '../../components/DataTable';
+import SearchableDropdown from '../../components/SearchableDropdown';
+import ModalView from '../../components/ModalView';
+import { generateKarigarHTML, generateCustomerHTML } from './pdf/pdfGenerators';
+
+const toYYYYMMDD = (val) => {
+  if (!val) return '';
+  const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (match) return `${match[3]}-${match[2]}-${match[1]}`;
+  return val;
+};
+
+const toDDMMYYYY = (val) => {
+  if (!val) return '';
+  const match = val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) return `${match[3]}/${match[2]}/${match[1]}`;
+  return val;
+};
+
+const parseDateString = (str) => {
+  if (!str) return null;
+  let match = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
+    if (!isNaN(d.getTime())) return d;
+  }
+  match = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (match) {
+    const p1 = parseInt(match[1], 10);
+    const p2 = parseInt(match[2], 10);
+    const y = parseInt(match[3], 10);
+    if (p1 > 12) {
+      const d = new Date(y, p2 - 1, p1);
+      if (!isNaN(d.getTime())) return d;
+    } else if (p2 > 12) {
+      const d = new Date(y, p1 - 1, p2);
+      if (!isNaN(d.getTime())) return d;
+    } else {
+      const d = new Date(y, p2 - 1, p1);
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  match = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (match) {
+    const p1 = parseInt(match[1], 10);
+    const p2 = parseInt(match[2], 10);
+    const y = parseInt(match[3], 10);
+    if (p1 > 12) {
+      const d = new Date(y, p2 - 1, p1);
+      if (!isNaN(d.getTime())) return d;
+    } else if (p2 > 12) {
+      const d = new Date(y, p1 - 1, p2);
+      if (!isNaN(d.getTime())) return d;
+    } else {
+      const d = new Date(y, p2 - 1, p1);
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d;
+  return null;
+};
+
+const OrderDetails = () => {
+  const [orders, setOrders] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedOrderToEdit, setSelectedOrderToEdit] = useState(null);
+  const [viewingImages, setViewingImages] = useState(null);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const filterDateRef = React.useRef(null);
+  
+  const [filters, setFilters] = useState({
+    searchQuery: '',
+    category: '',
+    karigar: '',
+    melting: '',
+    orderType: '',
+    date: ''
+  });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
+
+  // Load from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('ordersDataV3');
+    if (saved) {
+      setOrders(JSON.parse(saved));
+    }
+  }, []);
+
+  // Save to localStorage
+  const saveOrders = (newOrders) => {
+    setOrders(newOrders);
+    localStorage.setItem('ordersDataV3', JSON.stringify(newOrders));
+  };
+
+  const handleAddOrder = (newOrder) => {
+    const updated = [newOrder, ...orders];
+    saveOrders(updated);
+    toast.success('Order added successfully');
+  };
+
+  const handleEditOrder = (updatedOrder) => {
+    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
+    saveOrders(updated);
+    toast.success('Order updated successfully');
+  };
+
+  const calculateLeftDays = (deliveryDateStr) => {
+    if (!deliveryDateStr) return '-';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const delivery = parseDateString(deliveryDateStr);
+    if (!delivery || isNaN(delivery.getTime())) return '-';
+    const diffTime = delivery - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getStageColor = (stage) => {
+    switch(stage?.toLowerCase()) {
+      case 'delivered': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'qc': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'in progress': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'follow up':
+      case 'follow-up': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'new': default: return 'bg-amber-100 text-amber-800 border-amber-200';
+    }
+  };
+
+  const generatePDF = async (order, type) => {
+    const el = document.createElement('div');
+    el.style.width = '794px';
+    el.style.position = 'absolute';
+    el.style.left = '-9999px';
+    el.style.top = '0';
+    el.innerHTML = type === 'karigar' ? generateKarigarHTML(order) : generateCustomerHTML(order);
+    document.body.appendChild(el);
+
+    try {
+      const pages = el.querySelectorAll('.pdf-page');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      if (pages.length > 0) {
+        for (let i = 0; i < pages.length; i++) {
+          if (i > 0) {
+            pdf.addPage();
+          }
+          const canvas = await html2canvas(pages[i], { scale: 3, useCORS: true, logging: false, imageTimeout: 0 });
+          const imgData = canvas.toDataURL('image/png');
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        }
+      } else {
+        const canvas = await html2canvas(el, { scale: 3, useCORS: true, logging: false, imageTimeout: 0 });
+        const imgData = canvas.toDataURL('image/png');
+        const calculatedHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, calculatedHeight);
+      }
+
+      pdf.save(`${type}_${order.orderNo || 'order'}.pdf`);
+      toast.success('PDF downloaded');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to generate PDF');
+    } finally {
+      document.body.removeChild(el);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      searchQuery: '',
+      category: '',
+      karigar: '',
+      melting: '',
+      orderType: '',
+      date: ''
+    });
+    setCurrentPage(1);
+    toast.success('Filters cleared');
+  };
+
+  const categoriesList = useMemo(() => Array.from(new Set(orders.map(o => o.category))).filter(Boolean).sort(), [orders]);
+  const karigarsList = useMemo(() => Array.from(new Set(orders.map(o => o.karigar))).filter(Boolean).sort(), [orders]);
+  const meltingList = useMemo(() => Array.from(new Set(orders.map(o => o.melting))).filter(Boolean).sort(), [orders]);
+  const typesList = useMemo(() => Array.from(new Set(orders.map(o => o.orderType))).filter(Boolean).sort(), [orders]);
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter(o => {
+      if (filters.category && o.category !== filters.category) return false;
+      if (filters.karigar && o.karigar !== filters.karigar) return false;
+      if (filters.melting && o.melting !== filters.melting) return false;
+      if (filters.orderType && o.orderType !== filters.orderType) return false;
+      if (filters.date && o.orderRecDate !== filters.date && o.deliveryDate !== filters.date) return false;
+
+      if (filters.searchQuery) {
+        const q = filters.searchQuery.toLowerCase();
+        return Object.values(o).some(val => String(val).toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }, [orders, filters]);
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const tableHeaders = [
+    { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-20 min-w-[80px]' },
+    { label: 'Order Number', className: 'sticky left-20 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb]' },
+    "Timestamp",
+    "Live Left Days",
+    "Company Name",
+    "Company Number",
+    "Order Type",
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date",
+    "Karigar Name",
+    "Category",
+    "Quantity",
+    "From Weight",
+    "To Weight",
+    "Melting",
+    "Meena",
+    "Length",
+    "Size",
+    "Broadness",
+    "Screw",
+    "Karigar Notes",
+    "Narration 1",
+    "Narration 2",
+    "QC",
+    "Sample Weight",
+    "Order Stage",
+    "Total Weight",
+    "Delivery Location",
+    "Images (view)",
+    { label: 'Pdf Download', className: 'sticky right-0 bg-gray-50 z-20 shadow-[-1px_0_0_#e5e7eb]' }
+  ];
+
+  const formatTimestamp = (ts, id) => {
+    try {
+      const date = ts ? new Date(ts) : (id ? new Date(parseInt(id)) : null);
+      if (!date || isNaN(date.getTime())) return '-';
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = date.getFullYear();
+      const hh = String(date.getHours()).padStart(2, '0');
+      const min = String(date.getMinutes()).padStart(2, '0');
+      const ss = String(date.getSeconds()).padStart(2, '0');
+      return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+    } catch {
+      return '-';
+    }
+  };
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const parsed = parseDateString(dateStr);
+    if (!parsed || isNaN(parsed.getTime())) return dateStr;
+    const dd = String(parsed.getDate()).padStart(2, '0');
+    const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+    const yyyy = parsed.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  };
+  const renderRow = (order, idx) => {
+    const leftDays = calculateLeftDays(order.expectedDeliveryDate);
+    return (
+      <tr key={order.id || idx} className="hover:bg-amber-50/30 transition-colors border-b border-gray-100 group">
+        <td className="px-4 py-3 sticky left-0 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap w-20 min-w-[80px]">
+          <button
+            onClick={() => {
+              setSelectedOrderToEdit(order);
+              setIsEditModalOpen(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-md border border-amber-200 hover:bg-amber-100 transition-colors text-xs font-semibold"
+            title="Edit Order"
+          >
+            <Edit size={12} />
+            <span>Edit</span>
+          </button>
+        </td>
+        <td className="px-4 py-3 font-bold text-gray-900 sticky left-20 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap">
+          {order.orderNo || '-'}
+        </td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap font-medium">
+          {formatTimestamp(order.timestamp, order.id)}
+        </td>
+        <td className="px-4 py-3 text-center whitespace-nowrap">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${leftDays < 0 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>
+            {leftDays} Days
+          </span>
+        </td>
+        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-800 whitespace-nowrap">{order.company || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.companyNumber || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.orderType || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.quantity || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.fromWeight || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.toWeight || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-650 whitespace-nowrap">{order.melting || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.meena || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.length || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.size || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.broadness || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.screw || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap truncate max-w-[150px]" title={order.karigarNotes}>{order.karigarNotes || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap truncate max-w-[150px]" title={order.narration1}>{order.narration1 || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap truncate max-w-[150px]" title={order.narration2}>{order.narration2 || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.qc || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.sampleWeight || '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getStageColor(order.orderStage)}`}>
+            {order.orderStage || 'New'}
+          </span>
+        </td>
+        <td className="px-4 py-3 text-center text-xs font-black text-gray-900 whitespace-nowrap">{order.totalWeight || '-'} g</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.deliveryLocation || '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap">
+          <button
+            onClick={() => setViewingImages({ orderNo: order.orderNo, images: order.images || [] })}
+            className="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-md hover:bg-amber-100 transition-colors text-xs font-bold shadow-sm"
+          >
+            View
+          </button>
+        </td>
+        <td className="px-4 py-3 sticky right-0 bg-white group-hover:bg-amber-50 z-10 shadow-[-1px_0_0_#e5e7eb] text-center">
+          <div className="flex justify-center gap-2">
+            <button onClick={() => generatePDF(order, 'karigar')} className="p-1.5 text-amber-600 hover:bg-amber-100 rounded-md transition-colors" title="Karigar PDF">
+              <FileText size={16} />
+            </button>
+            <button onClick={() => generatePDF(order, 'customer')} className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors" title="Customer PDF">
+              <Download size={16} />
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  };
+
+  const renderCard = (order, idx) => {
+    const leftDays = calculateLeftDays(order.expectedDeliveryDate);
+    return (
+      <div key={order.id || idx} className="bg-white rounded-xl border border-amber-50 shadow-sm p-4 space-y-3 transition-all hover:shadow-md hover:border-amber-100">
+        <div className="flex justify-between items-center pb-2 border-b border-slate-50">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-gray-900 uppercase truncate max-w-[150px]">Order: {order.orderNo || '-'}</span>
+          </div>
+          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase border ${getStageColor(order.orderStage)}`}>
+            {order.orderStage || 'New'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 rounded-lg p-2 border border-slate-100/50">
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Customer/Company</span>
+            <span className="text-gray-700 font-medium">{order.company || '-'}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Company Number</span>
+            <span className="text-gray-700 font-medium">{order.companyNumber || '-'}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>
+            <span className="text-gray-700 font-medium">{order.karigar || '-'}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Expected Delivery</span>
+            <span className="text-gray-700 font-medium">{formatDate(order.expectedDeliveryDate)}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Live Left Days</span>
+            <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
+          </div>
+        </div>
+
+        <div className="flex gap-2 pt-2 border-t border-slate-100 mt-1">
+          <button
+            onClick={() => {
+              setSelectedOrderToEdit(order);
+              setIsEditModalOpen(true);
+            }}
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-amber-600 text-white rounded-lg text-[10px] font-bold shadow-sm"
+          >
+            <Edit size={12} /> Edit
+          </button>
+          <button onClick={() => generatePDF(order, 'karigar')} className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-[10px] font-bold border border-amber-200">
+            <FileText size={12} /> Karigar PDF
+          </button>
+          <button onClick={() => generatePDF(order, 'customer')} className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-bold border border-blue-200">
+            <Download size={12} /> Customer PDF
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="p-0 sm:p-2 md:p-6 space-y-2 md:space-y-6 flex flex-col h-full min-h-0">
+      
+      {/* Header Filters Row */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 lg:gap-4 w-full px-2 sm:px-0">
+        <div className="flex flex-col lg:flex-row w-full gap-2 lg:gap-3 items-center">
+          
+          {/* Search bar input */}
+          <div className="flex items-center gap-2 w-full lg:w-auto lg:flex-[1.5]">
+            <div className="flex-1 w-full relative">
+              <Search className="absolute left-2.5 top-[9px] lg:top-[11px] text-gray-400" size={14} />
+              <input
+                type="text"
+                placeholder="Search orders..."
+                value={filters.searchQuery}
+                onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
+                className="w-full bg-white border border-gray-300 rounded-lg pl-8 pr-2 py-1.5 focus:outline-none focus:border-amber-500 text-xs md:text-sm h-[32px] md:h-[38px]"
+              />
+            </div>
+            <button
+               onClick={() => setShowMobileFilters(!showMobileFilters)}
+               className={`lg:hidden flex items-center justify-center rounded-lg shadow-sm h-[32px] w-[32px] flex-shrink-0 transition ${showMobileFilters ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+               title="Toggle Filters"
+            >
+              <Filter size={14} />
+            </button>
+            <button
+              onClick={handleClearFilters}
+              className="lg:hidden flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg h-[32px] w-[32px] flex-shrink-0 shadow-sm active:scale-95"
+              title="Clear Filters"
+            >
+              <RotateCcw size={14} />
+            </button>
+          </div>
+
+          {/* Expanded dropdowns and date selectors */}
+          <div className={`${showMobileFilters ? 'flex' : 'hidden'} lg:flex flex-col lg:grid lg:grid-cols-4 gap-2 w-full lg:w-auto lg:flex-[6] overflow-visible`}>
+            
+            {/* Category Dropdown */}
+            <div className="w-full relative">
+              <SearchableDropdown
+                options={categoriesList.map(c => ({ value: c, label: c }))}
+                value={filters.category}
+                onChange={(val) => setFilters({ ...filters, category: val })}
+                placeholder="All Categories"
+                className="h-[32px] md:h-[38px]"
+                height="h-[32px] md:h-[38px]"
+                rounded="rounded-lg"
+              />
+            </div>
+
+            {/* Karigar Dropdown */}
+            <div className="w-full relative">
+              <SearchableDropdown
+                options={karigarsList.map(c => ({ value: c, label: c }))}
+                value={filters.karigar}
+                onChange={(val) => setFilters({ ...filters, karigar: val })}
+                placeholder="All Karigars"
+                className="h-[32px] md:h-[38px]"
+                height="h-[32px] md:h-[38px]"
+                rounded="rounded-lg"
+              />
+            </div>
+
+            {/* Melting Dropdown */}
+            <div className="w-full relative">
+              <SearchableDropdown
+                options={meltingList.map(c => ({ value: c, label: c }))}
+                value={filters.melting}
+                onChange={(val) => setFilters({ ...filters, melting: val })}
+                placeholder="All Melting"
+                className="h-[32px] md:h-[38px]"
+                height="h-[32px] md:h-[38px]"
+                rounded="rounded-lg"
+              />
+            </div>
+
+            {/* Order Type Dropdown */}
+            <div className="w-full relative">
+              <SearchableDropdown
+                options={typesList.map(c => ({ value: c, label: c }))}
+                value={filters.orderType}
+                onChange={(val) => setFilters({ ...filters, orderType: val })}
+                placeholder="All Types"
+                className="h-[32px] md:h-[38px]"
+                height="h-[32px] md:h-[38px]"
+                rounded="rounded-lg"
+              />
+            </div>
+
+          </div>
+          
+          <button
+            onClick={handleClearFilters}
+            className="hidden lg:flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg w-[38px] h-[38px] flex-shrink-0 hover:bg-gray-100 transition-colors shadow-sm ml-1"
+            title="Clear Filters"
+          >
+            <RotateCcw size={16} />
+          </button>
+
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold shadow-sm hover:shadow-md transition-all text-xs md:text-sm whitespace-nowrap h-[32px] md:h-[38px] flex-shrink-0 lg:ml-2"
+          >
+            <Plus size={16} />
+            Add Order
+          </button>
+        </div>
+      </div>
+
+      {/* Table content displaying logs */}
+      <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+        <DataTable
+          headers={tableHeaders}
+          data={paginatedOrders}
+          renderRow={renderRow}
+          renderCard={renderCard}
+          minWidth="2500px"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
+          totalResults={filteredOrders.length}
+          itemsPerPageOptions={[50, 100, 200, 500, 1000]}
+        />
+      </div>
+
+      <OrderForm 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSave={handleAddOrder} 
+        orders={orders}
+      />
+      <OrderFormEdit
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedOrderToEdit(null);
+        }}
+        onSave={handleEditOrder}
+        order={selectedOrderToEdit}
+      />
+
+      {/* Modal popup for viewing images */}
+      <ModalView
+        isOpen={!!viewingImages}
+        onClose={() => setViewingImages(null)}
+        title={`Images for Order: ${viewingImages?.orderNo}`}
+        maxWidth="max-w-xl"
+      >
+        {viewingImages?.images && viewingImages.images.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3">
+            {viewingImages.images.map((src, idx) => (
+              <div key={idx} className="relative w-full aspect-[6/5] overflow-hidden rounded-lg">
+                <img
+                  src={src}
+                  alt={`Order Image ${idx + 1}`}
+                  className="w-full h-full object-cover rounded-lg hover:scale-105 transition-transform duration-200"
+                />
+                <span className="absolute top-1.5 left-1.5 bg-black/60 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none font-mono">
+                  {idx + 1}/{viewingImages.images.length}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-xs text-gray-400 font-bold uppercase tracking-wider">No images uploaded for this order</div>
+        )}
+      </ModalView>
+    </div>
+  );
+};
+
+export default OrderDetails;

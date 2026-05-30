@@ -1,0 +1,81 @@
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import Layout from './components/Layout';
+import Login from './pages/Login';
+import Settings from './pages/Settings';
+import Master from './pages/Master/Master';
+
+import Dasboard from './pages/On Time/Ontime';
+import OrderHistory from './pages/Order/OrderHistory';
+import MetalIssue from './pages/MetalIssue/MetalIssue';
+import FollowUp from './pages/FollowUp/FollowUp';
+import QC1 from './pages/QC1/QC1';
+import GhatJama from './pages/GhatJama/GhatJama';
+import MeenaInhouse from './pages/MeenaInhouse/MeenaInhouse';
+import MeenaOutside from './pages/MeenaOutside/MeenaOutside';
+import PolishInhouse from './pages/PolishInhouse/PolishInhouse';
+import PolishOutside from './pages/PolishOutside/PolishOutside';
+import BanglePolish from './pages/BanglePolish/BanglePolish';
+import EPolish from './pages/EPolish/EPolish';
+import QC2 from './pages/QC2/QC2';
+import DispatchDepartment from './pages/DispatchDeparstment/Dispatch';
+import ReceiptDepartment from './pages/ReceiptDepartment/Receipt';
+import QC3 from './pages/QC3/QC3';
+import HuidLabel from './pages/Huid/Label/Label';
+import ReceivedInStock from './pages/ReceiveInStock/ReceiveInStock';
+import Delivery from './pages/Delivery/Delivery';
+
+import ProtectedRoute from './components/ProtectedRoute';
+import { initializeStorage } from './utils/storageManager';
+
+function App() {
+  useEffect(() => {
+    initializeStorage();
+  }, []);
+
+  return (
+    <div className="bg-white min-h-screen">
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<Dasboard />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="master" element={<Master />} />
+
+            <Route path="order-history" element={<OrderHistory />} />
+            <Route path="metal-issue" element={<MetalIssue />} />
+            <Route path="follow-up" element={<FollowUp />} />
+            <Route path="qc1" element={<QC1 />} />
+            <Route path="ghat-jama" element={<GhatJama />} />
+            <Route path="meena-inhouse" element={<MeenaInhouse />} />
+            <Route path="meena-outside" element={<MeenaOutside />} />
+            <Route path="polish-inhouse" element={<PolishInhouse />} />
+            <Route path="polish-outside" element={<PolishOutside />} />
+            <Route path="bangle-polish" element={<BanglePolish />} />
+            <Route path="e-polish" element={<EPolish />} />
+            <Route path="qc2" element={<QC2 />} />
+            <Route path="dispatch" element={<DispatchDepartment />} />
+            <Route path="receipt" element={<ReceiptDepartment />} />
+            <Route path="qc3" element={<QC3 />} />
+            <Route path="huid-label" element={<HuidLabel />} />
+            <Route path="receive-in-stock" element={<ReceivedInStock />} />
+            <Route path="delivery" element={<Delivery />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </div>
+  );
+}
+
+export default App;
