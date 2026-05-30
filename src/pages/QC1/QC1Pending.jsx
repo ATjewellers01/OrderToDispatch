@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ClipboardCheck } from 'lucide-react';
 import DataTable from '../../components/DataTable';
+import { formatTargetDate } from '../../utils/tatCalculator';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -83,6 +84,7 @@ const QC1Pending = ({ orders, onQCClick }) => {
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
+    "Target Date",
     "QC1 Status",
     "QC1 Type",
     "QC1 Remarks",
@@ -124,6 +126,17 @@ const QC1Pending = ({ orders, onQCClick }) => {
         </td>
         <td className="px-4 py-3 font-bold text-gray-900 sticky left-32 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap">
           {order.orderNo || '-'}
+        </td>
+        <td className="px-4 py-3 text-center whitespace-nowrap text-xs">
+          {order.currentStagePlannedDate ? (
+            <span className={`px-2 py-1 rounded font-bold border ${
+              new Date() > new Date(order.currentStagePlannedDate)
+                ? 'bg-red-100 text-red-800 border-red-200 animate-pulse'
+                : 'bg-blue-100 text-blue-800 border-blue-200'
+            }`}>
+              {formatTargetDate(order.currentStagePlannedDate)}
+            </span>
+          ) : <span className="text-gray-400">-</span>}
         </td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs">
           {order.status3 ? (
@@ -185,15 +198,13 @@ const QC1Pending = ({ orders, onQCClick }) => {
             <span className="text-gray-700 font-semibold">{order.karigar || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">QC1 Status</span>
-            {order.status3 ? (
-              <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold border inline-block ${getQCStatusColor(order.status3)}`}>{order.status3}</span>
-            ) : <span className="text-gray-400">-</span>}
-          </div>
-          <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">QC1 Type</span>
-            {order.qc1Type ? (
-              <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold border inline-block ${getQCTypeColor(order.qc1Type)}`}>{order.qc1Type}</span>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Target Date</span>
+            {order.currentStagePlannedDate ? (
+              <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
+                new Date() > new Date(order.currentStagePlannedDate)
+                  ? 'bg-red-100 text-red-800 border-red-200'
+                  : 'bg-blue-100 text-blue-800 border-blue-200'
+              }`}>{formatTargetDate(order.currentStagePlannedDate)}</span>
             ) : <span className="text-gray-400">-</span>}
           </div>
           <div>
@@ -201,6 +212,18 @@ const QC1Pending = ({ orders, onQCClick }) => {
             <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
           </div>
           <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight text-xs font-semibold">QC1 Status</span>
+            {order.status3 ? (
+              <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold border inline-block ${getQCStatusColor(order.status3)}`}>{order.status3}</span>
+            ) : <span className="text-gray-400">-</span>}
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight text-xs font-semibold">QC1 Type</span>
+            {order.qc1Type ? (
+              <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold border inline-block ${getQCTypeColor(order.qc1Type)}`}>{order.qc1Type}</span>
+            ) : <span className="text-gray-400">-</span>}
+          </div>
+          <div className="col-span-2">
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Total Weight</span>
             <span className="text-gray-700 font-bold">{order.totalWeight || '-'} g</span>
           </div>

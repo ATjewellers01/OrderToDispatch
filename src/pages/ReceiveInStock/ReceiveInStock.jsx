@@ -7,6 +7,7 @@ import ReceiveInStockPending from './ReceiveInStockPending';
 import ReceiveInStockHistory from './ReceiveInStockHistory';
 import ReceiveInStockForm from './ReceiveInStockForm';
 import ReceiveInStockEdit from './ReceiveInStockEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 export const ReceivedInStock = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ export const ReceivedInStock = () => {
   }, []);
 
   const handleSaveReceiveInStock = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Stock details updated successfully');
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, Filter, Download, FileText, RotateCcw, Edit, Calendar } from 'lucide-react';
+import { Search, Plus, Filter, Download, FileText, RotateCcw, Edit, Calendar, Eye } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import OrderForm from './OrderForm';
@@ -9,6 +9,7 @@ import DataTable from '../../components/DataTable';
 import SearchableDropdown from '../../components/SearchableDropdown';
 import ModalView from '../../components/ModalView';
 import { generateKarigarHTML, generateCustomerHTML } from './pdf/pdfGenerators';
+import { syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
 
 const toYYYYMMDD = (val) => {
   if (!val) return '';
@@ -104,13 +105,16 @@ const OrderDetails = () => {
   };
 
   const handleAddOrder = (newOrder) => {
-    const updated = [newOrder, ...orders];
+    const synced = syncOrderPlannedDates(null, newOrder);
+    const updated = [synced, ...orders];
     saveOrders(updated);
     toast.success('Order added successfully');
   };
 
   const handleEditOrder = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
+    const prevOrder = orders.find(o => o.id === updatedOrder.id);
+    const synced = syncOrderPlannedDates(prevOrder, updatedOrder);
+    const updated = orders.map(o => o.id === updatedOrder.id ? synced : o);
     saveOrders(updated);
     toast.success('Order updated successfully');
   };
@@ -399,15 +403,31 @@ const OrderDetails = () => {
               setSelectedOrderToEdit(order);
               setIsEditModalOpen(true);
             }}
-            className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-amber-600 text-white rounded-lg text-[10px] font-bold shadow-sm"
+            className="flex-1 flex items-center justify-center py-1.5 bg-amber-600 text-white rounded-lg shadow-sm active:scale-95 transition-transform"
+            title="Edit Order"
           >
-            <Edit size={12} /> Edit
+            <Edit size={14} />
           </button>
-          <button onClick={() => generatePDF(order, 'karigar')} className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-[10px] font-bold border border-amber-200">
-            <FileText size={12} /> Karigar PDF
+          <button
+            onClick={() => setViewingImages({ orderNo: order.orderNo, images: order.images || [] })}
+            className="flex-1 flex items-center justify-center py-1.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200 active:scale-95 transition-transform"
+            title="View Images"
+          >
+            <Eye size={14} />
           </button>
-          <button onClick={() => generatePDF(order, 'customer')} className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-bold border border-blue-200">
-            <Download size={12} /> Customer PDF
+          <button
+            onClick={() => generatePDF(order, 'karigar')}
+            className="flex-1 flex items-center justify-center py-1.5 bg-amber-50 text-amber-700 rounded-lg border border-amber-200 active:scale-95 transition-transform"
+            title="Karigar PDF"
+          >
+            <FileText size={14} />
+          </button>
+          <button
+            onClick={() => generatePDF(order, 'customer')}
+            className="flex-1 flex items-center justify-center py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 active:scale-95 transition-transform"
+            title="Customer PDF"
+          >
+            <Download size={14} />
           </button>
         </div>
       </div>
@@ -421,8 +441,8 @@ const OrderDetails = () => {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 lg:gap-4 w-full px-2 sm:px-0">
         <div className="flex flex-col lg:flex-row w-full gap-2 lg:gap-3 items-center">
           
-          {/* Search bar input */}
-          <div className="flex items-center gap-2 w-full lg:w-auto lg:flex-[1.5]">
+          {/* Search bar input & Mobile action buttons in one row */}
+          <div className="flex items-center gap-2 w-full lg:w-auto lg:flex-[1.5] flex-nowrap">
             <div className="flex-1 w-full relative">
               <Search className="absolute left-2.5 top-[9px] lg:top-[11px] text-gray-400" size={14} />
               <input
@@ -446,6 +466,13 @@ const OrderDetails = () => {
               title="Clear Filters"
             >
               <RotateCcw size={14} />
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="lg:hidden flex items-center justify-center bg-amber-600 hover:bg-amber-700 text-white rounded-lg h-[32px] w-[32px] flex-shrink-0 shadow-sm active:scale-95"
+              title="Add Order"
+            >
+              <Plus size={16} />
             </button>
           </div>
 
@@ -516,7 +543,7 @@ const OrderDetails = () => {
 
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold shadow-sm hover:shadow-md transition-all text-xs md:text-sm whitespace-nowrap h-[32px] md:h-[38px] flex-shrink-0 lg:ml-2"
+            className="hidden lg:flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold shadow-sm hover:shadow-md transition-all text-xs md:text-sm whitespace-nowrap h-[32px] md:h-[38px] flex-shrink-0 lg:ml-2"
           >
             <Plus size={16} />
             Add Order

@@ -23,7 +23,7 @@ const DataTable = ({
   itemsPerPageOptions = [10, 15, 20, 50, 100]
 }) => {
   return (
-    <div className="flex flex-col h-full min-h-0 bg-white">
+    <div className="flex flex-col h-auto md:h-full min-h-0 bg-white">
       {/* Mobile Card View (Hidden on Desktop) */}
       <div className="md:hidden flex flex-col gap-3 p-3 overflow-y-auto flex-1 bg-slate-50/50 scrollbar-hide">
         {data.length > 0 ? (

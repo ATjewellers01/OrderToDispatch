@@ -7,6 +7,7 @@ import LabelPending from './LabelPending';
 import LabelHistory from './LabelHistory';
 import LabelForm from './LabelForm';
 import LabelEdit from './LabelEdit';
+import { saveOrderAndSyncPlannedDates } from '../../../utils/orderWorkflowManager';
 
 export const HuidLabel = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ export const HuidLabel = () => {
   }, []);
 
   const handleSaveHuidLabel = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Huid/Label details updated successfully');
   };
 

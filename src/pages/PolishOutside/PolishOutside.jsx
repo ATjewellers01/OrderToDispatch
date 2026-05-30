@@ -7,6 +7,7 @@ import PolishOutsidePending from './PolishOutsidePending';
 import PolishOutsideHistory from './PolishOutsideHistory';
 import PolishOutsideForm from './PolishOutsideForm';
 import PolishOutsideEdit from './PolishOutsideEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const PolishOutside = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ const PolishOutside = () => {
   }, []);
 
   const handleSavePolish = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Polish Outside details updated successfully');
   };
 

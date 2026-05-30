@@ -301,14 +301,15 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
   const MAX_IMAGES = 15;
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files || []);
+    const target = e.target;
+    const files = Array.from(target.files || []);
     if (!files.length) return;
-    e.target.value = ''; // reset so same file can be picked again
 
     const currentCount = formData.images.length;
     const remaining = MAX_IMAGES - currentCount;
     if (remaining <= 0) {
       toast.error(`Maximum ${MAX_IMAGES} images allowed`);
+      target.value = '';
       return;
     }
 
@@ -317,7 +318,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
       toast.error(`Only ${remaining} more image(s) can be added (max ${MAX_IMAGES})`);
     }
 
-    // Read all selected files once, outside of setState to avoid StrictMode double-invoke
+    // Read all selected files once
     Promise.all(
       toAdd.map(
         (file) =>
@@ -329,6 +330,9 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
       )
     ).then((results) => {
       setFormData((prev) => ({ ...prev, images: [...prev.images, ...results] }));
+      target.value = ''; // reset so same file can be picked again
+    }).catch(() => {
+      target.value = '';
     });
   };
 

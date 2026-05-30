@@ -18,6 +18,39 @@ export const initializeStorage = () => {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(DEFAULT_USERS));
   }
 
+  if (!localStorage.getItem('companyShiftsDataV3')) {
+    localStorage.setItem('companyShiftsDataV3', JSON.stringify([
+      { id: 'shift-1', name: 'General Shift', startTime: '09:00', endTime: '18:00', isDefault: 'Yes' }
+    ]));
+  }
+
+  if (!localStorage.getItem('tatSetupDataV3')) {
+    localStorage.setItem('tatSetupDataV3', JSON.stringify([
+      { id: 'tat-1', stageName: 'Order', value: 1, type: 'day' },
+      { id: 'tat-2', stageName: 'Metal Issue', value: 2, type: 'day' },
+      { id: 'tat-3', stageName: 'Follow Up', value: 2, type: 'day' },
+      { id: 'tat-4', stageName: 'QC1', value: 1, type: 'day' },
+      { id: 'tat-5', stageName: 'Ghat Jama', value: 1, type: 'day' },
+      { id: 'tat-6', stageName: 'Meena Inhouse', value: 1, type: 'day' },
+      { id: 'tat-7', stageName: 'Meena Outside', value: 2, type: 'day' },
+      { id: 'tat-8', stageName: 'Polish Inhouse', value: 1, type: 'day' },
+      { id: 'tat-9', stageName: 'Polish Outside', value: 2, type: 'day' },
+      { id: 'tat-10', stageName: 'Bangle Polish', value: 1, type: 'day' },
+      { id: 'tat-11', stageName: 'E-Polish', value: 1, type: 'day' },
+      { id: 'tat-12', stageName: 'QC2', value: 1, type: 'day' },
+      { id: 'tat-13', stageName: 'Dispatch', value: 1, type: 'day' },
+      { id: 'tat-14', stageName: 'RD (Receipt Department)', value: 1, type: 'day' },
+      { id: 'tat-15', stageName: 'QC3', value: 1, type: 'day' },
+      { id: 'tat-16', stageName: 'HUID/Label', value: 1, type: 'day' },
+      { id: 'tat-17', stageName: 'Receive In Stock', value: 1, type: 'day' },
+      { id: 'tat-18', stageName: 'Delivery', value: 1, type: 'day' }
+    ]));
+  }
+
+  if (!localStorage.getItem('weekendSetupDataV3')) {
+    localStorage.setItem('weekendSetupDataV3', JSON.stringify(['Sunday']));
+  }
+
   // Sync / Migrate existing orders to include metalIssueType
   try {
     const savedOrders = localStorage.getItem('ordersDataV3');

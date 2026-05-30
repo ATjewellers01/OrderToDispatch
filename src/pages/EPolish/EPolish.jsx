@@ -7,6 +7,7 @@ import EPolishPending from './EPolishPending';
 import EPolishHistory from './EPolishHistory';
 import EPolishForm from './EPolishForm';
 import EPolishEdit from './EPolishEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const EPolish = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ const EPolish = () => {
   }, []);
 
   const handleSaveEPolish = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('E-Polish details updated successfully');
   };
 

@@ -25,6 +25,7 @@ import QC3 from './pages/QC3/QC3';
 import HuidLabel from './pages/Huid/Label/Label';
 import ReceivedInStock from './pages/ReceiveInStock/ReceiveInStock';
 import Delivery from './pages/Delivery/Delivery';
+import TatSetup from './pages/TatSetup/TatSetup';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import { initializeStorage } from './utils/storageManager';
@@ -69,6 +70,7 @@ function App() {
             <Route path="huid-label" element={<HuidLabel />} />
             <Route path="receive-in-stock" element={<ReceivedInStock />} />
             <Route path="delivery" element={<Delivery />} />
+            <Route path="tad-setup" element={<TatSetup />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

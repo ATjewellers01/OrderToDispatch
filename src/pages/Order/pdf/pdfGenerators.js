@@ -269,13 +269,13 @@ const generateBaseHTML = (order, type) => {
       ? `<div style="border: 1px solid #e5e7eb; padding: 25px; text-align: center; background: #fafafa;">
              <div style="font-size: 12px; font-family: Arial, sans-serif; padding: 80px 0; color: #9ca3af; letter-spacing: 1px;">[ NO IMAGE ATTACHED ]</div>
            </div>`
-      : `<div style="display: grid; grid-template-columns: repeat(${page1Cols}, 228px); gap: 12px; justify-content: center; margin: 0 auto;">
+      : `<div style="display: grid; grid-template-columns: repeat(${page1Cols}, 228px); gap: 16px 12px; justify-content: center; margin: 0 auto;">
              ${page1Images.map((src, idx) => `
-               <div style="width: 228px; height: 190px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
-                 <div style="flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden;">
-                   <img src="${src}" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" />
+               <div style="width: 228px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+                 <div style="width: 228px; height: 190px; overflow: hidden; display: block; background: #fafafa; border: 1px solid #e5e7eb;">
+                   <img src="${src}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
                  </div>
-                 <div style="font-size: 9px; font-family: Arial, sans-serif; color: #6b7280; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; line-height: 1;">
+                 <div style="font-size: 9px; font-family: Arial, sans-serif; color: #6b7280; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; line-height: 1; text-align: center;">
                    ${idx + 1}/${totalImgs}
                  </div>
                </div>
@@ -312,15 +312,15 @@ const generateBaseHTML = (order, type) => {
 
       const subImageHTML = `
         <div style="position: relative; z-index: 10;">
-          <div style="display: grid; grid-template-columns: repeat(${subCols}, 228px); gap: 12px; justify-content: center; margin: 0 auto;">
+          <div style="display: grid; grid-template-columns: repeat(${subCols}, 228px); gap: 16px 12px; justify-content: center; margin: 0 auto;">
             ${subImages.map((src, idx) => {
         const overallIdx = startIdx + idx;
         return `
-                <div style="width: 228px; height: 190px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
-                  <div style="flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden;">
-                    <img src="${src}" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" />
+                <div style="width: 228px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+                  <div style="width: 228px; height: 190px; overflow: hidden; display: block; background: #fafafa; border: 1px solid #e5e7eb;">
+                    <img src="${src}" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
                   </div>
-                  <div style="font-size: 9px; font-family: Arial, sans-serif; color: #6b7280; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; line-height: 1;">
+                  <div style="font-size: 9px; font-family: Arial, sans-serif; color: #6b7280; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; line-height: 1; text-align: center;">
                     ${overallIdx + 1}/${totalImgs}
                   </div>
                 </div>

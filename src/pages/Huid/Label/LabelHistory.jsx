@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { Edit } from 'lucide-react';
 import DataTable from '../../../components/DataTable';
 
@@ -67,6 +67,18 @@ const formatDate = (dateStr) => {
   return `${dd}/${mm}/${yyyy}`;
 };
 
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+};
 const getStageColor = (stage) => {
   switch(stage?.toLowerCase()) {
     case 'delivered': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
@@ -97,7 +109,8 @@ const LabelHistory = ({ orders, onEditClick }) => {
     { label: 'Sent Company', className: 'text-center' },
     { label: 'Sent Pcs', className: 'text-center' },
     { label: 'Huid Remarks', className: 'text-center' },
-    { label: 'Huid Date', className: 'text-center' },
+    { label: 'Target Date', className: 'text-center' },
+    { label: 'Done Date', className: 'text-center' },
     { label: 'Est Days', className: 'text-center' },
     { label: 'Stage', className: 'text-center' },
     { label: 'Karigar Name', className: 'text-center' },
@@ -159,7 +172,10 @@ const LabelHistory = ({ orders, onEditClick }) => {
           {order.huidRemarks || '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
-          {order.huidTimestamp ? formatDate(order.huidTimestamp) : '-'}
+          {formatDateTime(order.plannedDates?.['Label'])}
+        </td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
+          {formatDateTime(order.huidTimestamp)}
         </td>
         <td className="px-4 py-3 text-center whitespace-nowrap font-medium text-xs">
           <span className={`px-2.5 py-1 rounded-full font-bold border ${leftDays < 0 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>

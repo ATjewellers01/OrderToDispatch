@@ -7,6 +7,7 @@ import MeenaInhousePending from './MeenaInhousePending';
 import MeenaInhouseHistory from './MeenaInhouseHistory';
 import MeenaInhouseForm from './MeenaInhouseForm';
 import MeenaInhouseEdit from './MeenaInhouseEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const MeenaInhouse = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ const MeenaInhouse = () => {
   }, []);
 
   const handleSaveMeena = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Meena Inhouse details updated successfully');
   };
 

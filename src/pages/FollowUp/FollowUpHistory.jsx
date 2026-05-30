@@ -55,6 +55,18 @@ const formatDate = (dateStr) => {
   return `${dd}/${mm}/${yyyy}`;
 };
 
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+};
 const formatTimestamp = (ts) => {
   if (!ts) return '-';
   try {
@@ -130,9 +142,9 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues }) => {
 
   const tableHeaders = [
     { label: 'Order Number', className: 'font-bold' },
-    "Timestamp", "Status", "Remarks",
+    "Done Date", "Status", "Remarks",
     "Metal Issue Status", "Paid Weight", "Metal Issue Type",
-    "Next Date Of Flw-up",
+    "Target Date",
     "Old Karigar Name", "Old Karigar Del. Date", "Old Exp. Del. Date",
     "New Karigar Name", "Karigar Del. Date", "Exp. Del. Date"
   ];
@@ -170,7 +182,7 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues }) => {
           {issue?.metalIssueType || '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
-          {log.nextDate ? formatDate(log.nextDate) : '-'}
+          {log.nextDate ? formatDateTime(log.nextDate) : '-'}
         </td>
 
         {/* ── OLD values (before change) ── */}

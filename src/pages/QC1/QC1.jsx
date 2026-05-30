@@ -6,6 +6,7 @@ import { TabSwitcher } from '../../components/StandardButtons';
 import QC1Pending from './QC1Pending';
 import QC1History from './QC1History';
 import QCForm from './QCForm';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const QC1 = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -37,9 +38,7 @@ const QC1 = () => {
   }, []);
 
   const handleSaveQC = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('QC1 status updated successfully');
   };
 

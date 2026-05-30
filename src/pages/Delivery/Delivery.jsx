@@ -7,6 +7,7 @@ import DeliveryPending from './DeliveryPending';
 import DeliveryHistory from './DeliveryHistory';
 import DeliveryForm from './DeliveryForm';
 import DeliveryEdit from './DeliveryEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 export const Delivery = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ export const Delivery = () => {
   }, []);
 
   const handleSaveDelivery = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Delivery status updated successfully');
   };
 

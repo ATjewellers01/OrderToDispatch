@@ -7,6 +7,7 @@ import MeenaOutsidePending from './MeenaOutsidePending';
 import MeenaOutsideHistory from './MeenaOutsideHistory';
 import MeenaOutsideForm from './MeenaOutsideForm';
 import MeenaOutsideEdit from './MeenaOutsideEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const MeenaOutside = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ const MeenaOutside = () => {
   }, []);
 
   const handleSaveMeena = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Meena Outside details updated successfully');
   };
 

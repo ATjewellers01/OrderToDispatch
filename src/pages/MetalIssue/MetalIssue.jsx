@@ -7,6 +7,7 @@ import MetalIssueHistory from './MetalIssueHistory';
 import MetalIssueForm from './MetalIssueForm';
 import MetalIssueEdit from './MetalIssueEdit';
 import { TabSwitcher } from '../../components/StandardButtons';
+import { syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -90,7 +91,8 @@ const MetalIssue = () => {
     // Also update orderStage of the order to 'Follow Up' and record metalIssueType
     const updatedOrders = orders.map(o => {
       if (o.id === newIssue.orderId) {
-        return { ...o, orderStage: 'Follow Up', metalIssueType: newIssue.metalIssueType };
+        const nextOrder = { ...o, orderStage: 'Follow Up', metalIssueType: newIssue.metalIssueType };
+        return syncOrderPlannedDates(o, nextOrder);
       }
       return o;
     });
@@ -108,7 +110,8 @@ const MetalIssue = () => {
     // Revert orderStage to 'New' and clear metalIssueType
     const updatedOrders = orders.map(o => {
       if (o.id === orderId) {
-        return { ...o, orderStage: 'New', metalIssueType: '' };
+        const nextOrder = { ...o, orderStage: 'New', metalIssueType: '' };
+        return syncOrderPlannedDates(o, nextOrder);
       }
       return o;
     });
@@ -126,7 +129,8 @@ const MetalIssue = () => {
     // Ensure orderStage is set to 'Follow Up' and update metalIssueType
     const updatedOrders = orders.map(o => {
       if (o.id === updatedIssue.orderId) {
-        return { ...o, orderStage: 'Follow Up', metalIssueType: updatedIssue.metalIssueType };
+        const nextOrder = { ...o, orderStage: 'Follow Up', metalIssueType: updatedIssue.metalIssueType };
+        return syncOrderPlannedDates(o, nextOrder);
       }
       return o;
     });
@@ -193,7 +197,7 @@ const MetalIssue = () => {
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 xl:gap-4 w-full px-2 sm:px-0">
         
         {/* Left: Tab Selection */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 w-full sm:w-auto">
           <TabSwitcher
             activeTab={activeTab}
             onTabChange={setActiveTab}

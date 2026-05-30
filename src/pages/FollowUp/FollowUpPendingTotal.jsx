@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Pencil, Layers, ShieldCheck, Tag } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import DataTable from '../../components/DataTable';
+import { formatTargetDate } from '../../utils/tatCalculator';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -214,6 +215,7 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
+    "Target Date",
     "Calling Date", "Next Date Of Call", "Customer Name", "Category Name", "Melting", "Weight", 
     "Total Quantity", "Karigar Now", "Order Date", "Karigar Delivery Date", 
     "Delivery Date", "New Expected Date", "Metal Issue Status", "Paid Weight", "Metal Issue Type", "Order Stage", "Follow-up Status", 
@@ -238,6 +240,17 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
         </td>
         <td className="px-4 py-3 font-bold text-gray-900 sticky left-32 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap">
           {o.orderNo || '-'}
+        </td>
+        <td className="px-4 py-3 text-center whitespace-nowrap text-xs">
+          {o.currentStagePlannedDate ? (
+            <span className={`px-2 py-1 rounded font-bold border ${
+              new Date() > new Date(o.currentStagePlannedDate)
+                ? 'bg-red-100 text-red-800 border-red-200 animate-pulse'
+                : 'bg-blue-100 text-blue-800 border-blue-200'
+            }`}>
+              {formatTargetDate(o.currentStagePlannedDate)}
+            </span>
+          ) : <span className="text-gray-400">-</span>}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap font-medium">
           {l ? new Date(l.timestamp).toLocaleDateString('en-GB') : '-'}
@@ -307,10 +320,20 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
             <span className="text-gray-700 font-semibold">{o.karigar || '-'}</span>
           </div>
           <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Target Date</span>
+            {o.currentStagePlannedDate ? (
+              <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
+                new Date() > new Date(o.currentStagePlannedDate)
+                  ? 'bg-red-100 text-red-800 border-red-200'
+                  : 'bg-blue-100 text-blue-800 border-blue-200'
+              }`}>{formatTargetDate(o.currentStagePlannedDate)}</span>
+            ) : <span className="text-gray-400">-</span>}
+          </div>
+          <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Scheduled Call</span>
             <span className="text-red-600 font-bold">{l ? formatDate(l.nextDate || l.nextCallDate) : 'Pending First Call'}</span>
           </div>
-          <div>
+          <div className="col-span-2">
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Status</span>
             <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold inline-block border ${getFlwColor(l?.status)}`}>
               {l?.status || 'Pending'}
@@ -330,7 +353,7 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
   };
 
   return (
-    <div className="space-y-4 flex flex-col h-full min-h-0">
+    <div className="space-y-4 flex flex-col h-auto md:h-full min-h-0">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         {/* Order Stage Distribution Metric Card */}
@@ -431,13 +454,13 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
       </div>
 
       {/* Main Table view */}
-      <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="flex-1 md:min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-visible md:overflow-hidden flex flex-col">
         <DataTable
           headers={tableHeaders}
           data={paginatedOrders}
           renderRow={renderRow}
           renderCard={renderCard}
-          minWidth="2200px"
+          minWidth="2350px"
           currentPage={currentPage}
           totalPages={totalPages}
           itemsPerPage={itemsPerPage}

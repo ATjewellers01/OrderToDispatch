@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ClipboardCheck } from 'lucide-react';
 import DataTable from '../../components/DataTable';
+import { formatTargetDate } from '../../utils/tatCalculator';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -91,6 +92,7 @@ const DeliveryPending = ({ orders, onActionClick }) => {
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px] text-center' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold text-center' },
+    { label: 'Target Date', className: 'text-center' },
     { label: 'Receive Status', className: 'text-center' },
     { label: 'Inform Customer', className: 'text-center' },
     { label: 'Receive Remarks', className: 'text-center' },
@@ -131,6 +133,17 @@ const DeliveryPending = ({ orders, onActionClick }) => {
         </td>
         <td className="px-4 py-3 font-bold text-gray-900 sticky left-32 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap">
           {order.orderNo || order.orderNumber || '-'}
+        </td>
+        <td className="px-4 py-3 text-center whitespace-nowrap text-xs">
+          {order.currentStagePlannedDate ? (
+            <span className={`px-2 py-1 rounded font-bold border ${
+              new Date() > new Date(order.currentStagePlannedDate)
+                ? 'bg-red-100 text-red-800 border-red-200 animate-pulse'
+                : 'bg-blue-100 text-blue-800 border-blue-200'
+            }`}>
+              {formatTargetDate(order.currentStagePlannedDate)}
+            </span>
+          ) : <span className="text-gray-400">-</span>}
         </td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs">
           {recStat ? (
@@ -191,6 +204,16 @@ const DeliveryPending = ({ orders, onActionClick }) => {
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>
             <span className="text-gray-700 font-semibold">{order.karigar || order.karigarName || '-'}</span>
+          </div>
+          <div className="col-span-2">
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Target Date</span>
+            {order.currentStagePlannedDate ? (
+              <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
+                new Date() > new Date(order.currentStagePlannedDate)
+                  ? 'bg-red-100 text-red-800 border-red-200'
+                  : 'bg-blue-100 text-blue-800 border-blue-200'
+              }`}>{formatTargetDate(order.currentStagePlannedDate)}</span>
+            ) : <span className="text-gray-400">-</span>}
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Receive Status</span>

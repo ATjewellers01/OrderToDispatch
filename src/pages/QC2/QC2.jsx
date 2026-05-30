@@ -7,6 +7,7 @@ import QC2Pending from './QC2Pending';
 import QC2History from './QC2History';
 import QC2Form from './QC2Form';
 import QC2Edit from './QC2Edit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const QC2 = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ const QC2 = () => {
   }, []);
 
   const handleSaveQC2 = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('QC2 status updated successfully');
   };
 

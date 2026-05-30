@@ -7,6 +7,7 @@ import PolishInhousePending from './PolishInhousePending';
 import PolishInhouseHistory from './PolishInhouseHistory';
 import PolishInhouseForm from './PolishInhouseForm';
 import PolishInhouseEdit from './PolishInhouseEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const PolishInhouse = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ const PolishInhouse = () => {
   }, []);
 
   const handleSavePolish = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Polish Inhouse details updated successfully');
   };
 

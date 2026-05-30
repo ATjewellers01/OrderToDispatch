@@ -7,6 +7,7 @@ import DispatchPending from './DispatchPending';
 import DispatchHistory from './DispatchHistory';
 import DispatchForm from './DispatchForm';
 import DispatchEdit from './DispatchEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 export const DispatchDepartment = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ export const DispatchDepartment = () => {
   }, []);
 
   const handleSaveDispatch = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Dispatch status updated successfully');
   };
 

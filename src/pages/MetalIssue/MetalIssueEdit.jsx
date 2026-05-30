@@ -89,10 +89,6 @@ const MetalIssueEdit = ({ isOpen, onClose, onSave, order, issue }) => {
             <span className="text-gray-800 font-bold">{order.category || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block font-medium">Metal Issue Type</span>
-            <span className="text-amber-600 font-bold">{order?.metalIssueType || '-'}</span>
-          </div>
-          <div>
             <span className="text-gray-400 block font-medium">Total Weight</span>
             <span className="text-gray-800 font-bold">{order.totalWeight || '-'} g</span>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { Edit } from 'lucide-react';
 import DataTable from '../../components/DataTable';
 
@@ -51,6 +51,18 @@ const formatDate = (dateStr) => {
   return `${dd}/${mm}/${yyyy}`;
 };
 
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+};
 const getStageColor = (stage) => {
   switch(stage?.toLowerCase()) {
     case 'delivered': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
@@ -86,6 +98,8 @@ const QC1History = ({ orders, onEditClick }) => {
     "QC1 Status",
     "QC1 Type",
     "Remarks",
+    "Target Date",
+    "Done Date",
     "Est Days",
     "Status",
     "Karigar Name",
@@ -139,6 +153,12 @@ const QC1History = ({ orders, onEditClick }) => {
         </td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs text-gray-600 truncate max-w-[150px]" title={order.qcRemarks || '-'}>
           {order.qcRemarks || '-'}
+        </td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
+          {formatDateTime(order.plannedDates?.['QC1'])}
+        </td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
+          {formatDateTime(order.qc1Timestamp)}
         </td>
         <td className="px-4 py-3 text-center whitespace-nowrap font-medium text-xs">
           <span className={`px-2.5 py-1 rounded-full font-bold border ${leftDays < 0 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>

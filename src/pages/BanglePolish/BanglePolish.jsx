@@ -7,6 +7,7 @@ import BanglePolishPending from './BanglePolishPending';
 import BanglePolishHistory from './BanglePolishHistory';
 import BanglePolishForm from './BanglePolishForm';
 import BanglePolishEdit from './BanglePolishEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const BanglePolish = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ const BanglePolish = () => {
   }, []);
 
   const handleSavePolish = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Bangle Polish details updated successfully');
   };
 

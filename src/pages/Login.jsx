@@ -57,32 +57,32 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-amber-50 to-amber-100">
+    <div className="h-[100dvh] w-full flex flex-col bg-gradient-to-br from-amber-50 to-amber-100 overflow-hidden">
       {/* Center Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 space-y-6">
+      <div className="flex-1 flex items-center justify-center p-2 sm:p-4 pb-14 sm:pb-16">
+        <div className="w-[92%] sm:w-full max-w-[340px] sm:max-w-md bg-white rounded-2xl shadow-2xl p-4 sm:p-8 space-y-3.5 sm:space-y-6">
           
           {/* Logo Section */}
-          <div className="flex flex-col items-center space-y-6">
-            <div className="w-32 h-32 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-2.5 sm:space-y-4">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center">
               <img src={logoSvg} alt="JF Jewel Factory Logo" className="max-w-full max-h-full object-contain" />
             </div>
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold text-gray-900">Order To Dispatch</h1>
-              <p className="text-gray-600 text-base font-medium">Handmade Jewellery Unit</p>
+            <div className="text-center space-y-0.5">
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Order To Dispatch</h1>
+              <p className="text-gray-600 text-xs sm:text-base font-medium">Handmade Jewellery Unit</p>
             </div>
           </div>
-
+ 
           {/* Form */}
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-2.5 sm:space-y-4" onSubmit={handleSubmit}>
             {/* User ID Input */}
-            <div className="space-y-2">
-              <label htmlFor="id" className="text-sm font-semibold text-gray-700">
+            <div className="space-y-1">
+              <label htmlFor="id" className="text-[11px] sm:text-sm font-semibold text-gray-700">
                 User ID
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+                  <User className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   id="id"
@@ -91,20 +91,20 @@ const Login = () => {
                   required
                   value={id}
                   onChange={(e) => setId(e.target.value)}
-                  className="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
+                  className="block w-full pl-9 pr-4 py-1.5 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-xs sm:text-sm"
                   placeholder="Enter user ID"
                 />
               </div>
             </div>
-
+ 
             {/* Password Input */}
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-semibold text-gray-700">
+            <div className="space-y-1">
+              <label htmlFor="password" className="text-[11px] sm:text-sm font-semibold text-gray-700">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-gray-400" />
                 </div>
                 <input
                   id="password"
@@ -113,7 +113,7 @@ const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
+                  className="block w-full pl-9 pr-12 py-1.5 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all text-xs sm:text-sm"
                   placeholder="Enter password"
                 />
                 <button
@@ -122,25 +122,25 @@ const Login = () => {
                   onClick={togglePasswordVisibility}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
                   )}
                 </button>
               </div>
             </div>
-
+ 
             {/* Login Button */}
             <button
               type="submit"
               disabled={submitting}
-              className={`w-full py-3 px-4 text-base font-bold bg-amber-600 text-white rounded-lg hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-600 transition-all ${
+              className={`w-full py-1.5 sm:py-2.5 px-4 text-xs sm:text-base font-bold bg-amber-600 text-white rounded-lg hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-600 transition-all ${
                 submitting ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
               {submitting ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Signing in...</span>
                 </div>
               ) : (
@@ -148,44 +148,46 @@ const Login = () => {
               )}
             </button>
           </form>
-
+ 
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500 font-semibold">Demo Credentials</span>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-2 bg-white text-gray-500 font-semibold text-[11px] sm:text-xs">Demo Credentials</span>
             </div>
           </div>
-
+ 
           {/* Demo Credentials */}
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <p className="text-xs font-semibold text-gray-500 text-center mb-3 uppercase tracking-wider">Quick Login Options</p>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-xs font-semibold text-gray-500 text-center mb-1.5 sm:mb-3 uppercase tracking-wider">Quick Login Options</p>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => handleDemoCredential('admin')}
-                className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 hover:border-amber-500 hover:shadow-md hover:bg-amber-50 rounded-lg transition-all group"
+                className="flex flex-col items-center justify-center p-1.5 sm:p-3 bg-white border border-gray-200 hover:border-amber-500 hover:shadow-md hover:bg-amber-50 rounded-lg transition-all group"
               >
-                <span className="font-bold text-gray-800 text-sm group-hover:text-amber-700">Admin</span>
-                <span className="text-[10px] text-gray-500 font-mono mt-1">ID: admin</span>
+                <span className="font-bold text-gray-800 text-[11px] sm:text-sm group-hover:text-amber-700">Admin</span>
+                <span className="text-[9px] sm:text-[10px] text-gray-500 font-mono mt-0.5">ID: admin</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleDemoCredential('user')}
-                className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 hover:border-amber-500 hover:shadow-md hover:bg-amber-50 rounded-lg transition-all group"
+                className="flex flex-col items-center justify-center p-1.5 sm:p-3 bg-white border border-gray-200 hover:border-amber-500 hover:shadow-md hover:bg-amber-50 rounded-lg transition-all group"
               >
-                <span className="font-bold text-gray-800 text-sm group-hover:text-amber-700">User</span>
-                <span className="text-[10px] text-gray-500 font-mono mt-1">ID: user</span>
+                <span className="font-bold text-gray-800 text-[11px] sm:text-sm group-hover:text-amber-700">User</span>
+                <span className="text-[9px] sm:text-[10px] text-gray-500 font-mono mt-0.5">ID: user</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-
+ 
       {/* Footer at Bottom */}
-      <Footer />
+      <div className="w-full fixed bottom-0 left-0 right-0 z-50">
+        <Footer />
+      </div>
     </div>
   );
 };

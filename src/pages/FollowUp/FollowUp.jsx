@@ -7,6 +7,7 @@ import FollowUpPendingToday from './FollowUpPendingToday';
 import FollowUpPendingTotal from './FollowUpPendingTotal';
 import FollowUpHistory from './FollowUpHistory';
 import FollowUpForm from './FollowUpForm';
+import { syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
 
 const FollowUp = () => {
   const [activeTab, setActiveTab] = useState('today');
@@ -135,7 +136,7 @@ const FollowUp = () => {
         if (newLog.status === 'Finished Jama') {
           updatedFields.orderStage = 'Delivered';
         }
-        return updatedFields;
+        return syncOrderPlannedDates(o, updatedFields);
       }
       return o;
     });
@@ -146,13 +147,17 @@ const FollowUp = () => {
   };
 
   return (
-    <div className="p-0 sm:p-2 md:p-6 space-y-2 md:space-y-4 flex flex-col h-full min-h-0">
+    <div className={`p-0 sm:p-2 md:p-6 space-y-2 md:space-y-4 flex flex-col min-h-0 ${
+      activeTab === 'history' 
+        ? 'h-full overflow-hidden' 
+        : 'h-auto md:h-full overflow-y-auto md:overflow-hidden'
+    } custom-scrollbar`}>
 
       {/* Combined Tab Switcher & Filter Row — matches MetalIssue.jsx */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 xl:gap-4 w-full px-2 sm:px-0 flex-shrink-0">
 
         {/* Left: Tab Switcher */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 w-full sm:w-auto">
           <TabSwitcher
             activeTab={activeTab}
             onTabChange={(tab) => { setActiveTab(tab); handleClearFilters(); }}

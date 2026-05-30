@@ -7,6 +7,7 @@ import ReceiptPending from './ReceiptPending';
 import ReceiptHistory from './ReceiptHistory';
 import ReceiptForm from './ReceiptForm';
 import ReceiptEdit from './ReceiptEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 export const ReceiptDepartment = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -39,9 +40,7 @@ export const ReceiptDepartment = () => {
   }, []);
 
   const handleSaveReceipt = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Receipt details updated successfully');
   };
 

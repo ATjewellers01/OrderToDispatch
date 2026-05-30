@@ -5,6 +5,7 @@ import {
   Settings,
   LogOut as LogOutIcon,
   X,
+  Clock,
   Users,
   Database,
   ClipboardList,
@@ -76,7 +77,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/huid-label',          icon: Tags,           label: 'Huid/Label' },
     { path: '/receive-in-stock',    icon: Warehouse,      label: 'Receive In Stock' },
     { path: '/delivery',            icon: Package,        label: 'Delivery' },
-    { path: '/master',              icon: LayoutGrid,     label: 'Master' },
+    {path: '/master',              icon: LayoutGrid,     label: 'Master' },
+    { path: '/tad-setup',           icon: Clock,          label: 'TAD-DAYS Setup' },
     { path: '/settings',            icon: Settings,       label: 'Settings' },
   ];
 

@@ -7,6 +7,7 @@ import GhatJamaPending from './GhatJamaPending';
 import GhatJamaHistory from './GhatJamaHistory';
 import GhatJamaForm from './GhatJamaForm';
 import GhatJamaEdit from './GhatJamaEdit';
+import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const GhatJama = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -34,9 +35,7 @@ const GhatJama = () => {
   }, []);
 
   const handleSaveGhatJama = (updatedOrder) => {
-    const updated = orders.map(o => o.id === updatedOrder.id ? updatedOrder : o);
-    setOrders(updated);
-    localStorage.setItem('ordersDataV3', JSON.stringify(updated));
+    saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('Ghat Jama status updated successfully');
   };
 
