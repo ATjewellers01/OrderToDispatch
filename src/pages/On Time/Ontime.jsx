@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recha
 import { Filter, RotateCcw, Trophy, Medal, Award, User, Search, Hash } from "lucide-react";
 import toast from "react-hot-toast";
 import SearchableDropdown from "../../components/SearchableDropdown";
+import { generateFilterOptions } from '../../utils/filterUtils';
 import DragScrollTable from "../../components/DragScrollTable";
 
 // ── Date Utility Helpers ───────────────────────────────────────────
@@ -144,7 +145,7 @@ const Dasboard = () => {
     orderNumber: "",
     clientName: "",
     karigarStatus: "",
-    orderType: "",
+    orderType: [],
     orderStage: "",
     karigarName: "",
     leftDaysFrom: -500,
@@ -216,10 +217,10 @@ const Dasboard = () => {
       // Match explicit filters
       if (filters.orderNumber && !orderNoStr.includes(filters.orderNumber.toLowerCase())) return false;
       if (filters.clientName && !clientStr.includes(filters.clientName.toLowerCase())) return false;
-      if (filters.karigarStatus && karigarStatusVal !== filters.karigarStatus) return false;
-      if (filters.orderType && orderTypeVal !== filters.orderType) return false;
-      if (filters.orderStage && orderStageVal !== filters.orderStage) return false;
-      if (filters.karigarName && karigarNameVal !== filters.karigarName) return false;
+      if (filters.karigarStatus && filters.karigarStatus.length > 0 && !filters.karigarStatus.includes(karigarStatusVal)) return false;
+      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(orderTypeVal)) return false;
+      if (filters.orderStage && filters.orderStage.length > 0 && !filters.orderStage.includes(orderStageVal)) return false;
+      if (filters.karigarName && filters.karigarName.length > 0 && !filters.karigarName.includes(karigarNameVal)) return false;
 
       // Range slider left days
       if (leftDays < filters.leftDaysFrom || leftDays > filters.leftDaysTo) return false;
@@ -244,7 +245,7 @@ const Dasboard = () => {
       orderNumber: "",
       clientName: "",
       karigarStatus: "",
-      orderType: "",
+      orderType: [],
       orderStage: "",
       karigarName: "",
       leftDaysFrom: minMaxLeftDays.min,
@@ -678,8 +679,7 @@ const Dasboard = () => {
             {/* Late Status */}
             <div className="space-y-1 overflow-visible">
               <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Late Status</label>
-              <SearchableDropdown
-                options={[
+              <SearchableDropdown isMulti={true} options={[
                   { value: "All Status", label: "All Sales Statuses" },
                   { value: "Late Only", label: "Late Only" },
                   { value: "On Time Only", label: "On Time Only" }
@@ -716,8 +716,7 @@ const Dasboard = () => {
                     }}
                     className="w-full accent-amber-500 bg-slate-200 h-1.5 rounded-lg appearance-none cursor-pointer focus:outline-none"
                   />
-                  <input 
-                    type="number" 
+                  <input type="number" step="0.001" 
                     value={filters.leftDaysFrom}
                     onChange={(e) => { setFilters({ ...filters, leftDaysFrom: Number(e.target.value) }); setCurrentPage(1); }}
                     className="w-16 h-7 text-xs font-black text-slate-700 bg-white border border-slate-200 rounded-lg text-center focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm outline-none transition-all" 
@@ -737,8 +736,7 @@ const Dasboard = () => {
                     }}
                     className="w-full accent-amber-500 bg-slate-200 h-1.5 rounded-lg appearance-none cursor-pointer focus:outline-none"
                   />
-                  <input 
-                    type="number" 
+                  <input type="number" step="0.001" 
                     value={filters.leftDaysTo}
                     onChange={(e) => { setFilters({ ...filters, leftDaysTo: Number(e.target.value) }); setCurrentPage(1); }}
                     className="w-16 h-7 text-xs font-black text-slate-700 bg-white border border-slate-200 rounded-lg text-center focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-sm outline-none transition-all" 
@@ -1008,8 +1006,49 @@ const Dasboard = () => {
           </div>
         </div>
 
+        {/* Mobile Card View (Hidden on Desktop) */}
+        <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 overflow-y-auto max-h-[600px] bg-slate-50/50 scrollbar-hide content-start">
+          {paginatedDeliveryData.length > 0 ? (
+            paginatedDeliveryData.map((row, idx) => (
+              <div key={idx} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3 hover:border-amber-200 transition-colors">
+                <div className="flex justify-between items-center pb-2 border-b border-slate-50">
+                  <span className="text-xs font-black text-slate-900 uppercase font-mono">Order: {row.orderNo}</span>
+                  {renderStatusBadge(row.stage)}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 rounded-lg p-2 border border-slate-100/50">
+                  <div>
+                    <span className="text-slate-400 block uppercase text-[8px] tracking-tight font-black">Client</span>
+                    <span className="text-slate-800 font-bold uppercase">{row.client}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block uppercase text-[8px] tracking-tight font-black">Karigar</span>
+                    <span className="text-slate-800 font-bold uppercase">{row.karigar}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block uppercase text-[8px] tracking-tight font-black">Expected Delivery</span>
+                    <span className="text-slate-800 font-bold font-mono">{row.expDelDate}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block uppercase text-[8px] tracking-tight font-black">Delivery Late</span>
+                    <span className={`font-black font-mono ${row.delay < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{row.delay} Days</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-slate-400 block uppercase text-[8px] tracking-tight font-black">Karigar Delay</span>
+                    <span className={`font-black font-mono ${row.karigarDelay < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{row.karigarDelay} Days</span>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10 text-xs text-slate-400 font-black uppercase tracking-widest">
+              No detailed records
+            </div>
+          )}
+        </div>
+
         {/* Dense Responsive Table */}
-        <DragScrollTable className="max-h-[500px] custom-scrollbar">
+        <div className="hidden md:block">
+          <DragScrollTable className="max-h-[500px] custom-scrollbar">
           <table className="w-full text-center border-collapse table-auto relative">
             <thead className="sticky top-0 z-20 bg-slate-100 text-slate-900 uppercase tracking-wider border-b border-gray-200 shadow-sm font-extrabold text-[10px]">
               <tr>
@@ -1093,6 +1132,7 @@ const Dasboard = () => {
             </tbody>
           </table>
         </DragScrollTable>
+        </div>
 
         {/* Table Bottom Pagination Footer (Standard style matching screenshots) */}
         <div className="px-4 py-2 border-t border-gray-200 bg-gray-50 flex items-center justify-between gap-4 rounded-b-2xl">

@@ -192,7 +192,13 @@ const FollowUpForm = ({ isOpen, onClose, onSave, order }) => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value, type } = e.target;
+    if (type === 'number' && value && value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1].length > 3) {
+        value = parts[0] + '.' + parts[1].slice(0, 3);
+      }
+    }
 
     if (name === 'karigarDate') {
       // Auto-compute Expected Delivery Date = Karigar Date + 3 days

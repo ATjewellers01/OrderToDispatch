@@ -4,6 +4,7 @@ import { Plus, Search, RotateCcw, Building, Phone, Mail, MapPin, Trash2, Edit2, 
 import DataTable from '../../components/DataTable';
 import ModalForm from '../../components/ModalForm';
 import SearchableDropdown from '../../components/SearchableDropdown';
+import { generateFilterOptions } from '../../utils/filterUtils';
 
 const companyNames = [
   "Kalyan Jewellers", "Malabar Gold", "Tanishq", "Joyalukkas", "Bhima Jewellers", 
@@ -52,9 +53,9 @@ export default function CompanyDetails({
   // Local filter state (used only in standalone mode)
   const [localFilters, setLocalFilters] = useState({
     searchQuery: '',
-    companyName: '',
-    location: '',
-    emailDomain: ''
+    companyName: [],
+    location: [],
+    emailDomain: []
   });
   const [localShowMobileFilters, setLocalShowMobileFilters] = useState(false);
 
@@ -81,10 +82,10 @@ export default function CompanyDetails({
 
   const handleClearFilters = () => {
     if (isEmbedded) {
-      onExternalFiltersChange?.({ companyName: '', location: '', emailDomain: '' });
+      onExternalFiltersChange?.({ companyName: [], location: [], emailDomain: [] });
       onClearFilters?.();
     } else {
-      setLocalFilters({ searchQuery: '', companyName: '', location: '', emailDomain: '' });
+      setLocalFilters({ searchQuery: '', companyName: [], location: [], emailDomain: [] });
       setLocalShowMobileFilters(false);
       toast.success('Filters cleared');
     }
@@ -135,23 +136,26 @@ export default function CompanyDetails({
   };
 
   // Dropdown option lists
-  const companyNamesList = useMemo(() => Array.from(new Set(companies.map(c => c.name))).filter(Boolean).sort(), [companies]);
-  const locationsList = useMemo(() => Array.from(new Set(companies.map(c => { const parts = c.address.split(','); return parts[parts.length - 1]?.trim() || parts[0]?.trim(); }))).filter(Boolean).sort(), [companies]);
-  const emailDomainsList = useMemo(() => Array.from(new Set(companies.map(c => { const parts = c.gmail.split('@'); return parts[1] || ''; }))).filter(Boolean).sort(), [companies]);
+  const companyNamesList = useMemo(() => generateFilterOptions(companies, c => c.name), [companies]);
+  const locationsList = useMemo(() => generateFilterOptions(companies, c => { const parts = c.address.split(','); return parts[parts.length - 1]?.trim() || parts[0]?.trim(); }), [companies]);
+  const emailDomainsList = useMemo(() => generateFilterOptions(companies, c => { const parts = c.gmail.split('@'); return parts[1] || ''; }), [companies]);
 
   // Apply filters
   const filteredCompanies = useMemo(() => {
     return companies.filter(c => {
-      if (effectiveFilters.companyName && c.name !== effectiveFilters.companyName) return false;
-      if (effectiveFilters.location) {
+      if (effectiveFilters.companyName && effectiveFilters.companyName.length > 0 && !effectiveFilters.companyName.includes(c.name)) return false;
+      
+      if (effectiveFilters.location && effectiveFilters.location.length > 0) {
         const parts = c.address.split(',');
         const loc = parts[parts.length - 1]?.trim() || parts[0]?.trim();
-        if (loc !== effectiveFilters.location) return false;
+        if (!effectiveFilters.location.includes(loc)) return false;
       }
-      if (effectiveFilters.emailDomain) {
+      
+      if (effectiveFilters.emailDomain && effectiveFilters.emailDomain.length > 0) {
         const domain = c.gmail.split('@')[1] || '';
-        if (domain !== effectiveFilters.emailDomain) return false;
+        if (!effectiveFilters.emailDomain.includes(domain)) return false;
       }
+      
       if (effectiveSearch) {
         const q = effectiveSearch.toLowerCase();
         return c.name.toLowerCase().includes(q) || c.number.toLowerCase().includes(q) || c.gmail.toLowerCase().includes(q) || c.address.toLowerCase().includes(q);
@@ -238,13 +242,16 @@ export default function CompanyDetails({
         {/* Hidden trigger so Master's Add button can open the modal */}
         <div className="hidden" id="company-add-trigger" onClick={() => setShowAddItemModal(true)} />
         <div className="flex-1 min-w-0 lg:min-w-[150px]">
-          <SearchableDropdown options={companyNamesList.map(n => ({ value: n, label: n }))} value={effectiveFilters.companyName} onChange={val => setFilterField('companyName', val)} placeholder="All Companies" height="h-[32px] md:h-[38px]" rounded="rounded-lg" />
+          <SearchableDropdown options={companyNamesList}
+                isMulti={true} value={effectiveFilters.companyName} onChange={val => setFilterField('companyName', val)} placeholder="All Companies" height="h-[32px] md:h-[38px]" rounded="rounded-lg" />
         </div>
         <div className="flex-1 min-w-0 lg:min-w-[150px]">
-          <SearchableDropdown options={locationsList.map(l => ({ value: l, label: l }))} value={effectiveFilters.location} onChange={val => setFilterField('location', val)} placeholder="All Locations" height="h-[32px] md:h-[38px]" rounded="rounded-lg" />
+          <SearchableDropdown options={locationsList}
+                isMulti={true} value={effectiveFilters.location} onChange={val => setFilterField('location', val)} placeholder="All Locations" height="h-[32px] md:h-[38px]" rounded="rounded-lg" />
         </div>
         <div className="flex-1 min-w-0 lg:min-w-[150px]">
-          <SearchableDropdown options={emailDomainsList.map(d => ({ value: d, label: d }))} value={effectiveFilters.emailDomain} onChange={val => setFilterField('emailDomain', val)} placeholder="All Domains" height="h-[32px] md:h-[38px]" rounded="rounded-lg" />
+          <SearchableDropdown options={emailDomainsList}
+                isMulti={true} value={effectiveFilters.emailDomain} onChange={val => setFilterField('emailDomain', val)} placeholder="All Domains" height="h-[32px] md:h-[38px]" rounded="rounded-lg" />
         </div>
         <button onClick={handleClearFilters} className="hidden lg:flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg w-[38px] h-[38px] hover:bg-gray-100 transition-colors shadow-sm" title="Clear Filters">
           <RotateCcw size={16} />
@@ -275,9 +282,12 @@ export default function CompanyDetails({
               <button onClick={handleClearFilters} className="lg:hidden flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg h-[32px] w-[32px] flex-shrink-0 shadow-sm active:scale-95"><RotateCcw size={14} /></button>
             </div>
             <div className={`${localShowMobileFilters ? 'flex' : 'hidden'} lg:flex flex-col lg:flex-row lg:flex-nowrap gap-2 w-full lg:w-auto lg:flex-[6] overflow-visible`}>
-              <div className="flex-1 min-w-0 lg:min-w-[150px]"><SearchableDropdown options={companyNamesList.map(n => ({ value: n, label: n }))} value={localFilters.companyName} onChange={val => { setLocalFilters(p => ({ ...p, companyName: val })); setCurrentPage(1); }} placeholder="All Companies" height="h-[32px] md:h-[38px]" rounded="rounded-lg" /></div>
-              <div className="flex-1 min-w-0 lg:min-w-[150px]"><SearchableDropdown options={locationsList.map(l => ({ value: l, label: l }))} value={localFilters.location} onChange={val => { setLocalFilters(p => ({ ...p, location: val })); setCurrentPage(1); }} placeholder="All Locations" height="h-[32px] md:h-[38px]" rounded="rounded-lg" /></div>
-              <div className="flex-1 min-w-0 lg:min-w-[150px]"><SearchableDropdown options={emailDomainsList.map(d => ({ value: d, label: d }))} value={localFilters.emailDomain} onChange={val => { setLocalFilters(p => ({ ...p, emailDomain: val })); setCurrentPage(1); }} placeholder="All Domains" height="h-[32px] md:h-[38px]" rounded="rounded-lg" /></div>
+              <div className="flex-1 min-w-0 lg:min-w-[150px]"><SearchableDropdown options={companyNamesList}
+                isMulti={true} value={localFilters.companyName} onChange={val => { setLocalFilters(p => ({ ...p, companyName: val })); setCurrentPage(1); }} placeholder="All Companies" height="h-[32px] md:h-[38px]" rounded="rounded-lg" /></div>
+              <div className="flex-1 min-w-0 lg:min-w-[150px]"><SearchableDropdown options={locationsList}
+                isMulti={true} value={localFilters.location} onChange={val => { setLocalFilters(p => ({ ...p, location: val })); setCurrentPage(1); }} placeholder="All Locations" height="h-[32px] md:h-[38px]" rounded="rounded-lg" /></div>
+              <div className="flex-1 min-w-0 lg:min-w-[150px]"><SearchableDropdown options={emailDomainsList}
+                isMulti={true} value={localFilters.emailDomain} onChange={val => { setLocalFilters(p => ({ ...p, emailDomain: val })); setCurrentPage(1); }} placeholder="All Domains" height="h-[32px] md:h-[38px]" rounded="rounded-lg" /></div>
               <button onClick={handleClearFilters} className="hidden lg:flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg w-[38px] h-[38px] hover:bg-gray-100 transition-colors shadow-sm"><RotateCcw size={16} /></button>
             </div>
           </div>

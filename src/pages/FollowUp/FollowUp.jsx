@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { Search, Filter, RotateCcw } from 'lucide-react';
 import { TabSwitcher } from '../../components/StandardButtons';
 import SearchableDropdown from '../../components/SearchableDropdown';
+import { generateFilterOptions } from '../../utils/filterUtils';
 import FollowUpPendingToday from './FollowUpPendingToday';
 import FollowUpPendingTotal from './FollowUpPendingTotal';
 import FollowUpHistory from './FollowUpHistory';
@@ -20,10 +21,10 @@ const FollowUp = () => {
 
   const [filters, setFilters] = useState({
     searchQuery: '',
-    customer: '',
-    category: '',
-    stage: '',
-    karigar: '',
+    customer: [],
+    category: [],
+    stage: [],
+    karigar: [],
     flwStatus: ''
   });
 
@@ -32,18 +33,25 @@ const FollowUp = () => {
     orderNo: ''
   });
 
-  // Load datasets on mount
-  useEffect(() => {
+  // Load datasets (called on mount and whenever localStorage changes)
+  const loadData = () => {
     const savedOrders = localStorage.getItem('ordersDataV3');
     if (savedOrders) setOrders(JSON.parse(savedOrders));
     const savedLogs = localStorage.getItem('followUpHistoryDataV3');
     if (savedLogs) setHistoryLogs(JSON.parse(savedLogs));
     const savedIssues = localStorage.getItem('metalIssuesDataV3');
     if (savedIssues) setMetalIssues(JSON.parse(savedIssues));
+  };
+
+  useEffect(() => {
+    loadData();
+    // Re-sync whenever any other page (e.g. MetalIssue) updates localStorage
+    window.addEventListener('storage', loadData);
+    return () => window.removeEventListener('storage', loadData);
   }, []);
 
   const handleClearFilters = () => {
-    setFilters({ searchQuery: '', customer: '', category: '', stage: '', karigar: '', flwStatus: '' });
+    setFilters({ searchQuery: '', customer: [], category: [], stage: [], karigar: [], flwStatus: '' });
     toast.success('Filters cleared');
   };
 
@@ -96,10 +104,10 @@ const FollowUp = () => {
   const totalCount = useMemo(() => activeOrders.length, [activeOrders]);
 
   // Dropdown option lists (from all orders, not filtered, for stable lists)
-  const customersList = useMemo(() => Array.from(new Set(activeOrders.map(o => o.company))).filter(Boolean).sort(), [activeOrders]);
-  const categoriesList = useMemo(() => Array.from(new Set(activeOrders.map(o => o.category))).filter(Boolean).sort(), [activeOrders]);
-  const stagesList = useMemo(() => Array.from(new Set(activeOrders.map(o => o.orderStage))).filter(Boolean).sort(), [activeOrders]);
-  const karigarsList = useMemo(() => Array.from(new Set(activeOrders.map(o => o.karigar))).filter(Boolean).sort(), [activeOrders]);
+  const customersList = useMemo(() => generateFilterOptions(activeOrders, o => o.company), [activeOrders]);
+  const categoriesList = useMemo(() => generateFilterOptions(activeOrders, o => o.category), [activeOrders]);
+  const stagesList = useMemo(() => generateFilterOptions(activeOrders, o => o.orderStage), [activeOrders]);
+  const karigarsList = useMemo(() => generateFilterOptions(activeOrders, o => o.karigar), [activeOrders]);
   const flwStatusesList = useMemo(() => {
     const statuses = historyLogs.map(l => l.status).filter(Boolean);
     return Array.from(new Set(statuses)).sort();
@@ -107,7 +115,7 @@ const FollowUp = () => {
 
   // History: order numbers list for dropdown
   const orderNosList = useMemo(() =>
-    Array.from(new Set(historyLogs.map(l => l.orderNo))).filter(Boolean).sort()
+    generateFilterOptions(historyLogs, l => l.orderNo)
   , [historyLogs]);
 
   // History count (total logs)
@@ -206,7 +214,8 @@ const FollowUp = () => {
 
               <div className="w-full relative">
                 <SearchableDropdown
-                  options={customersList.map(c => ({ value: c, label: c }))}
+                  options={customersList}
+                  isMulti={true}
                   value={filters.customer}
                   onChange={(val) => setFilters({ ...filters, customer: val })}
                   placeholder="All Customers"
@@ -217,7 +226,8 @@ const FollowUp = () => {
 
               <div className="w-full relative">
                 <SearchableDropdown
-                  options={categoriesList.map(c => ({ value: c, label: c }))}
+                  options={categoriesList}
+                isMulti={true}
                   value={filters.category}
                   onChange={(val) => setFilters({ ...filters, category: val })}
                   placeholder="All Categories"
@@ -228,7 +238,8 @@ const FollowUp = () => {
 
               <div className="w-full relative">
                 <SearchableDropdown
-                  options={stagesList.map(c => ({ value: c, label: c }))}
+                  options={stagesList}
+                isMulti={true}
                   value={filters.stage}
                   onChange={(val) => setFilters({ ...filters, stage: val })}
                   placeholder="All Stages"
@@ -241,7 +252,8 @@ const FollowUp = () => {
               {activeTab === 'total' && (
                 <div className="w-full relative">
                   <SearchableDropdown
-                    options={karigarsList.map(c => ({ value: c, label: c }))}
+                    options={karigarsList}
+                isMulti={true}
                     value={filters.karigar}
                     onChange={(val) => setFilters({ ...filters, karigar: val })}
                     placeholder="All Karigars"
@@ -253,7 +265,8 @@ const FollowUp = () => {
 
               <div className="w-full relative">
                 <SearchableDropdown
-                  options={flwStatusesList.map(c => ({ value: c, label: c }))}
+                  options={flwStatusesList}
+                isMulti={true}
                   value={filters.flwStatus}
                   onChange={(val) => setFilters({ ...filters, flwStatus: val })}
                   placeholder="All Follow-ups"
@@ -303,7 +316,8 @@ const FollowUp = () => {
             {/* Order No dropdown */}
             <div className="w-full lg:w-[220px] relative overflow-visible">
               <SearchableDropdown
-                options={orderNosList.map(o => ({ value: o, label: o }))}
+                options={orderNosList}
+                isMulti={true}
                 value={historyFilters.orderNo}
                 onChange={(val) => setHistoryFilters({ ...historyFilters, orderNo: val })}
                 placeholder="All Order Numbers"

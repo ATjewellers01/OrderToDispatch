@@ -19,7 +19,8 @@ const CustomDropdown = ({
   placeholder = "Select option...", 
   className = "",
   height = "h-[30px] md:h-[34px]",
-  rounded = "rounded"
+  rounded = "rounded",
+  disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [openUp, setOpenUp] = useState(false);
@@ -62,7 +63,9 @@ const CustomDropdown = ({
   const handleToggle = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsOpen(!isOpen);
+    if (!disabled) {
+      setIsOpen(!isOpen);
+    }
   };
 
   return (
@@ -70,8 +73,9 @@ const CustomDropdown = ({
       {/* Selection Trigger */}
       <button
         type="button"
+        disabled={disabled}
         onClick={handleToggle}
-        className={`w-full bg-gray-50 border border-gray-200 ${rounded} px-2 py-1 flex justify-between items-center cursor-pointer hover:border-amber-500 ${height} shadow-sm group outline-none focus:ring-2 focus:ring-amber-500/20`}
+        className={`w-full bg-gray-50 border border-gray-200 ${rounded} px-2 py-1 flex justify-between items-center cursor-pointer hover:border-amber-500 ${height} shadow-sm group outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:border-gray-200`}
       >
         <span className={`text-xs truncate ${selectedOption && selectedOption.value !== '' ? 'text-gray-900' : 'text-gray-400 font-medium'}`}>
           {selectedOption ? selectedOption.label : placeholder}

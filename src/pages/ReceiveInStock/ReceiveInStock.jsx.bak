@@ -4,13 +4,13 @@ import toast from 'react-hot-toast';
 import SearchableDropdown from '../../components/SearchableDropdown';
 import { generateFilterOptions } from '../../utils/filterUtils';
 import { TabSwitcher } from '../../components/StandardButtons';
-import EPolishPending from './EPolishPending';
-import EPolishHistory from './EPolishHistory';
-import EPolishForm from './EPolishForm';
-import EPolishEdit from './EPolishEdit';
+import ReceiveInStockPending from './ReceiveInStockPending';
+import ReceiveInStockHistory from './ReceiveInStockHistory';
+import ReceiveInStockForm from './ReceiveInStockForm';
+import ReceiveInStockEdit from './ReceiveInStockEdit';
 import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
-const EPolish = () => {
+export const ReceivedInStock = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [orders, setOrders] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -35,9 +35,9 @@ const EPolish = () => {
     }
   }, []);
 
-  const handleSaveEPolish = (updatedOrder) => {
+  const handleSaveReceiveInStock = (updatedOrder) => {
     saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
-    toast.success('E-Polish details updated successfully');
+    toast.success('Stock details updated successfully');
   };
 
   const handleClearFilters = () => {
@@ -51,81 +51,45 @@ const EPolish = () => {
     toast.success('Filters cleared');
   };
 
-  // Base split without filters
-  const basePendingOrders = useMemo(() => {
-    return orders.filter(o => 
-      o.ghatJamaStatus === 'Complete' && 
-      (
-        o.ghatJamaType === 'E-Polish' || 
-        (o.ghatJamaType === 'Meena Inhouse' && o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'E-Polish')
-      ) &&
-      (!o.ePolishStatus || o.ePolishStatus === '' || o.ePolishStatus === 'Pending')
-    );
-  }, [orders]);
+  const categoriesList = useMemo(() => generateFilterOptions(orders, o => o.category || o.categoryName), [orders]);
+  const karigarsList = useMemo(() => generateFilterOptions(orders, o => o.karigar || o.karigarName), [orders]);
+  const meltingList = useMemo(() => generateFilterOptions(orders, o => o.melting), [orders]);
+  const typesList = useMemo(() => generateFilterOptions(orders, o => o.orderType), [orders]);
 
-  const baseHistoryOrders = useMemo(() => {
-    return orders.filter(o => 
-      o.ePolishStatus && 
-      o.ePolishStatus !== 'Pending' && 
-      o.ePolishStatus !== ''
-    );
-  }, [orders]);
+  // Filtered base orders
+  const filteredOrdersBase = useMemo(() => {
+    return orders.filter(o => {
+      const categoryVal = o.category || o.categoryName || '';
+      const karigarVal = o.karigar || o.karigarName || '';
+      
+      if (filters.category && filters.category.length > 0 && !filters.category.includes(categoryVal)) return false;
+      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(karigarVal)) return false;
+      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
+      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
 
-  const activeBaseOrders = activeTab === 'pending' ? basePendingOrders : baseHistoryOrders;
+      if (filters.searchQuery) {
+        const q = filters.searchQuery.toLowerCase();
+        return Object.values(o).some(val => String(val).toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }, [orders, filters]);
 
-  const categoriesList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.category || o.categoryName), [activeBaseOrders]);
-  const karigarsList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.karigar || o.karigarName), [activeBaseOrders]);
-  const meltingList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.melting), [activeBaseOrders]);
-  const typesList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.orderType), [activeBaseOrders]);
-
-  // Filtered orders list matching search parameters
-  
-
-  // Split orders based on E-Polish status
-  // 1. Pending: Ghat Jama completed as "E-Polish" OR (completed as "Meena Inhouse" and routed to "E-Polish") and E-Polish status is NOT complete/processed
-  
-
-  // 2. History: processed E-Polish orders (has ePolishStatus value)
-  
-  
-
-  // Filtered lists
+  // Split orders based on Stock ingestion stage
+  // 1. Pending: Complete in Huid/Label (huidStatus is set or status15 is 'Complete') AND not yet received in stock
   const pendingOrders = useMemo(() => {
-    return basePendingOrders.filter(o => {
-      const categoryVal = o.category || o.categoryName || '';
-      const karigarVal = o.karigar || o.karigarName || '';
-      
-      if (filters.category && filters.category.length > 0 && !filters.category.includes(categoryVal)) return false;
-      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(karigarVal)) return false;
-      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
-      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
+    return filteredOrdersBase.filter(o => 
+      (o.huidStatus === 'Huid Complete' || o.huidStatus === 'Sent In Huid' || o.huidStatus === 'No Huid' || o.status15 === 'Complete') &&
+      !o.receiveInStockStatus
+    );
+  }, [filteredOrdersBase]);
 
-      if (filters.searchQuery) {
-        const q = filters.searchQuery.toLowerCase();
-        return Object.values(o).some(val => String(val).toLowerCase().includes(q));
-      }
-      return true;
-    });
-  }, [basePendingOrders, filters]);
-
+  // 2. History: processed Stock receipt where receiveInStockStatus is 'Received'
   const historyOrders = useMemo(() => {
-    return baseHistoryOrders.filter(o => {
-      const categoryVal = o.category || o.categoryName || '';
-      const karigarVal = o.karigar || o.karigarName || '';
-      
-      if (filters.category && filters.category.length > 0 && !filters.category.includes(categoryVal)) return false;
-      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(karigarVal)) return false;
-      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
-      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
-
-      if (filters.searchQuery) {
-        const q = filters.searchQuery.toLowerCase();
-        return Object.values(o).some(val => String(val).toLowerCase().includes(q));
-      }
-      return true;
-    });
-  }, [baseHistoryOrders, filters]);
-
+    return filteredOrdersBase.filter(o => 
+      o.receiveInStockStatus === 'Received'
+    );
+  }, [filteredOrdersBase]);
 
   // Counts
   const pendingCount = pendingOrders.length;
@@ -254,7 +218,7 @@ const EPolish = () => {
       {/* Main Table view */}
       <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
         {activeTab === 'pending' ? (
-          <EPolishPending
+          <ReceiveInStockPending
             orders={pendingOrders}
             onActionClick={(order) => {
               setSelectedOrder(order);
@@ -262,7 +226,7 @@ const EPolish = () => {
             }}
           />
         ) : (
-          <EPolishHistory
+          <ReceiveInStockHistory
             orders={historyOrders}
             onEditClick={(order) => {
               setEditOrder(order);
@@ -273,28 +237,28 @@ const EPolish = () => {
       </div>
 
       {/* Process Modal (Pending) */}
-      <EPolishForm
+      <ReceiveInStockForm
         isOpen={isFormOpen}
         onClose={() => {
           setIsFormOpen(false);
           setSelectedOrder(null);
         }}
-        onSave={handleSaveEPolish}
+        onSave={handleSaveReceiveInStock}
         order={selectedOrder}
       />
 
       {/* Edit Modal (History) */}
-      <EPolishEdit
+      <ReceiveInStockEdit
         isOpen={isEditOpen}
         onClose={() => {
           setIsEditOpen(false);
           setEditOrder(null);
         }}
-        onSave={handleSaveEPolish}
+        onSave={handleSaveReceiveInStock}
         order={editOrder}
       />
     </div>
   );
 };
 
-export default EPolish;
+export default ReceivedInStock;

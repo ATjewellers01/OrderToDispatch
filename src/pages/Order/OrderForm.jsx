@@ -53,6 +53,39 @@ const parseDateString = (str) => {
   return null;
 };
 
+const compressImage = (base64Str, maxWidth = 800, maxHeight = 800, quality = 0.7) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxWidth || height > maxHeight) {
+        if (width > height) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        } else {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+      resolve(compressedDataUrl);
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+  });
+};
+
 const DateInput = ({ label, name, value, onChange, required }) => {
   const dateInputRef = React.useRef(null);
   const [isTouch, setIsTouch] = useState(false);
@@ -170,10 +203,18 @@ const DateInput = ({ label, name, value, onChange, required }) => {
   );
 };
 
+const getTodayDateString = () => {
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy = today.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+};
+
 const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
   const initialFormState = {
     orderNo: '',
-    orderRecDate: '',
+    orderRecDate: getTodayDateString(),
     category: '',
     fromWeight: '',
     melting: '',
@@ -278,7 +319,13 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
   }, [isOpen, orders]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value, type } = e.target;
+    if (type === 'number' && value && value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1].length > 3) {
+        value = parts[0] + '.' + parts[1].slice(0, 3);
+      }
+    }
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
       if (name === 'company') {
@@ -318,13 +365,15 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
       toast.error(`Only ${remaining} more image(s) can be added (max ${MAX_IMAGES})`);
     }
 
-    // Read all selected files once
+    // Read all selected files once and compress them
     Promise.all(
       toAdd.map(
         (file) =>
           new Promise((resolve) => {
             const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
+            reader.onloadend = () => {
+              compressImage(reader.result).then(resolve);
+            };
             reader.readAsDataURL(file);
           })
       )
@@ -504,18 +553,18 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Quantity <span className="text-red-500">*</span></label>
-          <input required type="number" name="quantity" value={formData.quantity} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input required type="number" step="0.001" name="quantity" value={formData.quantity} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
         </div>
 
         {/* Row 4 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">From Weight <span className="text-red-500">*</span></label>
-          <input required type="number" name="fromWeight" value={formData.fromWeight} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input required type="number" step="0.001" name="fromWeight" value={formData.fromWeight} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">To Weight <span className="text-red-500">*</span></label>
-          <input required type="number" name="toWeight" value={formData.toWeight} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input required type="number" step="0.001" name="toWeight" value={formData.toWeight} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
         </div>
 
         {/* Row 5 */}
@@ -555,7 +604,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         {/* Row 6 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Length</label>
-          <input type="number" name="length" value={formData.length} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input type="number" step="0.001" name="length" value={formData.length} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
         </div>
 
         <div>
@@ -566,7 +615,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         {/* Row 7 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Broadness</label>
-          <input type="number" name="broadness" value={formData.broadness} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input type="number" step="0.001" name="broadness" value={formData.broadness} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
         </div>
 
         <div>
@@ -610,7 +659,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         {/* Row 10 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Sample Weight</label>
-          <input type="number" name="sampleWeight" value={formData.sampleWeight} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input type="number" step="0.001" name="sampleWeight" value={formData.sampleWeight} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
         </div>
 
         <div>
@@ -683,7 +732,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         {/* Row 13 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Total Weight <span className="text-red-500">*</span></label>
-          <input required type="number" name="totalWeight" value={formData.totalWeight} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input required type="number" step="0.001" name="totalWeight" value={formData.totalWeight} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
         </div>
 
         <div>
@@ -731,6 +780,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
                 </p>
               </div>
               <input
+                key={isOpen ? 'open' : 'closed'}
                 type="file"
                 className="hidden"
                 accept="image/*"
@@ -759,7 +809,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(idx)}
-                  className="absolute top-1 right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full text-[10px] font-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow"
+                  className="absolute top-1 right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full text-[10px] font-black flex items-center justify-center transition-opacity shadow"
                   title="Remove image"
                 >
                   ✕

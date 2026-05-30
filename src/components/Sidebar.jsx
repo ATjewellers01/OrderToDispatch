@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FileText,
@@ -47,6 +47,9 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import loginLogo from '../Assets/loginlogo.svg';
+import LogoutButton from './LogoutButton';
+import { getSidebarPendingCounts } from '../utils/pendingCounters';
+
 const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
@@ -57,61 +60,94 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const adminMenuItems = [
-    { path: '/dashboard',           icon: TrendingUp,     label: 'On Time Delivery' },
+    { path: '/dashboard', icon: TrendingUp, label: 'On Time Delivery' },
 
-    { path: '/order-history',       icon: History,        label: 'Order Management' },
-    { path: '/metal-issue',         icon: Coins,          label: 'Metal Issue' },
-    { path: '/follow-up',           icon: ClipboardList,  label: 'Follow Up' },
-    { path: '/qc1',                 icon: ShieldCheck,    label: 'QC1' },
-    { path: '/ghat-jama',           icon: Hammer,         label: 'Ghat Jama' },
-    { path: '/meena-inhouse',       icon: Paintbrush,     label: 'Meena Inhouse' },
-    { path: '/meena-outside',       icon: Palette,        label: 'Meena Outside' },
-    { path: '/polish-inhouse',      icon: Sparkles,       label: 'Polish Inhouse' },
-    { path: '/polish-outside',      icon: Gem,            label: 'Polish Outside' },
-    { path: '/bangle-polish',       icon: Circle,         label: 'Bangle Polish' },
-    { path: '/e-polish',            icon: Zap,            label: 'E-Polish' },
-    { path: '/qc2',                 icon: BadgeCheck,     label: 'QC2' },
-    { path: '/dispatch',            icon: Truck,          label: 'Dispatch' },
-    { path: '/receipt',             icon: CheckCircle,    label: 'Receipt' },
-    { path: '/qc3',                 icon: CheckSquare,    label: 'QC3' },
-    { path: '/huid-label',          icon: Tags,           label: 'Huid/Label' },
-    { path: '/receive-in-stock',    icon: Warehouse,      label: 'Receive In Stock' },
-    { path: '/delivery',            icon: Package,        label: 'Delivery' },
-    {path: '/master',              icon: LayoutGrid,     label: 'Master' },
-    { path: '/tad-setup',           icon: Clock,          label: 'TAD-DAYS Setup' },
-    { path: '/settings',            icon: Settings,       label: 'Settings' },
+    { path: '/order-history', icon: History, label: 'Order Management' },
+    { path: '/metal-issue', icon: Coins, label: 'Metal Issue' },
+    { path: '/follow-up', icon: ClipboardList, label: 'Follow Up' },
+    { path: '/qc1', icon: ShieldCheck, label: 'QC1' },
+    { path: '/ghat-jama', icon: Hammer, label: 'Ghat Jama' },
+    { path: '/meena-inhouse', icon: Paintbrush, label: 'Meena Inhouse' },
+    { path: '/meena-outside', icon: Palette, label: 'Meena Outside' },
+    { path: '/polish-inhouse', icon: Sparkles, label: 'Polish Inhouse' },
+    { path: '/polish-outside', icon: Gem, label: 'Polish Outside' },
+    { path: '/bangle-polish', icon: Circle, label: 'Bangle Polish' },
+    { path: '/e-polish', icon: Zap, label: 'E-Polish' },
+    { path: '/qc2', icon: BadgeCheck, label: 'QC2' },
+    { path: '/dispatch', icon: Truck, label: 'Dispatch' },
+    { path: '/receipt', icon: CheckCircle, label: 'Receipt' },
+    { path: '/qc3', icon: CheckSquare, label: 'QC3' },
+    { path: '/huid-label', icon: Tags, label: 'Huid/Label' },
+    { path: '/receive-in-stock', icon: Warehouse, label: 'Receive In Stock' },
+    { path: '/delivery', icon: Package, label: 'Delivery' },
+    { path: '/master', icon: LayoutGrid, label: 'Master' },
+    { path: '/tat-setup', icon: Clock, label: 'TAT-DAYS Setup' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
   const employeeMenuItems = [
 
-    { path: '/order-history', icon: History,       label: 'Order Management' },
-    { path: '/metal-issue',   icon: Coins,         label: 'Metal Issue' },
-    { path: '/follow-up',     icon: ClipboardList, label: 'Follow Up' },
-    { path: '/qc1',           icon: ShieldCheck,   label: 'QC1' },
-    { path: '/ghat-jama',     icon: Hammer,        label: 'Ghat Jama' },
-    { path: '/meena-inhouse', icon: Paintbrush,    label: 'Meena Inhouse' },
-    { path: '/meena-outside', icon: Palette,       label: 'Meena Outside' },
-    { path: '/polish-inhouse', icon: Sparkles,     label: 'Polish Inhouse' },
-    { path: '/polish-outside', icon: Gem,          label: 'Polish Outside' },
-    { path: '/bangle-polish',  icon: Circle,       label: 'Bangle Polish' },
-    { path: '/e-polish',       icon: Zap,          label: 'E-Polish' },
-    { path: '/qc2',            icon: BadgeCheck,   label: 'QC2' },
-    { path: '/dispatch',       icon: Truck,        label: 'Dispatch' },
-    { path: '/receipt',        icon: CheckCircle,  label: 'Receipt' },
-    { path: '/qc3',            icon: CheckSquare,  label: 'QC3' },
-    { path: '/huid-label',     icon: Tags,         label: 'Huid/Label' },
-    { path: '/receive-in-stock',icon: Warehouse,    label: 'Receive In Stock' },
-    { path: '/delivery',       icon: Package,      label: 'Delivery' },
-    { path: '/master',        icon: LayoutGrid,    label: 'Master' },
+    { path: '/order-history', icon: History, label: 'Order Management' },
+    { path: '/metal-issue', icon: Coins, label: 'Metal Issue' },
+    { path: '/follow-up', icon: ClipboardList, label: 'Follow Up' },
+    { path: '/qc1', icon: ShieldCheck, label: 'QC1' },
+    { path: '/ghat-jama', icon: Hammer, label: 'Ghat Jama' },
+    { path: '/meena-inhouse', icon: Paintbrush, label: 'Meena Inhouse' },
+    { path: '/meena-outside', icon: Palette, label: 'Meena Outside' },
+    { path: '/polish-inhouse', icon: Sparkles, label: 'Polish Inhouse' },
+    { path: '/polish-outside', icon: Gem, label: 'Polish Outside' },
+    { path: '/bangle-polish', icon: Circle, label: 'Bangle Polish' },
+    { path: '/e-polish', icon: Zap, label: 'E-Polish' },
+    { path: '/qc2', icon: BadgeCheck, label: 'QC2' },
+    { path: '/dispatch', icon: Truck, label: 'Dispatch' },
+    { path: '/receipt', icon: CheckCircle, label: 'Receipt' },
+    { path: '/qc3', icon: CheckSquare, label: 'QC3' },
+    { path: '/huid-label', icon: Tags, label: 'Huid/Label' },
+    { path: '/receive-in-stock', icon: Warehouse, label: 'Receive In Stock' },
+    { path: '/delivery', icon: Package, label: 'Delivery' },
+    { path: '/master', icon: LayoutGrid, label: 'Master' },
   ];
 
-  const menuItems = user?.role === 'ADMIN' ? adminMenuItems : employeeMenuItems;
+  const [orders, setOrders] = useState([]);
+  const [metalIssues, setMetalIssues] = useState([]);
+  const [followUpLogs, setFollowUpLogs] = useState([]);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedOrders = localStorage.getItem('ordersDataV3');
+      if (savedOrders) setOrders(JSON.parse(savedOrders));
+      
+      const savedIssues = localStorage.getItem('metalIssuesDataV3');
+      if (savedIssues) setMetalIssues(JSON.parse(savedIssues));
+      
+      const savedLogs = localStorage.getItem('followUpHistoryDataV3');
+      if (savedLogs) setFollowUpLogs(JSON.parse(savedLogs));
+    };
+    
+    handleStorageChange();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const pendingCounts = useMemo(() => {
+    return getSidebarPendingCounts(orders, metalIssues, followUpLogs);
+  }, [orders, metalIssues, followUpLogs]);
+
+  const menuItems = (user?.role === 'ADMIN' ? adminMenuItems : employeeMenuItems)
+    .filter(item => {
+      if (!user?.accessPages || user.accessPages.length === 0) return true;
+      return user.accessPages.includes(item.path);
+    })
+    .map(item => ({
+      ...item,
+      count: pendingCounts[item.label] || 0
+    }));
 
   return (
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm z-40 lg:hidden"
           onClick={onClose}
         />
@@ -149,7 +185,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                       </div>
                       {item.isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </button>
-                    
+
                     {item.isOpen && (
                       <div className="pl-9 space-y-1 animate-in slide-in-from-top-2 duration-200">
                         {item.subItems.map((sub) => (
@@ -159,8 +195,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                             onClick={onClose}
                             className={({ isActive }) => `
                               flex items-center justify-between px-4 py-2.5 rounded-lg transition-all duration-200
-                              ${isActive 
-                                ? 'bg-amber-100/50 text-amber-600' 
+                              ${isActive
+                                ? 'bg-amber-100/50 text-amber-600'
                                 : 'text-gray-600 hover:bg-amber-50/50 hover:text-amber-600'}
                             `}
                           >
@@ -182,8 +218,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                     onClick={onClose}
                     className={({ isActive }) => `
                       flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group
-                      ${isActive 
-                        ? 'bg-amber-100/50 text-amber-600 border-l-4 border-amber-600' 
+                      ${isActive
+                        ? 'bg-amber-100/50 text-amber-600 border-l-4 border-amber-600'
                         : 'text-gray-700 hover:bg-amber-50/50 hover:text-amber-600 border-l-4 border-transparent'}
                     `}
                   >
@@ -204,13 +240,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
           {/* User Profile Section */}
           <div className="p-4 border-t border-amber-100 bg-amber-50/50">
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white transition-all font-semibold shadow-sm"
-            >
-              <LogOutIcon size={18} />
-              <span>Sign Out</span>
-            </button>
+            <LogoutButton onClick={handleLogout} />
           </div>
         </div>
       </aside>

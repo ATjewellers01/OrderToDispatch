@@ -134,7 +134,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={submitting}
-              className={`w-full py-1.5 sm:py-2.5 px-4 text-xs sm:text-base font-bold bg-amber-600 text-white rounded-lg hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-600 transition-all ${
+              className={`w-full py-1.5 sm:py-2.5 px-4 text-xs sm:text-base font-bold text-white rounded-lg focus:outline-none focus-visible:ring-amber-600/20 dark:focus-visible:ring-amber-600/40 bg-transparent bg-gradient-to-r from-amber-600 via-amber-500/60 to-amber-600 [background-size:200%_auto] hover:bg-[99%_center] shadow-sm transition-all ${
                 submitting ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >

@@ -25,7 +25,13 @@ const PolishOutsideEdit = ({ isOpen, onClose, onSave, order }) => {
   }, [isOpen, order]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value, type } = e.target;
+    if (type === 'number' && value && value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1].length > 3) {
+        value = parts[0] + '.' + parts[1].slice(0, 3);
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 

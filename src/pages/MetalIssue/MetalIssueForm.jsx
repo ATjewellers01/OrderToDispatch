@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import ModalForm from '../../components/ModalForm';
+import CustomDropdown from '../../components/CustomDropdown';
 import { preventInvalidDecimalChars } from '../../utils/numberUtils';
 
 const MetalIssueForm = ({ isOpen, onClose, onSave, order }) => {
@@ -20,7 +21,13 @@ const MetalIssueForm = ({ isOpen, onClose, onSave, order }) => {
   }, [isOpen]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value, type } = e.target;
+    if (type === 'number' && value && value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1].length > 3) {
+        value = parts[0] + '.' + parts[1].slice(0, 3);
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -99,29 +106,27 @@ const MetalIssueForm = ({ isOpen, onClose, onSave, order }) => {
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Metal Issue Status <span className="text-red-500">*</span>
             </label>
-            <select
-              required
-              name="metalIssueStatus"
+            <CustomDropdown
+              options={[
+                { value: 'Metal Issue', label: 'Metal Issue' },
+                { value: 'Metal On Delivery', label: 'Metal On Delivery' }
+              ]}
               value={formData.metalIssueStatus}
-              onChange={handleInputChange}
-              className={`w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium ${
-                formData.metalIssueStatus ? 'text-gray-900 font-bold' : 'text-gray-400'
-              }`}
-            >
-              <option value="" className="text-gray-400">Select Status</option>
-              <option value="Metal Issue" className="text-gray-900 font-medium">Metal Issue</option>
-              <option value="Metal On Delivery" className="text-gray-900 font-medium">Metal On Delivery</option>
-            </select>
+              onChange={(val) => handleInputChange({ target: { name: 'metalIssueStatus', value: val } })}
+              placeholder="Select Status"
+              className="w-full text-xs"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Paid Weight <span className="text-red-500">*</span>
             </label>
-            <input
-              required
+            <input required
               type="number"
-              step="any"
+              step="0.001"
               name="paidWeight"
               value={formData.paidWeight}
               onChange={handleInputChange}
@@ -136,19 +141,18 @@ const MetalIssueForm = ({ isOpen, onClose, onSave, order }) => {
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Metal Issue Type (Purity) <span className="text-red-500">*</span>
             </label>
-            <select
-              required
-              name="metalIssueType"
+            <CustomDropdown
+              options={[
+                { value: '99.90', label: '99.90' },
+                { value: '99.50', label: '99.50' }
+              ]}
               value={formData.metalIssueType}
-              onChange={handleInputChange}
-              className={`w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium ${
-                formData.metalIssueType ? 'text-gray-900 font-bold' : 'text-gray-400'
-              }`}
-            >
-              <option value="" className="text-gray-400">Select Type</option>
-              <option value="99.90" className="text-gray-900 font-medium">99.90</option>
-              <option value="99.50" className="text-gray-900 font-medium">99.50</option>
-            </select>
+              onChange={(val) => handleInputChange({ target: { name: 'metalIssueType', value: val } })}
+              placeholder="Select Type"
+              className="w-full text-xs"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
           </div>
 
           <div>

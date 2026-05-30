@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, ChevronDown, Check, Plus } from 'lucide-react';
+import { Search, ChevronDown, Check, Plus, Square, CheckSquare } from 'lucide-react';
 
 /**
  * SearchableDropdown Component
@@ -19,7 +19,8 @@ const SearchableDropdown = ({
   placeholder = "Select option...", 
   className = "",
   height = "h-[30px] md:h-[34px]",
-  rounded = "rounded"
+  rounded = "rounded",
+  isMulti = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,11 +31,29 @@ const SearchableDropdown = ({
 
   // Filter options based on search term
   const filteredOptions = allOptions.filter(opt =>
-    opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+    String(opt?.label || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Find the label for the current value
   const selectedOption = allOptions.find(opt => opt.value === value);
+  const selectedOptions = isMulti && Array.isArray(value) ? allOptions.filter(opt => value.includes(opt.value)) : [];
+  
+  const getTriggerText = () => {
+    if (isMulti) {
+      if (!value || value.length === 0) return placeholder;
+      if (value.length === 1) return selectedOptions[0]?.label || value[0];
+      return `${value.length} Selected`;
+    }
+    return selectedOption ? selectedOption.label : value ? value : placeholder;
+  };
+  
+  const isSelected = (optValue) => {
+    if (isMulti) {
+      if (optValue === '') return (!value || value.length === 0);
+      return Array.isArray(value) && value.includes(optValue);
+    }
+    return value === optValue;
+  };
 
   // Determine direction based on space
   useEffect(() => {
@@ -79,8 +98,8 @@ const SearchableDropdown = ({
         onClick={handleToggle}
         className={`w-full bg-gray-50 border border-gray-200 ${rounded} px-2 py-1 flex justify-between items-center cursor-pointer hover:border-amber-500 ${height} shadow-sm group outline-none focus:ring-2 focus:ring-amber-500/20`}
       >
-        <span className={`text-xs truncate ${selectedOption && selectedOption.value !== '' ? 'text-gray-900 font-medium' : value ? 'text-gray-900 font-medium' : 'text-gray-400 font-medium'}`}>
-          {selectedOption ? selectedOption.label : value ? value : placeholder}
+        <span className={`text-xs truncate ${(isMulti ? (value && value.length > 0) : (selectedOption && selectedOption.value !== '' || value)) ? 'text-gray-900 font-medium' : 'text-gray-400 font-medium'}`}>
+          {getTriggerText()}
         </span>
         <ChevronDown
           size={14}
@@ -115,18 +134,46 @@ const SearchableDropdown = ({
                   key={opt.value}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onChange(opt.value);
-                    setIsOpen(false);
-                    setSearchTerm("");
+                    if (isMulti) {
+                      if (opt.value === '') {
+                        onChange([]);
+                      } else {
+                        const currentVal = Array.isArray(value) ? value : [];
+                        if (currentVal.includes(opt.value)) {
+                          onChange(currentVal.filter(v => v !== opt.value));
+                        } else {
+                          onChange([...currentVal, opt.value]);
+                        }
+                      }
+                    } else {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                      setSearchTerm("");
+                    }
                   }}
-                  className={`px-3 py-1.5 text-xs cursor-pointer flex justify-between items-center hover:bg-amber-50 transition-colors group ${value === opt.value
-                      ? 'bg-amber-50/50 text-amber-700 font-semibold'
-                      : 'text-gray-700'
+                  className={`px-3 py-1.5 text-xs cursor-pointer flex justify-between items-center hover:bg-slate-50 transition-colors group ${isSelected(opt.value)
+                      ? 'bg-slate-50/50'
+                      : ''
                     }`}
                 >
-                  <span className="truncate">{opt.label}</span>
-                  {value === opt.value && (
-                    <Check size={12} className="text-amber-600 flex-shrink-0" />
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {isMulti ? (
+                      isSelected(opt.value) ? (
+                        <CheckSquare size={14} className="text-amber-600 flex-shrink-0" />
+                      ) : (
+                        <Square size={14} className="text-gray-300 flex-shrink-0" />
+                      )
+                    ) : (
+                      isSelected(opt.value) && (
+                        <Check size={12} className="text-amber-600 flex-shrink-0" />
+                      )
+                    )}
+                    <span className="truncate text-[#0a3161] font-medium">{opt.label}</span>
+                  </div>
+                  {opt.count !== undefined && (
+                    <span className="text-gray-500 text-[10px] pl-2 font-medium shrink-0">
+                      ({opt.count})
+                    </span>
                   )}
                 </div>
               ))

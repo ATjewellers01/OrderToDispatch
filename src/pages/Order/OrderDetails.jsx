@@ -10,6 +10,7 @@ import SearchableDropdown from '../../components/SearchableDropdown';
 import ModalView from '../../components/ModalView';
 import { generateKarigarHTML, generateCustomerHTML } from './pdf/pdfGenerators';
 import { syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
+import { generateFilterOptions } from '../../utils/filterUtils';
 
 const toYYYYMMDD = (val) => {
   if (!val) return '';
@@ -80,10 +81,10 @@ const OrderDetails = () => {
   
   const [filters, setFilters] = useState({
     searchQuery: '',
-    category: '',
-    karigar: '',
-    melting: '',
-    orderType: '',
+    category: [],
+    karigar: [],
+    melting: [],
+    orderType: [],
     date: ''
   });
 
@@ -185,27 +186,27 @@ const OrderDetails = () => {
   const handleClearFilters = () => {
     setFilters({
       searchQuery: '',
-      category: '',
-      karigar: '',
-      melting: '',
-      orderType: '',
+      category: [],
+      karigar: [],
+      melting: [],
+      orderType: [],
       date: ''
     });
     setCurrentPage(1);
     toast.success('Filters cleared');
   };
 
-  const categoriesList = useMemo(() => Array.from(new Set(orders.map(o => o.category))).filter(Boolean).sort(), [orders]);
-  const karigarsList = useMemo(() => Array.from(new Set(orders.map(o => o.karigar))).filter(Boolean).sort(), [orders]);
-  const meltingList = useMemo(() => Array.from(new Set(orders.map(o => o.melting))).filter(Boolean).sort(), [orders]);
-  const typesList = useMemo(() => Array.from(new Set(orders.map(o => o.orderType))).filter(Boolean).sort(), [orders]);
+  const categoriesList = useMemo(() => generateFilterOptions(orders, 'category'), [orders]);
+  const karigarsList = useMemo(() => generateFilterOptions(orders, 'karigar'), [orders]);
+  const meltingList = useMemo(() => generateFilterOptions(orders, 'melting'), [orders]);
+  const typesList = useMemo(() => generateFilterOptions(orders, 'orderType'), [orders]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
-      if (filters.category && o.category !== filters.category) return false;
-      if (filters.karigar && o.karigar !== filters.karigar) return false;
-      if (filters.melting && o.melting !== filters.melting) return false;
-      if (filters.orderType && o.orderType !== filters.orderType) return false;
+      if (filters.category && filters.category.length > 0 && !filters.category.includes(o.category)) return false;
+      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(o.karigar)) return false;
+      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
+      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
       if (filters.date && o.orderRecDate !== filters.date && o.deliveryDate !== filters.date) return false;
 
       if (filters.searchQuery) {
@@ -482,7 +483,8 @@ const OrderDetails = () => {
             {/* Category Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={categoriesList.map(c => ({ value: c, label: c }))}
+                options={categoriesList}
+                isMulti={true}
                 value={filters.category}
                 onChange={(val) => setFilters({ ...filters, category: val })}
                 placeholder="All Categories"
@@ -495,7 +497,8 @@ const OrderDetails = () => {
             {/* Karigar Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={karigarsList.map(c => ({ value: c, label: c }))}
+                options={karigarsList}
+                isMulti={true}
                 value={filters.karigar}
                 onChange={(val) => setFilters({ ...filters, karigar: val })}
                 placeholder="All Karigars"
@@ -508,7 +511,8 @@ const OrderDetails = () => {
             {/* Melting Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={meltingList.map(c => ({ value: c, label: c }))}
+                options={meltingList}
+                isMulti={true}
                 value={filters.melting}
                 onChange={(val) => setFilters({ ...filters, melting: val })}
                 placeholder="All Melting"
@@ -521,7 +525,8 @@ const OrderDetails = () => {
             {/* Order Type Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={typesList.map(c => ({ value: c, label: c }))}
+                options={typesList}
+                isMulti={true}
                 value={filters.orderType}
                 onChange={(val) => setFilters({ ...filters, orderType: val })}
                 placeholder="All Types"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import ModalForm from '../../components/ModalForm';
+import CustomDropdown from '../../components/CustomDropdown';
 
 const ReceiveInStockEdit = ({ isOpen, onClose, onSave, order }) => {
   const initialFormState = {
@@ -24,7 +25,13 @@ const ReceiveInStockEdit = ({ isOpen, onClose, onSave, order }) => {
   }, [isOpen, order]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value, type } = e.target;
+    if (type === 'number' && value && value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1].length > 3) {
+        value = parts[0] + '.' + parts[1].slice(0, 3);
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -102,18 +109,17 @@ const ReceiveInStockEdit = ({ isOpen, onClose, onSave, order }) => {
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Receive Status <span className="text-red-500">*</span>
             </label>
-            <select
-              required
-              name="receiveInStockStatus"
+            <CustomDropdown
+              options={[
+                { value: 'Received', label: 'Received' }
+              ]}
               value={formData.receiveInStockStatus}
-              onChange={handleInputChange}
-              className={`w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium ${
-                formData.receiveInStockStatus ? 'text-gray-900 font-bold' : 'text-gray-400'
-              }`}
-            >
-              <option value="" className="text-gray-400">Select Status</option>
-              <option value="Received" className="text-gray-900 font-medium">Received</option>
-            </select>
+              onChange={(val) => handleInputChange({ target: { name: 'receiveInStockStatus', value: val } })}
+              placeholder="Select Status"
+              className="w-full text-xs"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
           </div>
 
           {/* Inform To Customer */}
@@ -121,19 +127,18 @@ const ReceiveInStockEdit = ({ isOpen, onClose, onSave, order }) => {
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Inform To Customer <span className="text-red-500">*</span>
             </label>
-            <select
-              required
-              name="informToCustomer"
+            <CustomDropdown
+              options={[
+                { value: 'Informed', label: 'Informed' },
+                { value: 'Not Informed', label: 'Not Informed' }
+              ]}
               value={formData.informToCustomer}
-              onChange={handleInputChange}
-              className={`w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium ${
-                formData.informToCustomer ? 'text-gray-900 font-bold' : 'text-gray-400'
-              }`}
-            >
-              <option value="" className="text-gray-400">Select Status</option>
-              <option value="Informed" className="text-gray-900 font-medium">Informed</option>
-              <option value="Not Informed" className="text-gray-900 font-medium">Not Informed</option>
-            </select>
+              onChange={(val) => handleInputChange({ target: { name: 'informToCustomer', value: val } })}
+              placeholder="Select Status"
+              className="w-full text-xs"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
           </div>
 
           {/* Remarks */}

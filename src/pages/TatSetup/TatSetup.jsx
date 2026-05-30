@@ -1,8 +1,115 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { Clock, Plus, Trash2, Edit, Save, Sliders, CalendarDays, CheckCircle, RotateCcw } from 'lucide-react';
+import { Clock, Plus, Trash2, Edit, Sliders } from 'lucide-react';
 import { TabSwitcher } from '../../components/StandardButtons';
 import ModalForm from '../../components/ModalForm';
+import CustomDropdown from '../../components/CustomDropdown';
+
+const STANDARD_TAT_IDS = [
+  'tat-1', 'tat-2', 'tat-3', 'tat-4', 'tat-5', 'tat-6', 'tat-7', 'tat-8', 'tat-9',
+  'tat-10', 'tat-11', 'tat-12', 'tat-13', 'tat-14', 'tat-15', 'tat-16', 'tat-17', 'tat-18'
+];
+
+const STAGE_NAME_OPTIONS = [
+  { value: 'Order', label: 'Order' },
+  { value: 'Metal Issue', label: 'Metal Issue' },
+  { value: 'Follow Up', label: 'Follow Up' },
+  { value: 'QC1', label: 'QC1' },
+  { value: 'Ghat Jama', label: 'Ghat Jama' },
+  { value: 'Meena Inhouse', label: 'Meena Inhouse' },
+  { value: 'Meena Outside', label: 'Meena Outside' },
+  { value: 'Polish Inhouse', label: 'Polish Inhouse' },
+  { value: 'Polish Outside', label: 'Polish Outside' },
+  { value: 'Bangle Polish', label: 'Bangle Polish' },
+  { value: 'E-Polish', label: 'E-Polish' },
+  { value: 'QC2', label: 'QC2' },
+  { value: 'Dispatch', label: 'Dispatch' },
+  { value: 'RD (Receipt Department)', label: 'RD (Receipt Department)' },
+  { value: 'QC3', label: 'QC3' },
+  { value: 'HUID/Label', label: 'HUID/Label' },
+  { value: 'Receive In Stock', label: 'Receive In Stock' },
+  { value: 'Delivery', label: 'Delivery' },
+  { value: 'CUSTOM', label: 'Other / Custom Stage...' }
+];
+
+const formatTatDuration = (value, type) => {
+  const valNum = Number(value) || 0;
+  if (type === 'day') {
+    return `${valNum} ${valNum === 1 ? 'Day' : 'Days'}`;
+  }
+  if (type === 'hours') {
+    const totalSeconds = Math.round(valNum * 3600);
+    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const s = String(totalSeconds % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  }
+  if (type === 'minute') {
+    const totalSeconds = Math.round(valNum * 60);
+    const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const s = String(totalSeconds % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+  return `${valNum}`;
+};
+
+const getTatFormFromStage = (stage) => {
+  const val = Number(stage.value) || 0;
+  const type = stage.type || 'day';
+  
+  let days = '1';
+  let hours = '0';
+  let minutes = '0';
+  let seconds = '0';
+  
+  if (type === 'day') {
+    days = String(val);
+  } else if (type === 'hours') {
+    const totalSeconds = Math.round(val * 3600);
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    hours = String(h);
+    minutes = String(m);
+    seconds = String(s);
+  } else if (type === 'minute') {
+    const totalSeconds = Math.round(val * 60);
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    minutes = String(m);
+    seconds = String(s);
+  }
+  
+  return {
+    stageName: stage.stageName || '',
+    type,
+    days,
+    hours,
+    minutes,
+    seconds
+  };
+};
+
+const getStageValueFromForm = (form) => {
+  const type = form.type;
+  if (type === 'day') {
+    return Math.max(0, parseInt(form.days, 10) || 0);
+  }
+  if (type === 'hours') {
+    const h = Math.max(0, parseInt(form.hours, 10) || 0);
+    const m = Math.max(0, parseInt(form.minutes, 10) || 0);
+    const s = Math.max(0, parseInt(form.seconds, 10) || 0);
+    const totalSeconds = h * 3600 + m * 60 + s;
+    return totalSeconds / 3600;
+  }
+  if (type === 'minute') {
+    const m = Math.max(0, parseInt(form.minutes, 10) || 0);
+    const s = Math.max(0, parseInt(form.seconds, 10) || 0);
+    const totalSeconds = m * 60 + s;
+    return totalSeconds / 60;
+  }
+  return 0;
+};
 
 const TatSetup = () => {
   const [activeTab, setActiveTab] = useState('shift'); // 'shift', 'tat'
@@ -17,6 +124,19 @@ const TatSetup = () => {
     startTime: '09:00',
     endTime: '18:00',
     isDefault: 'No'
+  });
+
+  // Modal control for adding/editing TAT
+  const [isTatModalOpen, setIsTatModalOpen] = useState(false);
+  const [editingTatStage, setEditingTatStage] = useState(null);
+  const [customStageText, setCustomStageText] = useState('');
+  const [tatForm, setTatForm] = useState({
+    stageName: '',
+    type: 'day',
+    days: '1',
+    hours: '0',
+    minutes: '0',
+    seconds: '0'
   });
 
   // Load configuration from local storage
@@ -59,7 +179,6 @@ const TatSetup = () => {
       setTatStages(defaultTats);
       localStorage.setItem('tatSetupDataV3', JSON.stringify(defaultTats));
     }
-
   }, []);
 
   // ── SHIFT FUNCTIONS ───────────────────────────────────────
@@ -93,19 +212,16 @@ const TatSetup = () => {
 
     let updatedShifts;
     if (editingShift) {
-      // Edit
       updatedShifts = shifts.map(s => {
         if (s.id === editingShift.id) {
           return { ...s, ...shiftForm };
         }
-        // If editing this shift to be Default, set others to No
         if (shiftForm.isDefault === 'Yes') {
           return { ...s, isDefault: 'No' };
         }
         return s;
       });
     } else {
-      // Add
       const newShift = {
         id: `shift-${Date.now()}`,
         ...shiftForm
@@ -118,7 +234,6 @@ const TatSetup = () => {
       }
     }
 
-    // Ensure at least one shift is default if any shifts exist
     if (updatedShifts.length > 0 && !updatedShifts.some(s => s.isDefault === 'Yes')) {
       updatedShifts[0].isDefault = 'Yes';
     }
@@ -147,77 +262,133 @@ const TatSetup = () => {
   };
 
   // ── TAT STAGES FUNCTIONS ──────────────────────────────────
-  const handleTatValueChange = (id, val) => {
-    const numeric = val === '' ? '' : Math.max(0, parseInt(val, 10));
-    setTatStages(prev => prev.map(t => t.id === id ? { ...t, value: numeric } : t));
+  const handleOpenTatModal = (stage = null) => {
+    if (stage) {
+      setEditingTatStage(stage);
+      const initialForm = getTatFormFromStage(stage);
+      const isStandardOption = STAGE_NAME_OPTIONS.some(o => o.value === initialForm.stageName && o.value !== 'CUSTOM');
+      if (!isStandardOption) {
+        setCustomStageText(initialForm.stageName);
+        initialForm.stageName = 'CUSTOM';
+      } else {
+        setCustomStageText('');
+      }
+      setTatForm(initialForm);
+    } else {
+      setEditingTatStage(null);
+      setCustomStageText('');
+      setTatForm({
+        stageName: '',
+        type: 'day',
+        days: '1',
+        hours: '0',
+        minutes: '0',
+        seconds: '0'
+      });
+    }
+    setIsTatModalOpen(true);
   };
 
-  const handleTatTypeChange = (id, type) => {
-    setTatStages(prev => prev.map(t => t.id === id ? { ...t, type } : t));
-  };
+  const handleSaveTat = (e) => {
+    e.preventDefault();
+    
+    let resolvedStageName = tatForm.stageName;
+    if (resolvedStageName === 'CUSTOM') {
+      resolvedStageName = customStageText.trim();
+    }
 
-  const handleSaveTats = () => {
-    // Validate
-    const invalid = tatStages.some(t => t.value === '' || isNaN(t.value));
-    if (invalid) {
-      toast.error('Please enter valid numeric TAT values for all stages');
+    if (!resolvedStageName || !resolvedStageName.trim()) {
+      toast.error('Stage Name is required');
       return;
     }
 
-    localStorage.setItem('tatSetupDataV3', JSON.stringify(tatStages));
-    toast.success('TAT stage configurations saved successfully');
+    const calculatedValue = getStageValueFromForm(tatForm);
+    if (calculatedValue <= 0) {
+      toast.error('Duration must be greater than 0');
+      return;
+    }
+
+    let updatedTats;
+    if (editingTatStage) {
+      updatedTats = tatStages.map(t => t.id === editingTatStage.id ? {
+        ...t,
+        stageName: resolvedStageName.trim(),
+        value: calculatedValue,
+        type: tatForm.type
+      } : t);
+      toast.success('TAT stage updated successfully');
+    } else {
+      const newStage = {
+        id: `tat-${Date.now()}`,
+        stageName: resolvedStageName.trim(),
+        value: calculatedValue,
+        type: tatForm.type
+      };
+      updatedTats = [...tatStages, newStage];
+      toast.success('TAT stage added successfully');
+    }
+
+    setTatStages(updatedTats);
+    localStorage.setItem('tatSetupDataV3', JSON.stringify(updatedTats));
+    setIsTatModalOpen(false);
+    setEditingTatStage(null);
+    setCustomStageText('');
   };
 
-
+  const handleDeleteTatStage = (id) => {
+    if (confirm('Are you sure you want to delete this custom TAT stage?')) {
+      const updated = tatStages.filter(t => t.id !== id);
+      setTatStages(updated);
+      localStorage.setItem('tatSetupDataV3', JSON.stringify(updated));
+      toast.success('TAT stage deleted successfully');
+    }
+  };
 
   return (
     <div className="p-0 sm:p-2 md:p-6 space-y-4 flex flex-col h-full min-h-0 overflow-y-auto custom-scrollbar">
       
-      {/* Title Header - Tab Switcher and Dynamic Action Button in one row */}
-      <div className="px-2 sm:px-0 flex-shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
-        <TabSwitcher
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          tabs={[
-            { id: 'shift', label: 'Shift Hours' },
-            { id: 'tat', label: 'Stage TAT Settings' }
-          ]}
-        />
-
-        <div className="flex justify-end w-full sm:w-auto">
-          {activeTab === 'shift' && (
-            <button
-              onClick={() => handleOpenShiftModal()}
-              className="w-full sm:w-auto h-[32px] md:h-[38px] px-4 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-lg font-black text-xs shadow-md transition-all shrink-0 flex items-center justify-center gap-1.5"
-            >
-              <Plus size={14} />
-              <span>Add Shift</span>
-            </button>
-          )}
-          {activeTab === 'tat' && (
-            <button
-              onClick={handleSaveTats}
-              className="w-full sm:w-auto h-[32px] md:h-[38px] px-4 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-lg font-black text-xs shadow-md transition-all shrink-0 flex items-center justify-center gap-1.5"
-            >
-              <Save size={14} />
-              <span>Save TAT Setup</span>
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Main Configurations Container */}
-      <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sm:p-6 min-h-0 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col min-h-0">
+        
+        {/* Title Header - Tab Switcher and Dynamic Action Button in one row */}
+        <div className="p-4 sm:px-6 sm:py-4 border-b border-slate-100 flex-shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
+          <TabSwitcher
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            tabs={[
+              { id: 'shift', label: 'Shift Hours' },
+              { id: 'tat', label: 'Stage TAT Settings' }
+            ]}
+          />
+
+          <div className="flex justify-end w-full sm:w-auto">
+            {activeTab === 'shift' && (
+              <button
+                onClick={() => handleOpenShiftModal()}
+                className="w-full sm:w-auto h-[32px] md:h-[38px] px-4 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-lg font-black text-xs shadow-md transition-all shrink-0 flex items-center justify-center gap-1.5"
+              >
+                <Plus size={14} />
+                <span>Add Shift</span>
+              </button>
+            )}
+            {activeTab === 'tat' && (
+              <button
+                onClick={() => handleOpenTatModal()}
+                className="w-full sm:w-auto h-[32px] md:h-[38px] px-4 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-lg font-black text-xs shadow-md transition-all shrink-0 flex items-center justify-center gap-1.5"
+              >
+                <Plus size={14} />
+                <span>Add TAT Setup</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar">
 
         {/* ── TAB 1: SHIFT SETTINGS ─────────────────────────── */}
         {activeTab === 'shift' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <Sliders className="text-amber-500 shrink-0" size={16} />
-                <span>Company Shifts Registry</span>
-              </h3>
-            </div>
+
 
             {/* Shifts list */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -232,14 +403,33 @@ const TatSetup = () => {
                 >
                   {/* Default Tag */}
                   {shift.isDefault === 'Yes' && (
-                    <div className="absolute right-0 top-0 bg-amber-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-bl-lg tracking-wider">
-                      Default Shift
+                    <div className="absolute right-0 top-0 bg-amber-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-bl-lg tracking-wider z-10">
+                      Default
                     </div>
                   )}
 
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block leading-none">Shift Name</span>
-                    <span className="text-sm font-black text-slate-800 uppercase tracking-tight block">{shift.name}</span>
+                  <div className="flex justify-between items-start relative mt-1">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block leading-none">Shift Name</span>
+                      <span className="text-sm font-black text-slate-800 uppercase tracking-tight block">{shift.name}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleOpenShiftModal(shift)}
+                        className="p-1.5 text-slate-500 hover:text-amber-605 hover:bg-amber-50 rounded-lg transition-colors"
+                        title="Edit Shift"
+                      >
+                        <Edit size={15} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteShift(shift.id)}
+                        className="p-1.5 text-slate-500 hover:text-red-650 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Shift"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -251,23 +441,6 @@ const TatSetup = () => {
                       <span className="text-[8px] font-bold text-slate-400 block uppercase leading-none mb-1">End Time</span>
                       <span className="text-slate-800 font-extrabold text-sm">{shift.endTime}</span>
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100/50">
-                    <button
-                      onClick={() => handleOpenShiftModal(shift)}
-                      className="p-1 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                      title="Edit Shift"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteShift(shift.id)}
-                      className="p-1 text-slate-500 hover:text-red-650 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete Shift"
-                    >
-                      <Trash2 size={16} />
-                    </button>
                   </div>
                 </div>
               ))}
@@ -294,39 +467,45 @@ const TatSetup = () => {
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block mt-0.5">Duration SLA</span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <input 
-                      type="number"
-                      min={0}
-                      value={stage.value}
-                      onChange={(e) => handleTatValueChange(stage.id, e.target.value)}
-                      placeholder="0"
-                      className="w-16 h-[34px] px-2 text-center bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-850 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
-                    />
+                  <div className="flex items-center gap-3 shrink-0">
+                    {/* Display Formatted Time SLA */}
+                    <div className="bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5 font-mono text-center min-w-[70px]">
+                      <span className="text-slate-800 font-extrabold text-xs">
+                        {formatTatDuration(stage.value, stage.type)}
+                      </span>
+                    </div>
 
-                    <select
-                      value={stage.type}
-                      onChange={(e) => handleTatTypeChange(stage.id, e.target.value)}
-                      className="h-[34px] px-2 bg-white border border-gray-300 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-amber-500"
-                    >
-                      <option value="day">Days</option>
-                      <option value="hours">Hours</option>
-                      <option value="minute">Minutes</option>
-                    </select>
+                    {/* Edit and Delete Actions */}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleOpenTatModal(stage)}
+                        className="p-1 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        title="Edit TAT"
+                      >
+                        <Edit size={15} />
+                      </button>
+                      {!STANDARD_TAT_IDS.includes(stage.id) && (
+                        <button
+                          onClick={() => handleDeleteTatStage(stage.id)}
+                          className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete TAT"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
-
           </div>
         )}
-
-
-
       </div>
 
-      {/* ── SHIFT CREATION / EDIT MODAL ────────────────────── */}
+    </div>
+
+    {/* ── SHIFT CREATION / EDIT MODAL ────────────────────── */}
       <ModalForm
         isOpen={isShiftModalOpen}
         onClose={() => setIsShiftModalOpen(false)}
@@ -393,6 +572,162 @@ const TatSetup = () => {
               />
             </label>
           </div>
+        </div>
+      </ModalForm>
+
+      {/* ── TAT CREATION / EDIT MODAL ────────────────────── */}
+      <ModalForm
+        isOpen={isTatModalOpen}
+        onClose={() => {
+          setIsTatModalOpen(false);
+          setEditingTatStage(null);
+          setCustomStageText('');
+        }}
+        title={editingTatStage ? 'Edit Stage TAT' : 'Add Stage TAT'}
+        onSubmit={handleSaveTat}
+        submitText={editingTatStage ? 'Save Changes' : 'Add TAT Setup'}
+        cancelText="Cancel"
+        maxWidth="max-w-md"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+              Stage Name <span className="text-red-500">*</span>
+            </label>
+            <CustomDropdown
+              options={STAGE_NAME_OPTIONS}
+              value={STAGE_NAME_OPTIONS.some(o => o.value === tatForm.stageName && o.value !== 'CUSTOM') ? tatForm.stageName : (tatForm.stageName ? 'CUSTOM' : '')}
+              onChange={(val) => {
+                setTatForm(prev => ({ ...prev, stageName: val }));
+              }}
+              placeholder="Select Stage"
+              className="w-full text-xs"
+              height="h-[34px]"
+              rounded="rounded-lg"
+              disabled={editingTatStage && STANDARD_TAT_IDS.includes(editingTatStage.id)}
+            />
+          </div>
+
+          {tatForm.stageName === 'CUSTOM' && (
+            <div>
+              <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+                Custom Stage Name <span className="text-red-500">*</span>
+              </label>
+              <input 
+                type="text"
+                required
+                placeholder="Enter custom stage name"
+                value={customStageText}
+                onChange={(e) => setCustomStageText(e.target.value)}
+                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-bold text-slate-800"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+              Duration Unit <span className="text-red-500">*</span>
+            </label>
+            <CustomDropdown
+              options={[
+                { value: 'day', label: 'Days' },
+                { value: 'hours', label: 'Hours' },
+                { value: 'minute', label: 'Minutes' }
+              ]}
+              value={tatForm.type}
+              onChange={(val) => setTatForm(prev => ({ ...prev, type: val }))}
+              placeholder="Select Unit"
+              className="w-full"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
+          </div>
+
+          {/* Conditional inputs based on type */}
+          {tatForm.type === 'day' && (
+            <div>
+              <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+                Days <span className="text-red-500">*</span>
+              </label>
+              <input type="number" step="0.001"
+                min="1"
+                required
+                value={tatForm.days}
+                onChange={(e) => setTatForm({ ...tatForm, days: e.target.value })}
+                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-bold text-slate-800"
+              />
+            </div>
+          )}
+
+          {tatForm.type === 'hours' && (
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+                  Hours <span className="text-red-500">*</span>
+                </label>
+                <input type="number" step="0.001"
+                  min="0"
+                  required
+                  value={tatForm.hours}
+                  onChange={(e) => setTatForm({ ...tatForm, hours: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-bold text-slate-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+                  Minutes
+                </label>
+                <input type="number" step="0.001"
+                  min="0"
+                  max="59"
+                  value={tatForm.minutes}
+                  onChange={(e) => setTatForm({ ...tatForm, minutes: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-bold text-slate-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+                  Seconds
+                </label>
+                <input type="number" step="0.001"
+                  min="0"
+                  max="59"
+                  value={tatForm.seconds}
+                  onChange={(e) => setTatForm({ ...tatForm, seconds: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-bold text-slate-800"
+                />
+              </div>
+            </div>
+          )}
+
+          {tatForm.type === 'minute' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+                  Minutes <span className="text-red-500">*</span>
+                </label>
+                <input type="number" step="0.001"
+                  min="0"
+                  required
+                  value={tatForm.minutes}
+                  onChange={(e) => setTatForm({ ...tatForm, minutes: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-bold text-slate-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1">
+                  Seconds
+                </label>
+                <input type="number" step="0.001"
+                  min="0"
+                  max="59"
+                  value={tatForm.seconds}
+                  onChange={(e) => setTatForm({ ...tatForm, seconds: e.target.value })}
+                  className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-bold text-slate-800"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </ModalForm>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import ModalForm from '../../../components/ModalForm';
+import CustomDropdown from '../../../components/CustomDropdown';
 
 const LabelForm = ({ isOpen, onClose, onSave, order }) => {
   const initialFormState = {
@@ -28,7 +29,13 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
   }, [isOpen, order]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value, type } = e.target;
+    if (type === 'number' && value && value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1].length > 3) {
+        value = parts[0] + '.' + parts[1].slice(0, 3);
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -117,20 +124,19 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Huid Status <span className="text-red-500">*</span>
             </label>
-            <select
-              required
-              name="huidStatus"
+            <CustomDropdown
+              options={[
+                { value: 'Huid Complete', label: 'Huid Complete' },
+                { value: 'Sent In Huid', label: 'Sent In Huid' },
+                { value: 'No Huid', label: 'No Huid' }
+              ]}
               value={formData.huidStatus}
-              onChange={handleInputChange}
-              className={`w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium ${
-                formData.huidStatus ? 'text-gray-900 font-bold' : 'text-gray-400'
-              }`}
-            >
-              <option value="" className="text-gray-400">Select Huid Status</option>
-              <option value="Huid Complete" className="text-gray-900 font-medium">Huid Complete</option>
-              <option value="Sent In Huid" className="text-gray-900 font-medium">Sent In Huid</option>
-              <option value="No Huid" className="text-gray-900 font-medium">No Huid</option>
-            </select>
+              onChange={(val) => handleInputChange({ target: { name: 'huidStatus', value: val } })}
+              placeholder="Select Huid Status"
+              className="w-full text-xs"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
           </div>
 
           {/* Labeling Status */}
@@ -138,19 +144,18 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Labeling Status <span className="text-red-500">*</span>
             </label>
-            <select
-              required
-              name="labelingStatus"
+            <CustomDropdown
+              options={[
+                { value: 'Yes', label: 'Yes' },
+                { value: 'No', label: 'No' }
+              ]}
               value={formData.labelingStatus}
-              onChange={handleInputChange}
-              className={`w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium ${
-                formData.labelingStatus ? 'text-gray-900 font-bold' : 'text-gray-400'
-              }`}
-            >
-              <option value="" className="text-gray-400">Select Labeling Status</option>
-              <option value="Yes" className="text-gray-900 font-medium">Yes</option>
-              <option value="No" className="text-gray-900 font-medium">No</option>
-            </select>
+              onChange={(val) => handleInputChange({ target: { name: 'labelingStatus', value: val } })}
+              placeholder="Select Labeling Status"
+              className="w-full text-xs"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
           </div>
 
           {/* Sent Company Name */}
@@ -158,21 +163,20 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Sent Company Name <span className="text-red-500">*</span>
             </label>
-            <select
-              required
-              name="sentCompanyName"
+            <CustomDropdown
+              options={[
+                { value: 'Nakoda', label: 'Nakoda' },
+                { value: 'Vinayaka', label: 'Vinayaka' },
+                { value: 'Raipur', label: 'Raipur' },
+                { value: 'No Huid', label: 'No Huid' }
+              ]}
               value={formData.sentCompanyName}
-              onChange={handleInputChange}
-              className={`w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium ${
-                formData.sentCompanyName ? 'text-gray-900 font-bold' : 'text-gray-400'
-              }`}
-            >
-              <option value="" className="text-gray-400">Select Sent Company Name</option>
-              <option value="Nakoda" className="text-gray-900 font-medium">Nakoda</option>
-              <option value="Vinayaka" className="text-gray-900 font-medium">Vinayaka</option>
-              <option value="Raipur" className="text-gray-900 font-medium">Raipur</option>
-              <option value="No Huid" className="text-gray-900 font-medium">No Huid</option>
-            </select>
+              onChange={(val) => handleInputChange({ target: { name: 'sentCompanyName', value: val } })}
+              placeholder="Select Sent Company Name"
+              className="w-full text-xs"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
           </div>
 
           {/* Sent Huid/Label Pcs */}
@@ -180,9 +184,8 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Sent Huid/Label Pcs <span className="text-red-500">*</span>
             </label>
-            <input
-              required
-              type="number"
+            <input required
+              type="number" step="0.001"
               name="sentHuidLabelPcs"
               value={formData.sentHuidLabelPcs}
               onChange={handleInputChange}

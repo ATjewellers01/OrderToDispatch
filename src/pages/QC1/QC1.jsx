@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SearchableDropdown from '../../components/SearchableDropdown';
+import { generateFilterOptions } from '../../utils/filterUtils';
 import { TabSwitcher } from '../../components/StandardButtons';
 import QC1Pending from './QC1Pending';
 import QC1History from './QC1History';
@@ -17,10 +18,10 @@ const QC1 = () => {
 
   const [filters, setFilters] = useState({
     searchQuery: '',
-    category: '',
-    karigar: '',
-    melting: '',
-    orderType: ''
+    category: [],
+    karigar: [],
+    melting: [],
+    orderType: []
   });
 
   const [followUpLogs, setFollowUpLogs] = useState([]);
@@ -45,34 +46,13 @@ const QC1 = () => {
   const handleClearFilters = () => {
     setFilters({
       searchQuery: '',
-      category: '',
-      karigar: '',
-      melting: '',
-      orderType: ''
+      category: [],
+      karigar: [],
+      melting: [],
+      orderType: []
     });
     toast.success('Filters cleared');
   };
-
-  const categoriesList = useMemo(() => Array.from(new Set(orders.map(o => o.category))).filter(Boolean).sort(), [orders]);
-  const karigarsList = useMemo(() => Array.from(new Set(orders.map(o => o.karigar))).filter(Boolean).sort(), [orders]);
-  const meltingList = useMemo(() => Array.from(new Set(orders.map(o => o.melting))).filter(Boolean).sort(), [orders]);
-  const typesList = useMemo(() => Array.from(new Set(orders.map(o => o.orderType))).filter(Boolean).sort(), [orders]);
-
-  // Filtered orders list matching search parameters
-  const filteredOrdersBase = useMemo(() => {
-    return orders.filter(o => {
-      if (filters.category && o.category !== filters.category) return false;
-      if (filters.karigar && o.karigar !== filters.karigar) return false;
-      if (filters.melting && o.melting !== filters.melting) return false;
-      if (filters.orderType && o.orderType !== filters.orderType) return false;
-
-      if (filters.searchQuery) {
-        const q = filters.searchQuery.toLowerCase();
-        return Object.values(o).some(val => String(val).toLowerCase().includes(q));
-      }
-      return true;
-    });
-  }, [orders, filters]);
 
   // Compute latest follow-up status per order
   const latestFollowUpMap = useMemo(() => {
@@ -84,21 +64,70 @@ const QC1 = () => {
     return map;
   }, [followUpLogs]);
 
-  // Pending: only orders that came from Follow-up "Ghat Jama Flw-up Done" (orderStage === 'QC')
-  // and have not yet been marked QC Okay + Complete
-  const pendingOrders = useMemo(() => {
-    return filteredOrdersBase.filter(o => {
+  // Base split without filters
+  const basePendingOrders = useMemo(() => {
+    return orders.filter(o => {
       if (o.status3 === 'QC Okay' && o.qc1Type === 'Complete') return false;
       const followUpLog = latestFollowUpMap.get(o.id) || latestFollowUpMap.get(o.orderNo);
       const isGhatJamaDone = followUpLog?.status === 'Ghat Jama Flw-up Done';
       return o.orderStage === 'QC' && isGhatJamaDone;
     });
-  }, [filteredOrdersBase, latestFollowUpMap]);
+  }, [orders, latestFollowUpMap]);
+
+  const baseHistoryOrders = useMemo(() => {
+    return orders.filter(o => o.status3 === 'QC Okay' && o.qc1Type === 'Complete');
+  }, [orders]);
+
+  const activeBaseOrders = activeTab === 'pending' ? basePendingOrders : baseHistoryOrders;
+
+  const categoriesList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.category), [activeBaseOrders]);
+  const karigarsList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.karigar), [activeBaseOrders]);
+  const meltingList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.melting), [activeBaseOrders]);
+  const typesList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.orderType), [activeBaseOrders]);
+
+  // Filtered orders list matching search parameters
+  
+
+
+  // Pending: only orders that came from Follow-up "Ghat Jama Flw-up Done" (orderStage === 'QC')
+  // and have not yet been marked QC Okay + Complete
+  
 
   // History: completed QC orders
+  
+  
+
+  // Filtered lists
+  const pendingOrders = useMemo(() => {
+    return basePendingOrders.filter(o => {
+      if (filters.category && filters.category.length > 0 && !filters.category.includes(o.category)) return false;
+      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(o.karigar)) return false;
+      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
+      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
+
+      if (filters.searchQuery) {
+        const q = filters.searchQuery.toLowerCase();
+        return Object.values(o).some(val => String(val).toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }, [basePendingOrders, filters]);
+
   const historyOrders = useMemo(() => {
-    return filteredOrdersBase.filter(o => o.status3 === 'QC Okay' && o.qc1Type === 'Complete');
-  }, [filteredOrdersBase]);
+    return baseHistoryOrders.filter(o => {
+      if (filters.category && filters.category.length > 0 && !filters.category.includes(o.category)) return false;
+      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(o.karigar)) return false;
+      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
+      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
+
+      if (filters.searchQuery) {
+        const q = filters.searchQuery.toLowerCase();
+        return Object.values(o).some(val => String(val).toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }, [baseHistoryOrders, filters]);
+
 
   // Counts
   const pendingCount = pendingOrders.length;
@@ -159,7 +188,8 @@ const QC1 = () => {
             {/* Category Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={categoriesList.map(c => ({ value: c, label: c }))}
+                options={categoriesList}
+                isMulti={true}
                 value={filters.category}
                 onChange={(val) => setFilters({ ...filters, category: val })}
                 placeholder="All Categories"
@@ -172,7 +202,8 @@ const QC1 = () => {
             {/* Karigar Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={karigarsList.map(c => ({ value: c, label: c }))}
+                options={karigarsList}
+                isMulti={true}
                 value={filters.karigar}
                 onChange={(val) => setFilters({ ...filters, karigar: val })}
                 placeholder="All Karigars"
@@ -185,7 +216,8 @@ const QC1 = () => {
             {/* Melting Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={meltingList.map(c => ({ value: c, label: c }))}
+                options={meltingList}
+                isMulti={true}
                 value={filters.melting}
                 onChange={(val) => setFilters({ ...filters, melting: val })}
                 placeholder="All Melting"
@@ -198,7 +230,8 @@ const QC1 = () => {
             {/* Order Type Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={typesList.map(c => ({ value: c, label: c }))}
+                options={typesList}
+                isMulti={true}
                 value={filters.orderType}
                 onChange={(val) => setFilters({ ...filters, orderType: val })}
                 placeholder="All Types"

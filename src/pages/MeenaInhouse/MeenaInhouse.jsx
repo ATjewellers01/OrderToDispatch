@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SearchableDropdown from '../../components/SearchableDropdown';
+import { generateFilterOptions } from '../../utils/filterUtils';
 import { TabSwitcher } from '../../components/StandardButtons';
 import MeenaInhousePending from './MeenaInhousePending';
 import MeenaInhouseHistory from './MeenaInhouseHistory';
@@ -20,10 +21,10 @@ const MeenaInhouse = () => {
 
   const [filters, setFilters] = useState({
     searchQuery: '',
-    category: '',
-    karigar: '',
-    melting: '',
-    orderType: ''
+    category: [],
+    karigar: [],
+    melting: [],
+    orderType: []
   });
 
   // Load from localStorage
@@ -42,29 +43,59 @@ const MeenaInhouse = () => {
   const handleClearFilters = () => {
     setFilters({
       searchQuery: '',
-      category: '',
-      karigar: '',
-      melting: '',
-      orderType: ''
+      category: [],
+      karigar: [],
+      melting: [],
+      orderType: []
     });
     toast.success('Filters cleared');
   };
 
-  const categoriesList = useMemo(() => Array.from(new Set(orders.map(o => o.category || o.categoryName))).filter(Boolean).sort(), [orders]);
-  const karigarsList = useMemo(() => Array.from(new Set(orders.map(o => o.karigar || o.karigarName))).filter(Boolean).sort(), [orders]);
-  const meltingList = useMemo(() => Array.from(new Set(orders.map(o => o.melting))).filter(Boolean).sort(), [orders]);
-  const typesList = useMemo(() => Array.from(new Set(orders.map(o => o.orderType))).filter(Boolean).sort(), [orders]);
+  // Base split without filters
+  const basePendingOrders = useMemo(() => {
+    return orders.filter(o => 
+      o.ghatJamaStatus === 'Complete' && 
+      o.ghatJamaType === 'Meena Inhouse' &&
+      (!o.meenaInhouseStatus || o.meenaInhouseStatus === '' || o.meenaInhouseStatus === 'Pending')
+    );
+  }, [orders]);
+
+  const baseHistoryOrders = useMemo(() => {
+    return orders.filter(o => 
+      o.meenaInhouseStatus && 
+      o.meenaInhouseStatus !== 'Pending' && 
+      o.meenaInhouseStatus !== ''
+    );
+  }, [orders]);
+
+  const activeBaseOrders = activeTab === 'pending' ? basePendingOrders : baseHistoryOrders;
+
+  const categoriesList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.category || o.categoryName), [activeBaseOrders]);
+  const karigarsList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.karigar || o.karigarName), [activeBaseOrders]);
+  const meltingList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.melting), [activeBaseOrders]);
+  const typesList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.orderType), [activeBaseOrders]);
 
   // Filtered orders list matching search parameters
-  const filteredOrdersBase = useMemo(() => {
-    return orders.filter(o => {
+  
+
+  // Split orders based on Meena Inhouse status
+  // 1. Pending: Ghat Jama completed as "Meena Inhouse" and Meena status is NOT complete/processed
+  
+
+  // 2. History: processed Meena Inhouse orders (has meenaInhouseStatus value)
+  
+  
+
+  // Filtered lists
+  const pendingOrders = useMemo(() => {
+    return basePendingOrders.filter(o => {
       const categoryVal = o.category || o.categoryName || '';
       const karigarVal = o.karigar || o.karigarName || '';
       
-      if (filters.category && categoryVal !== filters.category) return false;
-      if (filters.karigar && karigarVal !== filters.karigar) return false;
-      if (filters.melting && o.melting !== filters.melting) return false;
-      if (filters.orderType && o.orderType !== filters.orderType) return false;
+      if (filters.category && filters.category.length > 0 && !filters.category.includes(categoryVal)) return false;
+      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(karigarVal)) return false;
+      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
+      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
 
       if (filters.searchQuery) {
         const q = filters.searchQuery.toLowerCase();
@@ -72,26 +103,26 @@ const MeenaInhouse = () => {
       }
       return true;
     });
-  }, [orders, filters]);
+  }, [basePendingOrders, filters]);
 
-  // Split orders based on Meena Inhouse status
-  // 1. Pending: Ghat Jama completed as "Meena Inhouse" and Meena status is NOT complete/processed
-  const pendingOrders = useMemo(() => {
-    return filteredOrdersBase.filter(o => 
-      o.ghatJamaStatus === 'Complete' && 
-      o.ghatJamaType === 'Meena Inhouse' &&
-      (!o.meenaInhouseStatus || o.meenaInhouseStatus === '' || o.meenaInhouseStatus === 'Pending')
-    );
-  }, [filteredOrdersBase]);
-
-  // 2. History: processed Meena Inhouse orders (has meenaInhouseStatus value)
   const historyOrders = useMemo(() => {
-    return filteredOrdersBase.filter(o => 
-      o.meenaInhouseStatus && 
-      o.meenaInhouseStatus !== 'Pending' && 
-      o.meenaInhouseStatus !== ''
-    );
-  }, [filteredOrdersBase]);
+    return baseHistoryOrders.filter(o => {
+      const categoryVal = o.category || o.categoryName || '';
+      const karigarVal = o.karigar || o.karigarName || '';
+      
+      if (filters.category && filters.category.length > 0 && !filters.category.includes(categoryVal)) return false;
+      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(karigarVal)) return false;
+      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
+      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
+
+      if (filters.searchQuery) {
+        const q = filters.searchQuery.toLowerCase();
+        return Object.values(o).some(val => String(val).toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }, [baseHistoryOrders, filters]);
+
 
   // Counts
   const pendingCount = pendingOrders.length;
@@ -152,7 +183,8 @@ const MeenaInhouse = () => {
             {/* Category Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={categoriesList.map(c => ({ value: c, label: c }))}
+                options={categoriesList}
+                isMulti={true}
                 value={filters.category}
                 onChange={(val) => setFilters({ ...filters, category: val })}
                 placeholder="All Categories"
@@ -165,7 +197,8 @@ const MeenaInhouse = () => {
             {/* Karigar Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={karigarsList.map(c => ({ value: c, label: c }))}
+                options={karigarsList}
+                isMulti={true}
                 value={filters.karigar}
                 onChange={(val) => setFilters({ ...filters, karigar: val })}
                 placeholder="All Karigars"
@@ -178,7 +211,8 @@ const MeenaInhouse = () => {
             {/* Melting Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={meltingList.map(c => ({ value: c, label: c }))}
+                options={meltingList}
+                isMulti={true}
                 value={filters.melting}
                 onChange={(val) => setFilters({ ...filters, melting: val })}
                 placeholder="All Melting"
@@ -191,7 +225,8 @@ const MeenaInhouse = () => {
             {/* Order Type Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={typesList.map(c => ({ value: c, label: c }))}
+                options={typesList}
+                isMulti={true}
                 value={filters.orderType}
                 onChange={(val) => setFilters({ ...filters, orderType: val })}
                 placeholder="All Types"

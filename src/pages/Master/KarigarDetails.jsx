@@ -4,6 +4,7 @@ import { Plus, Search, RotateCcw, User, Phone, MapPin, Trash2, Edit2, Filter, Br
 import DataTable from '../../components/DataTable';
 import ModalForm from '../../components/ModalForm';
 import SearchableDropdown from '../../components/SearchableDropdown';
+import { generateFilterOptions } from '../../utils/filterUtils';
 import { SEEDED_KARIGARS } from './masterdata';
 
 const KARIGAR_TYPES = ['Office', 'Factory'];
@@ -35,7 +36,7 @@ export default function KarigarDetails({
 
   // Local state (used in standalone mode only)
   const [localSearch, setLocalSearch] = useState('');
-  const [localTypeFilter, setLocalTypeFilter] = useState('');
+  const [localTypeFilter, setLocalTypeFilter] = useState([]);
   const [localShowMobileFilters, setLocalShowMobileFilters] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,7 +44,7 @@ export default function KarigarDetails({
 
   // Resolved values
   const effectiveSearch = isEmbedded ? (externalSearch || '') : localSearch;
-  const effectiveTypeFilter = isEmbedded ? (externalTypeFilter || '') : localTypeFilter;
+  const effectiveTypeFilter = isEmbedded ? (externalTypeFilter || []) : localTypeFilter;
 
   const setTypeFilter = (val) => {
     if (isEmbedded) onTypeFilterChange?.(val);
@@ -87,16 +88,16 @@ export default function KarigarDetails({
 
   const handleClearFilters = () => {
     setLocalSearch('');
-    setLocalTypeFilter('');
+    setLocalTypeFilter([]);
     setLocalShowMobileFilters(false);
-    if (isEmbedded) { onTypeFilterChange?.(''); onClearFilters?.(); }
+    if (isEmbedded) { onTypeFilterChange?.([]); onClearFilters?.(); }
     else toast.success('Filters cleared');
     setCurrentPage(1);
   };
 
   // Filtered list
   const filtered = useMemo(() => karigars.filter(k => {
-    if (effectiveTypeFilter && k.type !== effectiveTypeFilter) return false;
+    if (effectiveTypeFilter && effectiveTypeFilter.length > 0 && !effectiveTypeFilter.includes(k.type)) return false;
     if (effectiveSearch) {
       const q = effectiveSearch.toLowerCase();
       return k.name.toLowerCase().includes(q) || k.number.toLowerCase().includes(q) || k.address.toLowerCase().includes(q) || k.type.toLowerCase().includes(q);
@@ -192,7 +193,8 @@ export default function KarigarDetails({
         <div className="hidden" id="karigar-add-trigger" onClick={() => setShowAddModal(true)} />
         <div className="flex-1 min-w-0 lg:min-w-[160px]">
           <SearchableDropdown
-            options={KARIGAR_TYPES.map(t => ({ value: t, label: t }))}
+            options={KARIGAR_TYPES.map(t => ({ value: t, label: t, count: karigars.filter(k => k.type === t).length }))}
+            isMulti={true}
             value={effectiveTypeFilter}
             onChange={setTypeFilter}
             placeholder="All Types"
@@ -229,7 +231,7 @@ export default function KarigarDetails({
               <button onClick={handleClearFilters} className="lg:hidden flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg h-[32px] w-[32px] flex-shrink-0 shadow-sm active:scale-95"><RotateCcw size={14} /></button>
             </div>
             <div className={`${localShowMobileFilters ? 'flex' : 'hidden'} lg:flex flex-col lg:flex-row lg:flex-nowrap gap-2 w-full lg:w-auto lg:flex-[6] overflow-visible`}>
-              <div className="flex-1 min-w-0 lg:min-w-[160px]"><SearchableDropdown options={KARIGAR_TYPES.map(t => ({ value: t, label: t }))} value={localTypeFilter} onChange={val => { setLocalTypeFilter(val); setCurrentPage(1); }} placeholder="All Types" height="h-[32px] md:h-[38px]" rounded="rounded-lg" /></div>
+              <div className="flex-1 min-w-0 lg:min-w-[160px]"><SearchableDropdown options={KARIGAR_TYPES.map(t => ({ value: t, label: t, count: karigars.filter(k => k.type === t).length }))} isMulti={true} value={localTypeFilter} onChange={val => { setLocalTypeFilter(val); setCurrentPage(1); }} placeholder="All Types" height="h-[32px] md:h-[38px]" rounded="rounded-lg" /></div>
               <button onClick={handleClearFilters} className="hidden lg:flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg w-[38px] h-[38px] hover:bg-gray-100 transition-colors shadow-sm"><RotateCcw size={16} /></button>
             </div>
           </div>

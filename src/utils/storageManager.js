@@ -1,5 +1,24 @@
 // Storage Manager - Handle all localStorage operations
 
+// Monkey-patch localStorage to dispatch a 'storage' event in the same window
+const originalSetItem = localStorage.setItem;
+localStorage.setItem = function(key, value) {
+  originalSetItem.apply(this, arguments);
+  window.dispatchEvent(new Event('storage'));
+};
+
+const originalRemoveItem = localStorage.removeItem;
+localStorage.removeItem = function(key) {
+  originalRemoveItem.apply(this, arguments);
+  window.dispatchEvent(new Event('storage'));
+};
+
+const originalClear = localStorage.clear;
+localStorage.clear = function() {
+  originalClear.apply(this, arguments);
+  window.dispatchEvent(new Event('storage'));
+};
+
 const STORAGE_KEYS = {
   USERS: 'pcb_users',
   SETTINGS: 'pcb_settings',
@@ -7,9 +26,9 @@ const STORAGE_KEYS = {
 
 // Initialize default data
 const DEFAULT_USERS = [
-  { id: 'admin', name: 'Admin User', password: 'admin123', role: 'ADMIN', accessPages: [] },
-  { id: 'user', name: 'Employee 1', password: 'user123', role: 'USER', accessPages: [] },
-  { id: 'user2', name: 'Employee 2', password: 'user123', role: 'USER', accessPages: [] }
+  { id: 'admin', name: 'Admin User', password: 'admin123', role: 'ADMIN', accessPages: [], weekOff: 'Sunday' },
+  { id: 'user', name: 'Employee 1', password: 'user123', role: 'USER', accessPages: [], weekOff: 'Sunday' },
+  { id: 'user2', name: 'Employee 2', password: 'user123', role: 'USER', accessPages: [], weekOff: 'Sunday' }
 ];
 
 // Initialize storage with defaults
@@ -94,11 +113,27 @@ export const saveToStorage = (key, data) => {
 
 // User operations
 export const getUsers = () => {
-  const users = getFromStorage(STORAGE_KEYS.USERS);
+  let users = getFromStorage(STORAGE_KEYS.USERS);
   if (!users || !users.some(u => u.id === 'admin')) {
     saveToStorage(STORAGE_KEYS.USERS, DEFAULT_USERS);
     return DEFAULT_USERS;
   }
+  
+  // Migrate existing users to include weekOff if missing
+  let changed = false;
+  const migratedUsers = users.map(u => {
+    if (!u.weekOff) {
+      changed = true;
+      return { ...u, weekOff: 'Sunday' };
+    }
+    return u;
+  });
+
+  if (changed) {
+    saveToStorage(STORAGE_KEYS.USERS, migratedUsers);
+    return migratedUsers;
+  }
+
   return users;
 };
 export const saveUsers = (users) => saveToStorage(STORAGE_KEYS.USERS, users);

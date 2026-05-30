@@ -23,17 +23,11 @@ const DataTable = ({
   itemsPerPageOptions = [10, 15, 20, 50, 100]
 }) => {
   return (
-    <div className="flex flex-col h-auto md:h-full min-h-0 bg-white">
+    <div className="flex flex-col h-full min-h-0 bg-white w-full">
       {/* Mobile Card View (Hidden on Desktop) */}
-      <div className="md:hidden flex flex-col gap-3 p-3 overflow-y-auto flex-1 bg-slate-50/50 scrollbar-hide">
-        {data.length > 0 ? (
+      <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 overflow-y-auto flex-1 bg-slate-50/50 scrollbar-hide content-start">
+        {data.length > 0 && (
           data.map((item, index) => renderCard(item, index))
-        ) : (
-          <div className="p-8 text-center bg-white rounded-lg border border-dashed border-amber-200 shadow-sm">
-            <div className="text-3xl mb-3">📋</div>
-            <p className="text-sm font-bold text-gray-700 mb-1">No records yet</p>
-            <p className="text-xs text-gray-400">Use the <span className="font-semibold text-amber-600">+ Add</span> button above to add your first entry.</p>
-          </div>
         )}
       </div>
 
@@ -58,18 +52,8 @@ const DataTable = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {data.length > 0 ? (
+              {data.length > 0 && (
                 data.map((item, index) => renderRow(item, index))
-              ) : (
-                <tr>
-                  <td colSpan={999} className="py-16 text-center">
-                    <div className="inline-flex flex-col items-center gap-2">
-                      <div className="text-4xl">📋</div>
-                      <p className="text-sm font-bold text-gray-700">No records yet</p>
-                      <p className="text-xs text-gray-400">Use the <span className="font-semibold text-amber-600">+ Add</span> button above to add your first entry.</p>
-                    </div>
-                  </td>
-                </tr>
               )}
             </tbody>
           </table>

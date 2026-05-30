@@ -29,7 +29,17 @@ import TatSetup from './pages/TatSetup/TatSetup';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import { initializeStorage } from './utils/storageManager';
+import { useAuthStore } from './store/authStore';
 
+const IndexRedirect = () => {
+  const { user } = useAuthStore();
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role === 'ADMIN') return <Navigate to="/dashboard" replace />;
+  if (user.accessPages && user.accessPages.length > 0) {
+    return <Navigate to={user.accessPages[0]} replace />;
+  }
+  return <Navigate to="/order-history" replace />;
+};
 
 function App() {
   useEffect(() => {
@@ -48,7 +58,7 @@ function App() {
               <Layout />
             </ProtectedRoute>
           }>
-            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route index element={<IndexRedirect />} />
             <Route path="dashboard" element={<Dasboard />} />
             <Route path="settings" element={<Settings />} />
             <Route path="master" element={<Master />} />
@@ -71,7 +81,7 @@ function App() {
             <Route path="huid-label" element={<HuidLabel />} />
             <Route path="receive-in-stock" element={<ReceivedInStock />} />
             <Route path="delivery" element={<Delivery />} />
-            <Route path="tad-setup" element={<TatSetup />} />
+            <Route path="tat-setup" element={<TatSetup />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

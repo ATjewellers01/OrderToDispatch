@@ -1,6 +1,7 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Edit } from 'lucide-react';
 import DataTable from '../../components/DataTable';
+import { calculateDelay } from '../../utils/tatCalculator';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -101,6 +102,7 @@ const MeenaOutsideHistory = ({ orders, onEditClick }) => {
     "Outside Remarks",
     "Target Date",
     "Done Date",
+    "Delay",
     "Est Days",
     "Status",
     "Karigar Name",
@@ -159,6 +161,9 @@ const MeenaOutsideHistory = ({ orders, onEditClick }) => {
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
           {formatDateTime(order.meenaOutsideTimestamp)}
         </td>
+        <td className="px-4 py-3 text-center whitespace-nowrap">
+          {(() => { const d = calculateDelay(order.plannedDates?.['Meena Outside'], order.meenaOutsideTimestamp); return <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${d.display === '-' ? 'bg-gray-100 text-gray-500 border-gray-200' : d.isDelayed ? 'bg-red-100 text-red-800 border-red-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200'}`}>{d.display}</span>; })()}
+        </td>
         <td className="px-4 py-3 text-center whitespace-nowrap font-medium text-xs">
           <span className={`px-2.5 py-1 rounded-full font-bold border ${leftDays < 0 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>
             {leftDays} Days
@@ -204,6 +209,10 @@ const MeenaOutsideHistory = ({ orders, onEditClick }) => {
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Est Days</span>
             <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Delay</span>
+            {(() => { const d = calculateDelay(order.plannedDates?.['Meena Outside'], order.meenaOutsideTimestamp); return <span className={`font-bold ${d.isDelayed ? 'text-red-600' : d.display === '-' ? 'text-gray-400' : 'text-emerald-600'}`}>{d.display}</span>; })()}
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Total Weight</span>

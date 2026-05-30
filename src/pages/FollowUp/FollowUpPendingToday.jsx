@@ -142,12 +142,20 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
       const o = item.order;
       const l = item.latestLog;
 
-      if (filters.customer && o.company !== filters.customer) return false;
-      if (filters.category && o.category !== filters.category) return false;
-      if (filters.melting && o.melting !== filters.melting) return false;
-      if (filters.stage && o.orderStage !== filters.stage) return false;
-      if (filters.flwStatus && l?.status !== filters.flwStatus) return false;
-      if (filters.karigar && o.karigar !== filters.karigar) return false;
+      // Handle both array (multi-select) and string values
+      const customerFilter = Array.isArray(filters.customer) ? filters.customer : (filters.customer ? [filters.customer] : []);
+      const categoryFilter = Array.isArray(filters.category) ? filters.category : (filters.category ? [filters.category] : []);
+      const meltingFilter = Array.isArray(filters.melting) ? filters.melting : (filters.melting ? [filters.melting] : []);
+      const stageFilter = Array.isArray(filters.stage) ? filters.stage : (filters.stage ? [filters.stage] : []);
+      const flwFilter = Array.isArray(filters.flwStatus) ? filters.flwStatus : (filters.flwStatus ? [filters.flwStatus] : []);
+      const karigarFilter = Array.isArray(filters.karigar) ? filters.karigar : (filters.karigar ? [filters.karigar] : []);
+
+      if (customerFilter.length > 0 && !customerFilter.includes(o.company)) return false;
+      if (categoryFilter.length > 0 && !categoryFilter.includes(o.category)) return false;
+      if (meltingFilter.length > 0 && !meltingFilter.includes(o.melting)) return false;
+      if (stageFilter.length > 0 && !stageFilter.includes(o.orderStage)) return false;
+      if (flwFilter.length > 0 && !flwFilter.includes(l?.status)) return false;
+      if (karigarFilter.length > 0 && !karigarFilter.includes(o.karigar)) return false;
 
       if (filters.searchQuery) {
         const q = filters.searchQuery.toLowerCase();

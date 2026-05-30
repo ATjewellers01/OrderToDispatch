@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, RotateCcw, Coins, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SearchableDropdown from '../../components/SearchableDropdown';
+import { generateFilterOptions } from '../../utils/filterUtils';
 import MetalIssuePending from './MetalIssuePending';
 import MetalIssueHistory from './MetalIssueHistory';
 import MetalIssueForm from './MetalIssueForm';
@@ -64,10 +65,10 @@ const MetalIssue = () => {
 
   const [filters, setFilters] = useState({
     searchQuery: '',
-    category: '',
-    karigar: '',
-    melting: '',
-    orderType: '',
+    category: [],
+    karigar: [],
+    melting: [],
+    orderType: [],
     date: ''
   });
 
@@ -143,27 +144,39 @@ const MetalIssue = () => {
   const handleClearFilters = () => {
     setFilters({
       searchQuery: '',
-      category: '',
-      karigar: '',
-      melting: '',
-      orderType: '',
+      category: [],
+      karigar: [],
+      melting: [],
+      orderType: [],
       date: ''
     });
     toast.success('Filters cleared');
   };
 
-  const categoriesList = useMemo(() => Array.from(new Set(orders.map(o => o.category))).filter(Boolean).sort(), [orders]);
-  const karigarsList = useMemo(() => Array.from(new Set(orders.map(o => o.karigar))).filter(Boolean).sort(), [orders]);
-  const meltingList = useMemo(() => Array.from(new Set(orders.map(o => o.melting))).filter(Boolean).sort(), [orders]);
-  const typesList = useMemo(() => Array.from(new Set(orders.map(o => o.orderType))).filter(Boolean).sort(), [orders]);
+  const basePendingOrders = useMemo(() => {
+    const issuedIds = new Set(metalIssues.map(issue => issue.orderId));
+    return orders.filter(o => !issuedIds.has(o.id));
+  }, [orders, metalIssues]);
+
+  const baseHistoryOrders = useMemo(() => {
+    const issuedIds = new Set(metalIssues.map(issue => issue.orderId));
+    return orders.filter(o => issuedIds.has(o.id));
+  }, [orders, metalIssues]);
+
+  const activeBaseOrders = activeTab === 'pending' ? basePendingOrders : baseHistoryOrders;
+
+  const categoriesList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.category), [activeBaseOrders]);
+  const karigarsList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.karigar), [activeBaseOrders]);
+  const meltingList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.melting), [activeBaseOrders]);
+  const typesList = useMemo(() => generateFilterOptions(activeBaseOrders, o => o.orderType), [activeBaseOrders]);
 
   // Filtered orders list matching search parameters
   const filteredOrdersBase = useMemo(() => {
     return orders.filter(o => {
-      if (filters.category && o.category !== filters.category) return false;
-      if (filters.karigar && o.karigar !== filters.karigar) return false;
-      if (filters.melting && o.melting !== filters.melting) return false;
-      if (filters.orderType && o.orderType !== filters.orderType) return false;
+      if (filters.category && filters.category.length > 0 && !filters.category.includes(o.category)) return false;
+      if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(o.karigar)) return false;
+      if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
+      if (filters.orderType && filters.orderType.length > 0 && !filters.orderType.includes(o.orderType)) return false;
       if (filters.date && o.orderRecDate !== filters.date && o.deliveryDate !== filters.date) return false;
 
       if (filters.searchQuery) {
@@ -245,7 +258,8 @@ const MetalIssue = () => {
             {/* Category Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={categoriesList.map(c => ({ value: c, label: c }))}
+                options={categoriesList}
+                isMulti={true}
                 value={filters.category}
                 onChange={(val) => setFilters({ ...filters, category: val })}
                 placeholder="All Categories"
@@ -258,7 +272,8 @@ const MetalIssue = () => {
             {/* Karigar Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={karigarsList.map(c => ({ value: c, label: c }))}
+                options={karigarsList}
+                isMulti={true}
                 value={filters.karigar}
                 onChange={(val) => setFilters({ ...filters, karigar: val })}
                 placeholder="All Karigars"
@@ -271,7 +286,8 @@ const MetalIssue = () => {
             {/* Melting Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={meltingList.map(c => ({ value: c, label: c }))}
+                options={meltingList}
+                isMulti={true}
                 value={filters.melting}
                 onChange={(val) => setFilters({ ...filters, melting: val })}
                 placeholder="All Melting"
@@ -284,7 +300,8 @@ const MetalIssue = () => {
             {/* Order Type Dropdown */}
             <div className="w-full relative">
               <SearchableDropdown
-                options={typesList.map(c => ({ value: c, label: c }))}
+                options={typesList}
+                isMulti={true}
                 value={filters.orderType}
                 onChange={(val) => setFilters({ ...filters, orderType: val })}
                 placeholder="All Types"

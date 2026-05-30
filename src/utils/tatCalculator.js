@@ -128,6 +128,64 @@ export const calculatePlannedDate = (startVal, stageName) => {
   return current.toISOString();
 };
 
+
+/**
+ * Calculate delay between Target Date and Done Date.
+ * Uses the default shift to convert excess minutes into meaningful units.
+ *
+ * @param {string|null} targetDateISO  - The planned/target date (ISO string)
+ * @param {string|null} doneDateISO    - The actual done/completion date (ISO string)
+ * @returns {{ isDelayed: boolean, display: string, minutes: number }}
+ */
+export const calculateDelay = (targetDateISO, doneDateISO) => {
+  if (!targetDateISO || !doneDateISO) {
+    return { isDelayed: false, display: '-', minutes: 0 };
+  }
+
+  const target = new Date(targetDateISO);
+  const done = new Date(doneDateISO);
+
+  if (isNaN(target.getTime()) || isNaN(done.getTime())) {
+    return { isDelayed: false, display: '-', minutes: 0 };
+  }
+
+  const diffMs = done.getTime() - target.getTime();
+  if (diffMs <= 0) {
+    // Done on time or early
+    const earlyMins = Math.abs(Math.round(diffMs / 60000));
+    return { isDelayed: false, display: `On Time`, minutes: Math.round(diffMs / 60000) };
+  }
+
+  // Load shift to compute shift hours per day
+  const savedShifts = localStorage.getItem('companyShiftsDataV3');
+  const shifts = savedShifts ? JSON.parse(savedShifts) : [
+    { id: 'shift-1', name: 'General Shift', startTime: '09:00', endTime: '18:00', isDefault: 'Yes' }
+  ];
+  const defaultShift = shifts.find(s => s.isDefault === 'Yes') || shifts[0] || { startTime: '09:00', endTime: '18:00' };
+
+  const [startHour, startMin] = defaultShift.startTime.split(':').map(Number);
+  const [endHour, endMin] = defaultShift.endTime.split(':').map(Number);
+  const shiftMinsPerDay = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+
+  const totalMins = Math.round(diffMs / 60000);
+
+  if (shiftMinsPerDay > 0 && totalMins >= shiftMinsPerDay) {
+    const days = Math.floor(totalMins / shiftMinsPerDay);
+    const remMins = totalMins % shiftMinsPerDay;
+    const hrs = Math.floor(remMins / 60);
+    const mins = remMins % 60;
+    let display = `+${days}d`;
+    if (hrs > 0) display += ` ${hrs}h`;
+    if (mins > 0 && days === 0) display += ` ${mins}m`;
+    return { isDelayed: true, display, minutes: totalMins };
+  } else {
+    const hrs = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+    let display = hrs > 0 ? `+${hrs}h ${mins}m` : `+${mins}m`;
+    return { isDelayed: true, display, minutes: totalMins };
+  }
+};
+
 export const formatTargetDate = (dateStr) => {
   if (!dateStr) return '-';
   const parsed = new Date(dateStr);

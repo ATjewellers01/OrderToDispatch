@@ -14,15 +14,15 @@ export default function Master() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   // Per-view filter states lifted here so Master toolbar can clear them
-  const [companyFilters, setCompanyFilters] = useState({ companyName: '', location: '', emailDomain: '' });
-  const [karigarTypeFilter, setKarigarTypeFilter] = useState('');
+  const [companyFilters, setCompanyFilters] = useState({ companyName: [], location: [], emailDomain: [] });
+  const [karigarTypeFilter, setKarigarTypeFilter] = useState([]);
 
   const currentView = VIEWS.find(v => v.id === activeView);
 
   const handleClearFilters = () => {
     setSearchQuery('');
-    setCompanyFilters({ companyName: '', location: '', emailDomain: '' });
-    setKarigarTypeFilter('');
+    setCompanyFilters({ companyName: [], location: [], emailDomain: [] });
+    setKarigarTypeFilter([]);
     setShowMobileFilters(false);
   };
 

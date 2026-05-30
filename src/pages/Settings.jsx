@@ -4,42 +4,80 @@ import { Trash2, Edit2, Search, User, Key, Shield, Check, X, RotateCcw, Plus } f
 import { getUsers, saveUsers } from '../utils/storageManager';
 import DataTable from '../components/DataTable';
 import ModalForm from '../components/ModalForm';
+import CustomDropdown from '../components/CustomDropdown';
+
+const PAGE_OPTIONS = [
+  { path: '/order-history', label: 'Order Management' },
+  { path: '/metal-issue', label: 'Metal Issue' },
+  { path: '/follow-up', label: 'Follow Up' },
+  { path: '/qc1', label: 'QC1' },
+  { path: '/ghat-jama', label: 'Ghat Jama' },
+  { path: '/meena-inhouse', label: 'Meena Inhouse' },
+  { path: '/meena-outside', label: 'Meena Outside' },
+  { path: '/polish-inhouse', label: 'Polish Inhouse' },
+  { path: '/polish-outside', label: 'Polish Outside' },
+  { path: '/bangle-polish', label: 'Bangle Polish' },
+  { path: '/e-polish', label: 'E-Polish' },
+  { path: '/qc2', label: 'QC2' },
+  { path: '/dispatch', label: 'Dispatch' },
+  { path: '/receipt', label: 'Receipt' },
+  { path: '/qc3', label: 'QC3' },
+  { path: '/huid-label', label: 'Huid/Label' },
+  { path: '/receive-in-stock', label: 'Receive In Stock' },
+  { path: '/delivery', label: 'Delivery' },
+  { path: '/master', label: 'Master' },
+];
+
+const getPageAccessText = (user) => {
+  if (user.role === 'ADMIN') return 'All Pages';
+  if (!user.accessPages || user.accessPages.length === 0) return 'All Pages';
+  return user.accessPages
+    .map(p => PAGE_OPTIONS.find(o => o.path === p)?.label || p)
+    .join(', ');
+};
 
 export default function Settings() {
   const [users, setUsers] = useState(getUsers());
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
 
   // New User Form State
   const [newUser, setNewUser] = useState({
     id: '',
     name: '',
     password: '',
-    role: 'USER'
+    role: 'USER',
+    accessPages: [],
+    weekOff: 'Sunday'
   });
 
   // User Edit State
-  const [editingUserId, setEditingUserId] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(15);
 
   const handleEditUser = (user) => {
-    setEditingUserId(user.id);
-    setEditingUser({ ...user });
+    setEditingUser({
+      ...user,
+      accessPages: user.accessPages || [],
+      weekOff: user.weekOff || 'Sunday'
+    });
+    setShowEditUserModal(true);
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = (e) => {
+    if (e) e.preventDefault();
     if (!editingUser.name.trim() || !editingUser.password.trim()) {
       toast.error('Please fill all required fields');
       return;
     }
 
-    const updatedUsers = users.map(u => u.id === editingUserId ? editingUser : u);
+    const updatedUsers = users.map(u => u.id === editingUser.id ? editingUser : u);
     setUsers(updatedUsers);
     saveUsers(updatedUsers);
-    setEditingUserId(null);
+    setShowEditUserModal(false);
     setEditingUser(null);
     toast.success('User updated successfully!');
   };
@@ -72,7 +110,9 @@ export default function Settings() {
       id: newUser.id.trim(),
       name: newUser.name.trim(),
       password: newUser.password.trim(),
-      role: newUser.role
+      role: newUser.role,
+      accessPages: newUser.role === 'ADMIN' ? [] : (newUser.accessPages || []),
+      weekOff: newUser.weekOff || 'Sunday'
     }];
 
     setUsers(updatedUsers);
@@ -83,7 +123,9 @@ export default function Settings() {
       id: '',
       name: '',
       password: '',
-      role: 'USER'
+      role: 'USER',
+      accessPages: [],
+      weekOff: 'Sunday'
     });
     setShowAddUserModal(false);
     toast.success('New user added successfully!');
@@ -110,77 +152,12 @@ export default function Settings() {
   );
 
   const tableHeaders = [
-    "SN", "Name", "User ID", "Password", "Role", "Actions"
+    "SN", "Name", "User ID", "Password", "Role", "Week Off", "Page Access", "Actions"
   ];
 
   const renderRow = (user, idx) => {
-    const isEditing = editingUserId === user.id;
     const globalIdx = (currentPage - 1) * itemsPerPage + idx + 1;
     
-    if (isEditing) {
-      return (
-        <tr key={user.id} className="bg-amber-50/40 border-b border-gray-100 transition-colors">
-          <td className="px-4 py-2.5 text-center text-xs text-gray-700 whitespace-nowrap">{globalIdx}</td>
-          <td className="px-4 py-2.5 whitespace-nowrap">
-            <div className="relative">
-              <User className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
-              <input
-                type="text"
-                value={editingUser.name}
-                onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                className="w-full pl-8 pr-3 py-1.5 border border-amber-200 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs h-[30px] bg-white text-gray-800"
-              />
-            </div>
-          </td>
-          <td className="px-4 py-2.5 whitespace-nowrap text-center">
-            <span className="bg-gray-100 text-gray-500 text-xs px-2.5 py-1 rounded border border-gray-200 font-mono">
-              {editingUser.id}
-            </span>
-          </td>
-          <td className="px-4 py-2.5 whitespace-nowrap">
-            <div className="relative">
-              <Key className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
-              <input
-                type="text"
-                value={editingUser.password}
-                onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                className="w-full pl-8 pr-3 py-1.5 border border-amber-200 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs h-[30px] bg-white text-gray-800"
-              />
-            </div>
-          </td>
-          <td className="px-4 py-2.5 whitespace-nowrap">
-            <div className="relative">
-              <Shield className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
-              <select
-                value={editingUser.role}
-                onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                className="w-full pl-8 pr-2 py-1.5 border border-amber-200 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs h-[30px] bg-white text-amber-700 font-bold appearance-none"
-              >
-                <option value="USER">USER</option>
-                <option value="ADMIN">ADMIN</option>
-              </select>
-            </div>
-          </td>
-          <td className="px-4 py-2.5 whitespace-nowrap text-center">
-            <div className="flex gap-2 justify-center">
-              <button
-                onClick={handleSaveUser}
-                className="flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition px-2 py-1 rounded text-[11px] font-bold"
-              >
-                <Check size={12} /> Save
-              </button>
-              <button
-                onClick={() => setEditingUserId(null)}
-                className="flex items-center gap-1 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition px-2 py-1 rounded text-[11px]"
-              >
-                <X size={12} /> Cancel
-              </button>
-            </div>
-          </td>
-        </tr>
-      );
-    }
-
     return (
       <tr key={user.id} className="hover:bg-amber-50/30 transition-colors border-b border-gray-100">
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{globalIdx}</td>
@@ -193,6 +170,12 @@ export default function Settings() {
           }`}>
             {user.role}
           </span>
+        </td>
+        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">
+          {user.weekOff || '-'}
+        </td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 max-w-[200px] truncate" title={getPageAccessText(user)}>
+          {getPageAccessText(user)}
         </td>
         <td className="px-4 py-3 whitespace-nowrap text-center">
           <div className="flex gap-2 justify-center">
@@ -215,79 +198,7 @@ export default function Settings() {
   };
 
   const renderCard = (user, idx) => {
-    const isEditing = editingUserId === user.id;
     const globalIdx = (currentPage - 1) * itemsPerPage + idx + 1;
-
-    if (isEditing) {
-      return (
-        <div key={user.id} className="bg-amber-50/20 rounded-xl border border-amber-200 p-4 space-y-3 shadow-md">
-          <div className="flex justify-between items-center border-b border-amber-100 pb-2">
-            <span className="text-[10px] text-amber-500 uppercase tracking-widest font-bold">Edit User #{globalIdx}</span>
-            <span className="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded border border-gray-200 font-mono">
-              ID: {editingUser.id}
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-[10px] text-gray-400 uppercase tracking-tight block">Name</label>
-              <div className="relative">
-                <User className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
-                <input
-                  type="text"
-                  value={editingUser.name}
-                  onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                  className="w-full pl-8 pr-3 py-1.5 border border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-xs h-[34px] bg-white text-gray-800"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] text-gray-400 uppercase tracking-tight block">Password</label>
-              <div className="relative">
-                <Key className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
-                <input
-                  type="text"
-                  value={editingUser.password}
-                  onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                  className="w-full pl-8 pr-3 py-1.5 border border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-xs h-[34px] bg-white text-gray-800"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] text-gray-400 uppercase tracking-tight block">Role</label>
-              <div className="relative">
-                <Shield className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
-                <select
-                  value={editingUser.role}
-                  onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                  className="w-full pl-8 pr-2 py-1.5 border border-amber-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-xs h-[34px] bg-white text-amber-700 font-bold"
-                >
-                  <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={handleSaveUser}
-                className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow"
-              >
-                <Check size={14} /> Save
-              </button>
-              <button
-                onClick={() => setEditingUserId(null)}
-                className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-bold flex items-center justify-center gap-1 border border-gray-200"
-              >
-                <X size={14} /> Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
 
     return (
       <div key={user.id} className="bg-white rounded-xl border border-amber-50 shadow-sm p-4 space-y-3 transition-all hover:shadow-md hover:border-amber-100">
@@ -305,15 +216,26 @@ export default function Settings() {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 rounded-lg p-2 border border-slate-100/50">
+        <div className="grid grid-cols-3 gap-2 text-[11px] bg-slate-50 rounded-lg p-2 border border-slate-100/50">
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">User ID</span>
             <span className="text-amber-600 font-mono font-semibold">{user.id}</span>
           </div>
           <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Week Off</span>
+            <span className="text-gray-700 font-bold">{user.weekOff || '-'}</span>
+          </div>
+          <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Password</span>
             <span className="text-gray-400 font-bold">••••••••</span>
           </div>
+        </div>
+
+        <div className="text-[11px] bg-slate-50 rounded-lg p-2 border border-slate-100/50">
+          <span className="text-gray-400 block uppercase text-[8px] tracking-tight font-semibold">Page Access</span>
+          <span className="text-gray-700 font-medium truncate block max-w-full" title={getPageAccessText(user)}>
+            {getPageAccessText(user)}
+          </span>
         </div>
 
         <div className="flex gap-2 pt-1.5">
@@ -452,20 +374,197 @@ export default function Settings() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight">Access Role *</label>
-            <div className="relative">
-              <Shield className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
-              <select
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                className="w-full pl-8 pr-2 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs h-[32px] md:h-[36px]"
-              >
-                <option value="USER">USER</option>
-                <option value="ADMIN">ADMIN</option>
-              </select>
-            </div>
+            <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight font-semibold">Access Role *</label>
+            <CustomDropdown
+              options={[
+                { value: 'USER', label: 'USER' },
+                { value: 'ADMIN', label: 'ADMIN' }
+              ]}
+              value={newUser.role}
+              onChange={(val) => setNewUser(prev => ({ ...prev, role: val }))}
+              placeholder="Select Role"
+              className="w-full"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
           </div>
+
+          <div className="space-y-1">
+            <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight font-semibold">Week Off *</label>
+            <CustomDropdown
+              options={[
+                { value: 'Sunday', label: 'Sunday' },
+                { value: 'Monday', label: 'Monday' },
+                { value: 'Tuesday', label: 'Tuesday' },
+                { value: 'Wednesday', label: 'Wednesday' },
+                { value: 'Thursday', label: 'Thursday' },
+                { value: 'Friday', label: 'Friday' },
+                { value: 'Saturday', label: 'Saturday' }
+              ]}
+              value={newUser.weekOff}
+              onChange={(val) => setNewUser(prev => ({ ...prev, weekOff: val }))}
+              placeholder="Select Week Off"
+              className="w-full"
+              height="h-[34px]"
+              rounded="rounded-lg"
+            />
+          </div>
+
+          {newUser.role === 'USER' && (
+            <div className="space-y-1">
+              <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight font-semibold">Page Access</label>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {PAGE_OPTIONS.map((page) => {
+                  const isChecked = newUser.accessPages?.includes(page.path);
+                  return (
+                    <label key={page.path} className="flex items-center gap-2 text-xs text-gray-700 hover:text-amber-700 cursor-pointer font-medium">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setNewUser(prev => {
+                            const current = prev.accessPages || [];
+                            const updated = checked 
+                              ? [...current, page.path] 
+                              : current.filter(p => p !== page.path);
+                            return { ...prev, accessPages: updated };
+                          });
+                        }}
+                        className="rounded text-amber-600 focus:ring-amber-500 border-gray-300 w-3.5 h-3.5"
+                      />
+                      <span>{page.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
+      </ModalForm>
+
+      {/* Edit User Modal */}
+      <ModalForm
+        isOpen={showEditUserModal}
+        onClose={() => {
+          setShowEditUserModal(false);
+          setEditingUser(null);
+        }}
+        title="Edit User Account"
+        onSubmit={handleSaveUser}
+        submitText="Save Changes"
+        maxWidth="max-w-md"
+      >
+        {editingUser && (
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight">Full Name *</label>
+              <div className="relative">
+                <User className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
+                <input
+                  type="text"
+                  value={editingUser.name}
+                  onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                  placeholder="Enter full name"
+                  className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs h-[32px] md:h-[36px]"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight font-semibold">User ID</label>
+              <div className="relative">
+                <span className="w-full pl-3 pr-3 py-2 border border-gray-200 bg-gray-100 text-gray-500 rounded text-xs block font-mono h-[32px] md:h-[36px] content-center">
+                  {editingUser.id}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight">Password *</label>
+              <div className="relative">
+                <Key className="absolute left-2.5 top-[9px] text-gray-400" size={14} />
+                <input
+                  type="text"
+                  value={editingUser.password}
+                  onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
+                  placeholder="Enter login password"
+                  className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs h-[32px] md:h-[36px]"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight font-semibold">Access Role *</label>
+              <CustomDropdown
+                options={[
+                  { value: 'USER', label: 'USER' },
+                  { value: 'ADMIN', label: 'ADMIN' }
+                ]}
+                value={editingUser.role}
+                onChange={(val) => setEditingUser(prev => ({ ...prev, role: val }))}
+                placeholder="Select Role"
+                className="w-full"
+                height="h-[34px]"
+                rounded="rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight font-semibold">Week Off *</label>
+              <CustomDropdown
+                options={[
+                  { value: 'Sunday', label: 'Sunday' },
+                  { value: 'Monday', label: 'Monday' },
+                  { value: 'Tuesday', label: 'Tuesday' },
+                  { value: 'Wednesday', label: 'Wednesday' },
+                  { value: 'Thursday', label: 'Thursday' },
+                  { value: 'Friday', label: 'Friday' },
+                  { value: 'Saturday', label: 'Saturday' }
+                ]}
+                value={editingUser.weekOff}
+                onChange={(val) => setEditingUser(prev => ({ ...prev, weekOff: val }))}
+                placeholder="Select Week Off"
+                className="w-full"
+                height="h-[34px]"
+                rounded="rounded-lg"
+              />
+            </div>
+
+            {editingUser.role === 'USER' && (
+              <div className="space-y-1">
+                <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight font-semibold">Page Access</label>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {PAGE_OPTIONS.map((page) => {
+                    const isChecked = editingUser.accessPages?.includes(page.path);
+                    return (
+                      <label key={page.path} className="flex items-center gap-2 text-xs text-gray-700 hover:text-amber-700 cursor-pointer font-medium">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setEditingUser(prev => {
+                              const current = prev.accessPages || [];
+                              const updated = checked 
+                                ? [...current, page.path] 
+                                : current.filter(p => p !== page.path);
+                              return { ...prev, accessPages: updated };
+                            });
+                          }}
+                          className="rounded text-amber-600 focus:ring-amber-500 border-gray-300 w-3.5 h-3.5"
+                        />
+                        <span>{page.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </ModalForm>
 
     </div>
