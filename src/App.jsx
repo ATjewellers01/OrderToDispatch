@@ -30,6 +30,7 @@ import TatSetup from './pages/TatSetup/TatSetup';
 import ProtectedRoute from './components/ProtectedRoute';
 import { initializeStorage } from './utils/storageManager';
 
+
 function App() {
   useEffect(() => {
     initializeStorage();

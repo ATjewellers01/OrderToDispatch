@@ -29,8 +29,10 @@ const DataTable = ({
         {data.length > 0 ? (
           data.map((item, index) => renderCard(item, index))
         ) : (
-          <div className="p-8 text-center text-gray-500 bg-white rounded-lg border border-gray-100 shadow-sm text-xs font-medium">
-            No records found.
+          <div className="p-8 text-center bg-white rounded-lg border border-dashed border-amber-200 shadow-sm">
+            <div className="text-3xl mb-3">📋</div>
+            <p className="text-sm font-bold text-gray-700 mb-1">No records yet</p>
+            <p className="text-xs text-gray-400">Use the <span className="font-semibold text-amber-600">+ Add</span> button above to add your first entry.</p>
           </div>
         )}
       </div>
@@ -56,7 +58,19 @@ const DataTable = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {data.map((item, index) => renderRow(item, index))}
+              {data.length > 0 ? (
+                data.map((item, index) => renderRow(item, index))
+              ) : (
+                <tr>
+                  <td colSpan={999} className="py-16 text-center">
+                    <div className="inline-flex flex-col items-center gap-2">
+                      <div className="text-4xl">📋</div>
+                      <p className="text-sm font-bold text-gray-700">No records yet</p>
+                      <p className="text-xs text-gray-400">Use the <span className="font-semibold text-amber-600">+ Add</span> button above to add your first entry.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </DragScrollTable>
