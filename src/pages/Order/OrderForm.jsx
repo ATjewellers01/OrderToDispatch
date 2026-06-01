@@ -258,18 +258,45 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
     return defaultCompanies;
   });
 
+  // ── Master: Delivery Locations ──
+  const [deliveryLocations, setDeliveryLocations] = useState(() => {
+    const saved = localStorage.getItem('master_delivery_locations');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // ── Master: Order Stages ──
+  const [orderStages, setOrderStages] = useState(() => {
+    const saved = localStorage.getItem('master_order_stages');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   useEffect(() => {
     if (isOpen) {
       const saved = localStorage.getItem('master_companies');
       if (saved) {
         setCompanies(JSON.parse(saved));
       }
+      const savedLocations = localStorage.getItem('master_delivery_locations');
+      if (savedLocations) setDeliveryLocations(JSON.parse(savedLocations));
+      const savedStages = localStorage.getItem('master_order_stages');
+      if (savedStages) setOrderStages(JSON.parse(savedStages));
     }
   }, [isOpen]);
 
   const companyOptions = useMemo(() => {
     return companies.map(c => ({ value: c.name, label: c.name }));
   }, [companies]);
+
+  // ── Dynamic options from Master ──
+  const deliveryLocationOptions = useMemo(() =>
+    deliveryLocations.map(l => ({ value: l.location, label: l.location })),
+    [deliveryLocations]
+  );
+
+  const orderStageOptions = useMemo(() =>
+    orderStages.map(s => ({ value: s.stage, label: s.stage })),
+    [orderStages]
+  );
 
   // Karigar options — live from master_karigars localStorage
   const karigarOptions = useKarigarOptions();
@@ -668,7 +695,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
             options={[
               { value: 'Customer Order', label: 'Customer Order' },
               { value: 'Stock Order', label: 'Stock Order' },
-              { value: 'Argent Order', label: 'Argent Order' }
+              { value: 'Urgent Order', label: 'Urgent Order' }
             ]}
             value={formData.orderType}
             onChange={(val) => handleInputChange({ target: { name: 'orderType', value: val } })}
@@ -713,13 +740,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Order Stage <span className="text-red-500">*</span></label>
           <CustomDropdown
-            options={[
-              { value: 'New', label: 'New' },
-              { value: 'Follow Up', label: 'Follow Up' },
-              { value: 'In Progress', label: 'In Progress' },
-              { value: 'QC', label: 'QC' },
-              { value: 'Delivered', label: 'Delivered' }
-            ]}
+            options={orderStageOptions}
             value={formData.orderStage}
             onChange={(val) => handleInputChange({ target: { name: 'orderStage', value: val } })}
             placeholder="Select Stage"
@@ -738,10 +759,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Delivery Location <span className="text-red-500">*</span></label>
           <CustomDropdown
-            options={[
-              { value: 'Head Office', label: 'Head Office' },
-              { value: 'Branch 1', label: 'Branch 1' }
-            ]}
+            options={deliveryLocationOptions}
             value={formData.deliveryLocation}
             onChange={(val) => handleInputChange({ target: { name: 'deliveryLocation', value: val } })}
             placeholder="Select Location"

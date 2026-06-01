@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { Plus, Search, RotateCcw, Filter, ChevronDown, Building2, HardHat } from 'lucide-react';
+import { Plus, Search, RotateCcw, Filter, ChevronDown, Building2, HardHat, MapPin, Tag } from 'lucide-react';
 import CompanyDetails from './CompanyDetails';
 import KarigarDetails from './KarigarDetails';
+import DeliveryLocation from './DeliveryLocation';
+import OrderStage from './OrderStage';
 
 const VIEWS = [
-  { id: 'company', label: 'Company Details', icon: Building2 },
-  { id: 'karigar', label: 'Karigar Details', icon: HardHat },
+  { id: 'company',  label: 'Company Details',    icon: Building2 },
+  { id: 'karigar',  label: 'Karigar Details',     icon: HardHat   },
+  { id: 'delivery', label: 'Delivery Locations',  icon: MapPin    },
+  { id: 'orderstage', label: 'Order Stages',      icon: Tag       },
 ];
 
 export default function Master() {
@@ -33,8 +37,13 @@ export default function Master() {
   };
 
   const triggerAdd = () => {
-    const id = activeView === 'company' ? 'company-add-trigger' : 'karigar-add-trigger';
-    document.getElementById(id)?.click();
+    const map = {
+      company:    'company-add-trigger',
+      karigar:    'karigar-add-trigger',
+      delivery:   'delivery-location-add-trigger',
+      orderstage: 'order-stage-add-trigger',
+    };
+    document.getElementById(map[activeView])?.click();
   };
 
   return (
@@ -133,6 +142,20 @@ export default function Master() {
                 filtersOnly={true}
               />
             )}
+            {activeView === 'delivery' && (
+              <DeliveryLocation
+                searchQuery={searchQuery}
+                onClearFilters={handleClearFilters}
+                filtersOnly={true}
+              />
+            )}
+            {activeView === 'orderstage' && (
+              <OrderStage
+                searchQuery={searchQuery}
+                onClearFilters={handleClearFilters}
+                filtersOnly={true}
+              />
+            )}
           </div>
         </div>
 
@@ -162,6 +185,18 @@ export default function Master() {
           typeFilter={karigarTypeFilter}
           onTypeFilterChange={setKarigarTypeFilter}
           showMobileFilters={showMobileFilters}
+          onClearFilters={handleClearFilters}
+        />
+      )}
+      {activeView === 'delivery' && (
+        <DeliveryLocation
+          searchQuery={searchQuery}
+          onClearFilters={handleClearFilters}
+        />
+      )}
+      {activeView === 'orderstage' && (
+        <OrderStage
+          searchQuery={searchQuery}
           onClearFilters={handleClearFilters}
         />
       )}

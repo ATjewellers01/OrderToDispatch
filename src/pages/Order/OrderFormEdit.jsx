@@ -634,7 +634,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
             options={[
               { value: 'Customer Order', label: 'Customer Order' },
               { value: 'Stock Order', label: 'Stock Order' },
-              { value: 'Argent Order', label: 'Argent Order' }
+              { value: 'Urgent Order', label: 'Urgent Order' }
             ]}
             value={formData.orderType}
             onChange={(val) => handleInputChange({ target: { name: 'orderType', value: val } })}
