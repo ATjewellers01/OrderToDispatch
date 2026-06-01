@@ -261,13 +261,29 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
   // ── Master: Delivery Locations ──
   const [deliveryLocations, setDeliveryLocations] = useState(() => {
     const saved = localStorage.getItem('master_delivery_locations');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) return JSON.parse(saved);
+    const defaults = [
+      { id: 'DL-001', location: 'Mumbai',  timestamp: '2026-06-01T08:30:00' },
+      { id: 'DL-002', location: 'Kolkata', timestamp: '2026-06-01T09:15:00' },
+      { id: 'DL-003', location: 'Raipur',  timestamp: '2026-06-01T10:00:00' },
+    ];
+    localStorage.setItem('master_delivery_locations', JSON.stringify(defaults));
+    return defaults;
   });
 
   // ── Master: Order Stages ──
   const [orderStages, setOrderStages] = useState(() => {
     const saved = localStorage.getItem('master_order_stages');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) return JSON.parse(saved);
+    const defaults = [
+      { id: 'OS-001', stage: 'Pending',              timestamp: '2026-06-01T08:00:00' },
+      { id: 'OS-002', stage: 'In Progress',           timestamp: '2026-06-01T08:15:00' },
+      { id: 'OS-003', stage: 'Ready for Delivery',    timestamp: '2026-06-01T08:30:00' },
+      { id: 'OS-004', stage: 'Completed',             timestamp: '2026-06-01T08:45:00' },
+      { id: 'OS-005', stage: 'Reject',                timestamp: '2026-06-01T09:00:00' },
+    ];
+    localStorage.setItem('master_order_stages', JSON.stringify(defaults));
+    return defaults;
   });
 
   useEffect(() => {
@@ -277,9 +293,31 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         setCompanies(JSON.parse(saved));
       }
       const savedLocations = localStorage.getItem('master_delivery_locations');
-      if (savedLocations) setDeliveryLocations(JSON.parse(savedLocations));
+      if (savedLocations) {
+        setDeliveryLocations(JSON.parse(savedLocations));
+      } else {
+        const defaults = [
+          { id: 'DL-001', location: 'Mumbai',  timestamp: '2026-06-01T08:30:00' },
+          { id: 'DL-002', location: 'Kolkata', timestamp: '2026-06-01T09:15:00' },
+          { id: 'DL-003', location: 'Raipur',  timestamp: '2026-06-01T10:00:00' },
+        ];
+        localStorage.setItem('master_delivery_locations', JSON.stringify(defaults));
+        setDeliveryLocations(defaults);
+      }
       const savedStages = localStorage.getItem('master_order_stages');
-      if (savedStages) setOrderStages(JSON.parse(savedStages));
+      if (savedStages) {
+        setOrderStages(JSON.parse(savedStages));
+      } else {
+        const defaults = [
+          { id: 'OS-001', stage: 'Pending',              timestamp: '2026-06-01T08:00:00' },
+          { id: 'OS-002', stage: 'In Progress',           timestamp: '2026-06-01T08:15:00' },
+          { id: 'OS-003', stage: 'Ready for Delivery',    timestamp: '2026-06-01T08:30:00' },
+          { id: 'OS-004', stage: 'Completed',             timestamp: '2026-06-01T08:45:00' },
+          { id: 'OS-005', stage: 'Reject',                timestamp: '2026-06-01T09:00:00' },
+        ];
+        localStorage.setItem('master_order_stages', JSON.stringify(defaults));
+        setOrderStages(defaults);
+      }
     }
   }, [isOpen]);
 
