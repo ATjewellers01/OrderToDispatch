@@ -131,9 +131,6 @@ const generateBaseHTML = (order, type) => {
         
         <!-- Right: Address Details -->
         <div style="text-align: right; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10px; color: #4b5563; line-height: 1.5; flex-shrink: 0; width: 220px; font-weight: bold;">
-          <div><strong>Address:</strong> Raipur, Chhattisgarh, India</div>
-          <div><strong>GSTIN:</strong> 22AAAAA0000A1Z5</div>
-          <div><strong>Phone:</strong> +91 98765 43210</div>
           <div style="margin-top: 2px; color: #9ca3af; font-size: 9px; font-weight: bold;">Printed: ${formatTimestamp(new Date())}</div>
         </div>
       </div>
@@ -352,7 +349,6 @@ const generateBaseHTML = (order, type) => {
             
             <!-- Right: Address Details -->
             <div style="text-align: right; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10px; color: #4b5563; line-height: 1.5; flex-shrink: 0; width: 220px; font-weight: bold;">
-              <div><strong>Address:</strong> Raipur, Chhattisgarh, India</div>
               <div style="margin-top: 2px; color: #9ca3af; font-size: 9px; font-weight: bold;">Printed: ${formatTimestamp(new Date())}</div>
             </div>
           </div>
