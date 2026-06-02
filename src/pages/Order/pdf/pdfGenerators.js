@@ -91,32 +91,32 @@ const generateBaseHTML = (order, type) => {
   const logoHTML = '';
 
   const customerHeader = `
-    <table style="width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #374151; font-weight: bold;">
+    <table style="width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #374151; font-weight: bold; margin: 0; padding: 0; line-height: 1.1;">
       <tr>
-        <td style="padding: 2px 0; text-align: left; width: 50%;"><strong>Customer:</strong> ${order.company || '-'}</td>
-        <td style="padding: 2px 0; text-align: right; width: 50%;"><strong>Mobile:</strong> ${order.companyNumber || '-'}</td>
+        <td style="padding: 1px 0; text-align: left; width: 50%; line-height: 1.1;"><strong>Customer:</strong> ${order.company || '-'}</td>
+        <td style="padding: 1px 0; text-align: right; width: 50%; line-height: 1.1;"><strong>Mobile:</strong> ${order.companyNumber || '-'}</td>
       </tr>
       <tr>
-        <td style="padding: 2px 0; text-align: left; width: 50%;"><strong>City:</strong> ${order.deliveryLocation || '-'}</td>
-        <td style="padding: 2px 0; text-align: right; width: 50%;"><strong>Delivery Location:</strong> ${order.deliveryLocation || '-'}</td>
+        <td style="padding: 1px 0; text-align: left; width: 50%; line-height: 1.1;"><strong>City:</strong> ${order.deliveryLocation || '-'}</td>
+        <td style="padding: 1px 0; text-align: right; width: 50%; line-height: 1.1;"><strong>Delivery Location:</strong> ${order.deliveryLocation || '-'}</td>
       </tr>
     </table>
   `;
 
   const karigarHeader = `
-    <div style="display: flex; justify-content: space-between; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #374151; font-weight: bold; padding: 2px 0;">
+    <div style="display: flex; justify-content: space-between; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #374151; font-weight: bold; padding: 1px 0; margin: 0; line-height: 1.1;">
       <div><strong>Karigar Name:</strong> ${order.karigar || '-'}</div>
       <div><strong>City:</strong> Raipur</div>
     </div>
   `;
 
   const headerHTML = `
-    <div style="padding: 0 0 8px 0; border-bottom: 2px solid #111827; margin-bottom: 15px; position: relative; z-index: 10;">
+    <div style="padding: 0 0 4px 0; border-bottom: 2px solid #111827; margin-bottom: 12px; position: relative; z-index: 10;">
       <!-- Row 1: Logo (Left), Title & Order No (Center), Address Details (Right) -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 15px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 15px;">
         <!-- Left: Logo -->
         <div style="text-align: left; flex-shrink: 0; width: 140px;">
-          <img src="${pdfLogo}" style="height: 75px; max-width: 140px; display: block; object-fit: contain;" />
+          <img src="${pdfLogo}" style="height: 70px; max-width: 140px; display: block; object-fit: contain;" />
         </div>
         
         <!-- Center: Title and Order Number -->
@@ -124,7 +124,7 @@ const generateBaseHTML = (order, type) => {
           <h2 style="margin: 0; font-size: 22px; color: #111827; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: bold; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.2;">
             ${isCustomer ? 'CUSTOMER REPORT' : 'KARIGAR REPORT'}
           </h2>
-          <div style="font-size: 13px; font-weight: bold; color: #4b5563; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin-top: 5px;">
+          <div style="font-size: 13px; font-weight: bold; color: #4b5563; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin-top: 3px;">
             Order No: ${order.orderNo || '-'}
           </div>
         </div>
@@ -136,7 +136,7 @@ const generateBaseHTML = (order, type) => {
       </div>
       
       <!-- Row 2: Customer / Karigar Information -->
-      <div style="border-top: 1px solid #e5e7eb; padding-top: 6px;">
+      <div style="border-top: 1px solid #e5e7eb; padding-top: 4px;">
         ${isCustomer ? customerHeader : karigarHeader}
       </div>
     </div>
