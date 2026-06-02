@@ -239,8 +239,6 @@ export default function CompanyDetails({
   if (filtersOnly) {
     return (
       <>
-        {/* Hidden trigger so Master's Add button can open the modal */}
-        <div className="hidden" id="company-add-trigger" onClick={() => setShowAddItemModal(true)} />
         <div className="flex-1 min-w-0 lg:min-w-[150px]">
           <SearchableDropdown options={companyNamesList}
                 isMulti={true} value={effectiveFilters.companyName} onChange={val => setFilterField('companyName', val)} placeholder="All Companies" height="h-[32px] md:h-[38px]" rounded="rounded-lg" />
@@ -256,7 +254,6 @@ export default function CompanyDetails({
         <button onClick={handleClearFilters} className="hidden lg:flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg w-[38px] h-[38px] hover:bg-gray-100 transition-colors shadow-sm" title="Clear Filters">
           <RotateCcw size={16} />
         </button>
-        {modals}
       </>
     );
   }

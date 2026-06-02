@@ -190,7 +190,6 @@ export default function KarigarDetails({
   if (filtersOnly) {
     return (
       <>
-        <div className="hidden" id="karigar-add-trigger" onClick={() => setShowAddModal(true)} />
         <div className="flex-1 min-w-0 lg:min-w-[160px]">
           <SearchableDropdown
             options={KARIGAR_TYPES.map(t => ({ value: t, label: t, count: karigars.filter(k => k.type === t).length }))}
@@ -205,7 +204,6 @@ export default function KarigarDetails({
         <button onClick={handleClearFilters} className="hidden lg:flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg w-[38px] h-[38px] hover:bg-gray-100 transition-colors shadow-sm" title="Clear Filters">
           <RotateCcw size={16} />
         </button>
-        {modals}
       </>
     );
   }

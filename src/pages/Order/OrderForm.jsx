@@ -286,6 +286,12 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
     return defaults;
   });
 
+  // ── Master: Categories ──
+  const [categories, setCategories] = useState(() => {
+    const saved = localStorage.getItem('master_categories');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   useEffect(() => {
     if (isOpen) {
       const saved = localStorage.getItem('master_companies');
@@ -318,6 +324,10 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         localStorage.setItem('master_order_stages', JSON.stringify(defaults));
         setOrderStages(defaults);
       }
+      const savedCategories = localStorage.getItem('master_categories');
+      if (savedCategories) {
+        setCategories(JSON.parse(savedCategories));
+      }
     }
   }, [isOpen]);
 
@@ -334,6 +344,11 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
   const orderStageOptions = useMemo(() =>
     orderStages.map(s => ({ value: s.stage, label: s.stage })),
     [orderStages]
+  );
+
+  const categoryOptions = useMemo(() =>
+    categories.map(c => ({ value: c.category, label: c.category })),
+    [categories]
   );
 
   // Karigar options — live from master_karigars localStorage
@@ -600,13 +615,8 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         {/* Row 3 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Category</label>
-          <CustomDropdown
-            options={[
-              { value: 'Necklace', label: 'Necklace' },
-              { value: 'Ring', label: 'Ring' },
-              { value: 'Earrings', label: 'Earrings' },
-              { value: 'Bangle', label: 'Bangle' }
-            ]}
+          <SearchableDropdown
+            options={categoryOptions}
             value={formData.category}
             onChange={(val) => handleInputChange({ target: { name: 'category', value: val } })}
             placeholder="Select Category"

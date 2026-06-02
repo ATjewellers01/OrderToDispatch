@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Plus, Search, RotateCcw, Filter, ChevronDown, Building2, HardHat, MapPin, Tag } from 'lucide-react';
+import { Plus, Search, RotateCcw, Filter, ChevronDown, Building2, HardHat, MapPin, Tag, Layers } from 'lucide-react';
 import CompanyDetails from './CompanyDetails';
 import KarigarDetails from './KarigarDetails';
 import DeliveryLocation from './DeliveryLocation';
 import OrderStage from './OrderStage';
+import Category from './Category';
 
 const VIEWS = [
   { id: 'company',  label: 'Company Details',    icon: Building2 },
   { id: 'karigar',  label: 'Karigar Details',     icon: HardHat   },
   { id: 'delivery', label: 'Delivery Locations',  icon: MapPin    },
   { id: 'orderstage', label: 'Order Stages',      icon: Tag       },
+  { id: 'category', label: 'Category',            icon: Layers    },
 ];
 
 export default function Master() {
@@ -42,6 +44,7 @@ export default function Master() {
       karigar:    'karigar-add-trigger',
       delivery:   'delivery-location-add-trigger',
       orderstage: 'order-stage-add-trigger',
+      category:   'category-add-trigger',
     };
     document.getElementById(map[activeView])?.click();
   };
@@ -156,6 +159,13 @@ export default function Master() {
                 filtersOnly={true}
               />
             )}
+            {activeView === 'category' && (
+              <Category
+                searchQuery={searchQuery}
+                onClearFilters={handleClearFilters}
+                filtersOnly={true}
+              />
+            )}
           </div>
         </div>
 
@@ -196,6 +206,12 @@ export default function Master() {
       )}
       {activeView === 'orderstage' && (
         <OrderStage
+          searchQuery={searchQuery}
+          onClearFilters={handleClearFilters}
+        />
+      )}
+      {activeView === 'category' && (
+        <Category
           searchQuery={searchQuery}
           onClearFilters={handleClearFilters}
         />

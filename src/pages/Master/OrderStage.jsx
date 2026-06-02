@@ -263,7 +263,6 @@ export default function OrderStage({
   if (filtersOnly) {
     return (
       <>
-        <div className="hidden" id="order-stage-add-trigger" onClick={() => setShowAddModal(true)} />
         <button
           onClick={handleClearFilters}
           className="hidden lg:flex items-center justify-center bg-gray-50 text-gray-500 border border-gray-200 rounded-lg w-[38px] h-[38px] hover:bg-gray-100 transition-colors shadow-sm"
@@ -271,7 +270,6 @@ export default function OrderStage({
         >
           <RotateCcw size={16} />
         </button>
-        {modals}
       </>
     );
   }
