@@ -251,6 +251,34 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
     return defaultCompanies;
   });
 
+  // ── Master: Delivery Locations ──
+  const [deliveryLocations, setDeliveryLocations] = useState(() => {
+    const saved = localStorage.getItem('master_delivery_locations');
+    if (saved) return JSON.parse(saved);
+    const defaults = [
+      { id: 'DL-001', location: 'Mumbai',  timestamp: '2026-06-01T08:30:00' },
+      { id: 'DL-002', location: 'Kolkata', timestamp: '2026-06-01T09:15:00' },
+      { id: 'DL-003', location: 'Raipur',  timestamp: '2026-06-01T10:00:00' },
+    ];
+    localStorage.setItem('master_delivery_locations', JSON.stringify(defaults));
+    return defaults;
+  });
+
+  // ── Master: Order Stages ──
+  const [orderStages, setOrderStages] = useState(() => {
+    const saved = localStorage.getItem('master_order_stages');
+    if (saved) return JSON.parse(saved);
+    const defaults = [
+      { id: 'OS-001', stage: 'Pending',              timestamp: '2026-06-01T08:00:00' },
+      { id: 'OS-002', stage: 'In Progress',           timestamp: '2026-06-01T08:15:00' },
+      { id: 'OS-003', stage: 'Ready for Delivery',    timestamp: '2026-06-01T08:30:00' },
+      { id: 'OS-004', stage: 'Completed',             timestamp: '2026-06-01T08:45:00' },
+      { id: 'OS-005', stage: 'Reject',                timestamp: '2026-06-01T09:00:00' },
+    ];
+    localStorage.setItem('master_order_stages', JSON.stringify(defaults));
+    return defaults;
+  });
+
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem('master_categories');
     if (saved) {
@@ -267,6 +295,32 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
       const saved = localStorage.getItem('master_companies');
       if (saved) {
         setCompanies(JSON.parse(saved));
+      }
+      const savedLocations = localStorage.getItem('master_delivery_locations');
+      if (savedLocations) {
+        setDeliveryLocations(JSON.parse(savedLocations));
+      } else {
+        const defaults = [
+          { id: 'DL-001', location: 'Mumbai',  timestamp: '2026-06-01T08:30:00' },
+          { id: 'DL-002', location: 'Kolkata', timestamp: '2026-06-01T09:15:00' },
+          { id: 'DL-003', location: 'Raipur',  timestamp: '2026-06-01T10:00:00' },
+        ];
+        localStorage.setItem('master_delivery_locations', JSON.stringify(defaults));
+        setDeliveryLocations(defaults);
+      }
+      const savedStages = localStorage.getItem('master_order_stages');
+      if (savedStages) {
+        setOrderStages(JSON.parse(savedStages));
+      } else {
+        const defaults = [
+          { id: 'OS-001', stage: 'Pending',              timestamp: '2026-06-01T08:00:00' },
+          { id: 'OS-002', stage: 'In Progress',           timestamp: '2026-06-01T08:15:00' },
+          { id: 'OS-003', stage: 'Ready for Delivery',    timestamp: '2026-06-01T08:30:00' },
+          { id: 'OS-004', stage: 'Completed',             timestamp: '2026-06-01T08:45:00' },
+          { id: 'OS-005', stage: 'Reject',                timestamp: '2026-06-01T09:00:00' },
+        ];
+        localStorage.setItem('master_order_stages', JSON.stringify(defaults));
+        setOrderStages(defaults);
       }
       const savedCategories = localStorage.getItem('master_categories');
       if (savedCategories) {
@@ -292,6 +346,16 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
   const categoryOptions = useMemo(() =>
     categories.map(c => ({ value: c.category, label: c.category })),
     [categories]
+  );
+
+  const deliveryLocationOptions = useMemo(() =>
+    deliveryLocations.map(l => ({ value: l.location, label: l.location })),
+    [deliveryLocations]
+  );
+
+  const orderStageOptions = useMemo(() =>
+    orderStages.map(s => ({ value: s.stage, label: s.stage })),
+    [orderStages]
   );
 
   // Karigar options — live from master_karigars localStorage
@@ -705,13 +769,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Order Stage <span className="text-red-500">*</span></label>
           <CustomDropdown
-            options={[
-              { value: 'New', label: 'New' },
-              { value: 'Follow Up', label: 'Follow Up' },
-              { value: 'In Progress', label: 'In Progress' },
-              { value: 'QC', label: 'QC' },
-              { value: 'Delivered', label: 'Delivered' }
-            ]}
+            options={orderStageOptions}
             value={formData.orderStage}
             onChange={(val) => handleInputChange({ target: { name: 'orderStage', value: val } })}
             placeholder="Select Stage"
@@ -730,10 +788,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Delivery Location <span className="text-red-500">*</span></label>
           <CustomDropdown
-            options={[
-              { value: 'Head Office', label: 'Head Office' },
-              { value: 'Branch 1', label: 'Branch 1' }
-            ]}
+            options={deliveryLocationOptions}
             value={formData.deliveryLocation}
             onChange={(val) => handleInputChange({ target: { name: 'deliveryLocation', value: val } })}
             placeholder="Select Location"
