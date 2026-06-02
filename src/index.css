@@ -106,3 +106,32 @@ table th, table td {
 .no-spinners {
   -moz-appearance: textfield; /* Firefox */
 }
+
+/* Custom Row Color Coding based on Order Type */
+tr.order-row-urgent {
+  background-color: #fef2f2 !important; /* soft red */
+}
+tr.order-row-urgent:hover {
+  background-color: #fee2e2 !important; /* slightly darker soft red on hover */
+}
+tr.order-row-urgent td {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+}
+tr.order-row-urgent:hover td {
+  background-color: #fee2e2 !important;
+}
+
+tr.order-row-stock {
+  background-color: #eff6ff !important; /* soft blue */
+}
+tr.order-row-stock:hover {
+  background-color: #dbeafe !important; /* slightly darker soft blue on hover */
+}
+tr.order-row-stock td {
+  background-color: #eff6ff !important;
+  color: #1e40af !important;
+}
+tr.order-row-stock:hover td {
+  background-color: #dbeafe !important;
+}

@@ -53,7 +53,27 @@ const DataTable = ({
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {data.length > 0 && (
-                data.map((item, index) => renderRow(item, index))
+                data.map((item, index) => {
+                  const row = renderRow(item, index);
+                  if (!row || !item || !item.orderType) return row;
+                  
+                  const isUrgent = item.orderType.trim().toLowerCase() === 'urgent order';
+                  const isStock = item.orderType.trim().toLowerCase() === 'stock order';
+                  
+                  let customClass = '';
+                  if (isUrgent) {
+                    customClass = 'order-row-urgent';
+                  } else if (isStock) {
+                    customClass = 'order-row-stock';
+                  }
+                  
+                  if (customClass) {
+                    return React.cloneElement(row, {
+                      className: `${row.props.className || ''} ${customClass}`
+                    });
+                  }
+                  return row;
+                })
               )}
             </tbody>
           </table>
