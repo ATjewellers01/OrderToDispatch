@@ -629,6 +629,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
           <CustomDropdown
             options={[
               { value: '18K', label: '18K' },
+              { value: '20K', label: '20K' },
               { value: '22K', label: '22K' },
               { value: '24K', label: '24K' }
             ]}
@@ -678,8 +679,8 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
           <label className="block text-xs font-semibold text-gray-700 mb-1">Screw</label>
           <CustomDropdown
             options={[
-              { value: 'Type 1', label: 'Type 1' },
-              { value: 'Type 2', label: 'Type 2' }
+              { value: 'English', label: 'English' },
+              { value: 'Pongli', label: 'Pongli' }
             ]}
             value={formData.screw}
             onChange={(val) => handleInputChange({ target: { name: 'screw', value: val } })}
