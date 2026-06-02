@@ -5,6 +5,7 @@ import ModalForm from '../../components/ModalForm';
 import CustomDropdown from '../../components/CustomDropdown';
 import SearchableDropdown from '../../components/SearchableDropdown';
 import { useKarigarOptions } from '../../hooks/useKarigarOptions';
+import { SEEDED_CATEGORIES } from '../Master/Category';
 
 const companyNames = [
   "Kalyan Jewellers", "Malabar Gold", "Tanishq", "Joyalukkas", "Bhima Jewellers", 
@@ -289,7 +290,13 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
   // ── Master: Categories ──
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem('master_categories');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const hasChain = parsed.some(c => c.category === 'CHAIN');
+      if (hasChain) return parsed;
+    }
+    localStorage.setItem('master_categories', JSON.stringify(SEEDED_CATEGORIES));
+    return SEEDED_CATEGORIES;
   });
 
   useEffect(() => {
@@ -326,7 +333,17 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
       }
       const savedCategories = localStorage.getItem('master_categories');
       if (savedCategories) {
-        setCategories(JSON.parse(savedCategories));
+        const parsed = JSON.parse(savedCategories);
+        const hasChain = parsed.some(c => c.category === 'CHAIN');
+        if (hasChain) {
+          setCategories(parsed);
+        } else {
+          localStorage.setItem('master_categories', JSON.stringify(SEEDED_CATEGORIES));
+          setCategories(SEEDED_CATEGORIES);
+        }
+      } else {
+        localStorage.setItem('master_categories', JSON.stringify(SEEDED_CATEGORIES));
+        setCategories(SEEDED_CATEGORIES);
       }
     }
   }, [isOpen]);

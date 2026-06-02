@@ -4,7 +4,7 @@ import { Plus, Search, RotateCcw, Layers, Trash2, Edit2 } from 'lucide-react';
 import DataTable from '../../components/DataTable';
 import ModalForm from '../../components/ModalForm';
 
-const SEEDED_CATEGORIES = [
+export const SEEDED_CATEGORIES = [
   { id: 'CAT-001', category: 'CHAIN', timestamp: '2026-06-01T08:00:00.000Z' },
   { id: 'CAT-002', category: 'NATH / NOSE RING', timestamp: '2026-06-01T08:10:00.000Z' },
   { id: 'CAT-003', category: 'EARRINGS', timestamp: '2026-06-01T08:20:00.000Z' },
