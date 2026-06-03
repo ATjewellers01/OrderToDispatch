@@ -104,10 +104,12 @@ const generateBaseHTML = (order, type) => {
   `;
 
   const karigarHeader = `
-    <div style="display: flex; justify-content: space-between; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #374151; font-weight: bold; padding: 0; margin: 0; line-height: 1.0;">
-      <div><strong>Karigar Name:</strong> ${order.karigar || '-'}</div>
-      <div><strong>City:</strong> Raipur</div>
-    </div>
+    <table style="width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #374151; font-weight: bold; margin: 0; padding: 0; line-height: 1.0;">
+      <tr>
+        <td style="padding: 0; text-align: left; width: 50%; line-height: 1.0;"><strong>Karigar Name:</strong> ${order.karigar || '-'}</td>
+        <td style="padding: 0; text-align: right; width: 50%; line-height: 1.0;"><strong>City:</strong> Raipur</td>
+      </tr>
+    </table>
   `;
 
   const headerHTML = `
