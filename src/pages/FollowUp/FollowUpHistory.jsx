@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import DataTable from '../../components/DataTable';
-import { calculateDelay } from '../../utils/tatCalculator';
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
 const parseDateString = (str) => {
@@ -165,7 +164,7 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
 
   const tableHeaders = [
     { label: 'Order Number', className: 'font-bold' },
-    "Done Date", "Delay", "Status", "Remarks",
+    "Done Date", "Status", "Remarks",
     "Order Type",
     "Metal Issue Status", "Paid Weight", "Metal Issue Type",
     "Target Date",
@@ -184,9 +183,6 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap font-medium">
           {formatTimestamp(log.timestamp)}
-        </td>
-        <td className="px-4 py-3 text-center whitespace-nowrap">
-          {(() => { const d = calculateDelay(log.nextDate, log.timestamp); return <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${d.display === '-' ? 'bg-gray-100 text-gray-500 border-gray-200' : d.isDelayed ? 'bg-red-100 text-red-800 border-red-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200'}`}>{d.display}</span>; })()}
         </td>
         <td className="px-4 py-3 text-center text-xs whitespace-nowrap">
           <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${getFlwColor(log.status)}`}>
@@ -284,10 +280,6 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
           <div>
             <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Order Type</span>
             <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order?.orderType)}`}>{order?.orderType || '-'}</span>
-          </div>
-          <div>
-            <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Delay</span>
-            {(() => { const d = calculateDelay(log.nextDate, log.timestamp); return <span className={`font-bold ${d.isDelayed ? 'text-red-600' : d.display === '-' ? 'text-gray-400' : 'text-emerald-600'}`}>{d.display}</span>; })()}
           </div>
           <div>
             <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Remarks</span>
