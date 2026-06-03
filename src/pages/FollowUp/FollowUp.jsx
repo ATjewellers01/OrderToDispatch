@@ -361,7 +361,7 @@ const FollowUp = () => {
         )}
 
         {activeTab === 'history' && (
-          <FollowUpHistory historyLogs={historyLogs} filters={historyFilters} metalIssues={metalIssues} />
+          <FollowUpHistory historyLogs={historyLogs} filters={historyFilters} metalIssues={metalIssues} orders={orders} />
         )}
       </div>
 

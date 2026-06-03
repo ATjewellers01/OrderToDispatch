@@ -97,7 +97,7 @@ const getFlwColor = (status) => {
   }
 };
 
-const FollowUpHistory = ({ historyLogs, filters, metalIssues }) => {
+const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
@@ -113,6 +113,18 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues }) => {
     }
     return map;
   }, [metalIssues]);
+
+  // Build order map for Order Type lookup
+  const orderMap = useMemo(() => {
+    const map = new Map();
+    if (orders) {
+      orders.forEach(o => {
+        if (o.id) map.set(o.id, o);
+        if (o.orderNo) map.set(o.orderNo, o);
+      });
+    }
+    return map;
+  }, [orders]);
 
   // Apply filters
   const filteredLogs = useMemo(() => {
@@ -144,6 +156,7 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues }) => {
   const tableHeaders = [
     { label: 'Order Number', className: 'font-bold' },
     "Done Date", "Delay", "Status", "Remarks",
+    "Order Type",
     "Metal Issue Status", "Paid Weight", "Metal Issue Type",
     "Target Date",
     "Old Karigar Name", "Old Karigar Del. Date", "Old Exp. Del. Date",
@@ -152,6 +165,7 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues }) => {
 
   const renderRow = (log, idx) => {
     const issue = metalIssueMap.get(log.orderId) || metalIssueMap.get(log.orderNo);
+    const order = orderMap.get(log.orderId) || orderMap.get(log.orderNo);
     const isKarigarChange = log.status === 'Change Karigar And Dates';
     return (
       <tr key={log.id || idx} className="hover:bg-amber-50/30 transition-colors border-b border-gray-100 group">
@@ -171,6 +185,9 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues }) => {
         </td>
         <td className="px-4 py-3 text-left text-xs text-gray-700 whitespace-nowrap truncate max-w-[250px]" title={log.remarks}>
           {log.remarks || '-'}
+        </td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
+          {order?.orderType || '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">
           {issue ? (
@@ -252,6 +269,10 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues }) => {
           <div>
             <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Timestamp</span>
             <span className="text-gray-700 font-semibold">{formatTimestamp(log.timestamp)}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Order Type</span>
+            <span className="text-gray-700 font-semibold">{order?.orderType || '-'}</span>
           </div>
           <div>
             <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Delay</span>
