@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import SearchableDropdown from "../../components/SearchableDropdown";
 import { generateFilterOptions } from '../../utils/filterUtils';
 import DragScrollTable from "../../components/DragScrollTable";
+import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
 // ── Date Utility Helpers ───────────────────────────────────────────
 
@@ -1067,25 +1068,28 @@ const Dasboard = () => {
             </thead>
 
             <tbody className="divide-y divide-slate-100 bg-white">
-              {paginatedDeliveryData.map((row, idx) => (
-                <tr
-                  key={idx}
-                  className={`hover:bg-amber-50/20 transition-colors group ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/15"
-                    }`}
-                >
-                  {/* Sticky Order Number Column */}
-                  <td className={`px-4 py-2.5 text-xs font-black text-slate-900 sticky left-0 z-10 shadow-[1px_0_0_#e2e8f0] border-r border-slate-200/80 text-center whitespace-nowrap font-mono transition-colors group-hover:bg-amber-50 ${
-                    idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'
-                  }`}>
-                    {row.orderNo}
-                  </td>
+              {paginatedDeliveryData.map((row, idx) => {
+                const isUrgent = row.type?.trim().toLowerCase() === 'urgent order';
+                const isStock = row.type?.trim().toLowerCase() === 'stock order';
+                const rowClass = isUrgent ? 'order-row-urgent' : isStock ? 'order-row-stock' : (idx % 2 === 0 ? "bg-white" : "bg-slate-50/15");
+                return (
+                  <tr
+                    key={idx}
+                    className={`hover:bg-amber-50/20 transition-colors group ${rowClass}`}
+                  >
+                    {/* Sticky Order Number Column */}
+                    <td className={`px-4 py-2.5 text-xs font-black text-slate-900 sticky left-0 z-10 shadow-[1px_0_0_#e2e8f0] border-r border-slate-200/80 text-center whitespace-nowrap font-mono transition-colors group-hover:bg-amber-50 ${
+                      isUrgent ? '' : isStock ? '' : (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50')
+                    }`}>
+                      {row.orderNo}
+                    </td>
 
                   {/* Flat Separated Table Body Cells (No vertical border lines) */}
                   <td className={`px-4 py-2 text-xs font-black text-center font-mono whitespace-nowrap ${row.delay < 0 ? "text-rose-600" : "text-emerald-600"}`}>{row.delay} Days</td>
                   <td className={`px-4 py-2 text-xs font-black text-center font-mono whitespace-nowrap ${row.karigarDelay < 0 ? "text-rose-600" : "text-emerald-600"}`}>{row.karigarDelay} Days</td>
                   <td className="px-4 py-2 text-xs font-extrabold text-slate-700 text-center font-mono whitespace-nowrap">{row.expDelDate}</td>
                   <td className="px-4 py-2 text-center whitespace-nowrap">{renderStatusBadge(row.isLate)}</td>
-                  <td className="px-4 py-2 text-xs font-black text-slate-700 text-center uppercase whitespace-nowrap">{row.type}</td>
+                  <td className="px-4 py-2 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(row.type)}`}>{row.type || '-'}</span></td>
                   <td className="px-4 py-2 text-xs font-extrabold text-slate-500 text-center font-mono whitespace-nowrap">{row.stockInDate}</td>
                   <td className="px-4 py-2 text-xs font-black text-slate-800 text-center font-mono whitespace-nowrap">{row.stockDays}</td>
                   <td className="px-4 py-2 text-xs font-extrabold text-slate-650 text-center font-mono whitespace-nowrap">{row.prodTime}</td>
@@ -1120,7 +1124,8 @@ const Dasboard = () => {
                   <td className="px-4 py-2 text-xs font-extrabold text-slate-500 text-center font-mono whitespace-nowrap">{row.delDate}</td>
                   <td className="px-4 py-2 text-xs font-extrabold text-slate-500 text-center font-mono whitespace-nowrap">{row.kDate}</td>
                 </tr>
-              ))}
+              );
+              })}
 
               {paginatedDeliveryData.length === 0 && (
                 <tr>

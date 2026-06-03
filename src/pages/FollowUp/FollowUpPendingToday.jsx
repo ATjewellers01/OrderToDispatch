@@ -4,6 +4,8 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 import DataTable from '../../components/DataTable';
 import { formatTargetDate } from '../../utils/tatCalculator';
 
+import { getOrderTypeColor } from '../../utils/orderTypeUtils';
+
 const parseDateString = (str) => {
   if (!str) return null;
   let match = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -211,10 +213,16 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
   }, [statusMetrics]);
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-  const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedOrders = useMemo(() => {
+    const raw = filteredOrders.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+    return raw.map(item => ({
+      ...item,
+      orderType: item.order?.orderType
+    }));
+  }, [filteredOrders, currentPage, itemsPerPage]);
 
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
@@ -297,7 +305,7 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
           </span>
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-600 whitespace-nowrap">Active</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{o.orderType || '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(o.orderType)}`}>{o.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-left text-xs text-gray-500 whitespace-nowrap truncate max-w-[200px]" title={l?.remarks}>{l?.remarks || '-'}</td>
       </tr>
     );

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Edit } from 'lucide-react';
 import DataTable from '../../components/DataTable';
 import { calculateDelay } from '../../utils/tatCalculator';
+import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -122,10 +123,14 @@ const MetalIssueHistory = ({ ordersWithIssues, onEditClick }) => {
 
   const totalPages = Math.ceil(ordersWithIssues.length / itemsPerPage);
   const paginatedOrders = useMemo(() => {
-    return ordersWithIssues.slice(
+    const raw = ordersWithIssues.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     );
+    return raw.map(item => ({
+      ...item,
+      orderType: item.order?.orderType
+    }));
   }, [ordersWithIssues, currentPage, itemsPerPage]);
 
   const renderRow = (item, idx) => {
@@ -185,7 +190,7 @@ const MetalIssueHistory = ({ ordersWithIssues, onEditClick }) => {
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || '-'} g</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.orderType || '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate)}</td>

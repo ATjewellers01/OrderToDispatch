@@ -221,10 +221,6 @@ const FollowUpForm = ({ isOpen, onClose, onSave, order }) => {
       toast.error('Follow-up status is required');
       return;
     }
-    if (!formData.remarks.trim()) {
-      toast.error('Remarks are required');
-      return;
-    }
 
     // Conditional field validations
     if (['Not Started', 'Prakash', 'Management'].includes(formData.status) && !formData.nextDate) {
@@ -351,10 +347,9 @@ const FollowUpForm = ({ isOpen, onClose, onSave, order }) => {
           {/* Row 2: Remarks — full width */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Remarks <span className="text-red-500">*</span>
+              Remarks
             </label>
             <textarea
-              required
               name="remarks"
               value={formData.remarks}
               onChange={handleInputChange}

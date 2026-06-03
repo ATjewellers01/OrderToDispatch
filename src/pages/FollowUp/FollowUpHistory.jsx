@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import DataTable from '../../components/DataTable';
 import { calculateDelay } from '../../utils/tatCalculator';
+import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -148,10 +149,19 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
   }, [historyLogs, filters]);
 
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-  const paginatedLogs = filteredLogs.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedLogs = useMemo(() => {
+    const raw = filteredLogs.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+    return raw.map(log => {
+      const order = orderMap.get(log.orderId) || orderMap.get(log.orderNo);
+      return {
+        ...log,
+        orderType: order?.orderType
+      };
+    });
+  }, [filteredLogs, currentPage, itemsPerPage, orderMap]);
 
   const tableHeaders = [
     { label: 'Order Number', className: 'font-bold' },
@@ -187,7 +197,7 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
           {log.remarks || '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
-          {order?.orderType || '-'}
+          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order?.orderType)}`}>{order?.orderType || '-'}</span>
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">
           {issue ? (
@@ -257,6 +267,7 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
 
   const renderCard = (log, idx) => {
     const isKarigarChange = log.status === 'Change Karigar And Dates';
+    const order = orderMap.get(log.orderId) || orderMap.get(log.orderNo);
     return (
       <div key={log.id || idx} className="bg-white rounded-xl border border-amber-50 shadow-sm p-4 space-y-3 transition-all hover:shadow-md hover:border-amber-100">
         <div className="flex justify-between items-center pb-2 border-b border-slate-50">
@@ -272,7 +283,7 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
           </div>
           <div>
             <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Order Type</span>
-            <span className="text-gray-700 font-semibold">{order?.orderType || '-'}</span>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order?.orderType)}`}>{order?.orderType || '-'}</span>
           </div>
           <div>
             <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Delay</span>

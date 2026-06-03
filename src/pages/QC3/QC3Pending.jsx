@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { ClipboardCheck } from 'lucide-react';
 import DataTable from '../../components/DataTable';
 import { formatTargetDate } from '../../utils/tatCalculator';
+
+import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -168,7 +170,7 @@ const QC3Pending = ({ orders, onActionClick }) => {
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || order.categoryName || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-amber-600 font-semibold whitespace-nowrap">{order.metalIssueType || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || order.weight || '-'} {order.totalWeight ? 'g' : ''}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.orderType || '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || order.customerName || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.deliveryDate)}</td>

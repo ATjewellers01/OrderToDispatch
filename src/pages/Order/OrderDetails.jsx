@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Plus, Filter, Download, FileText, RotateCcw, Edit, Calendar, Eye } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -11,6 +11,7 @@ import ModalView from '../../components/ModalView';
 import { generateKarigarHTML, generateCustomerHTML } from './pdf/pdfGenerators';
 import { syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
 import { generateFilterOptions } from '../../utils/filterUtils';
+import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
 const toYYYYMMDD = (val) => {
   if (!val) return '';
@@ -312,7 +313,7 @@ const OrderDetails = () => {
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-800 whitespace-nowrap">{order.company || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.companyNumber || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.orderType || '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate)}</td>
