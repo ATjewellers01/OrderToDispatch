@@ -4,6 +4,7 @@ import { Search, ChevronDown, Check, Plus, Square, CheckSquare } from 'lucide-re
 /**
  * SearchableDropdown Component
  * A custom select component with built-in search functionality.
+ * Supports full keyboard accessibility (arrows, enter, escape, tab).
  * 
  * @param {Array} options - Array of { value, label } objects.
  * @param {any} value - Currently selected value.
@@ -25,7 +26,12 @@ const SearchableDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [openUp, setOpenUp] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+
   const dropdownRef = useRef(null);
+  const triggerRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const listRef = useRef(null);
 
   const allOptions = [{ value: '', label: placeholder }, ...options];
 
@@ -55,6 +61,35 @@ const SearchableDropdown = ({
     return value === optValue;
   };
 
+  const hasAddButton = !!onAdd;
+  const totalItemCount = filteredOptions.length + (hasAddButton ? 1 : 0);
+
+  // Focus search input when dropdown opens
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  // Sync focused index with search query changes or value
+  useEffect(() => {
+    if (isOpen) {
+      if (!isMulti && value) {
+        const idx = filteredOptions.findIndex(opt => opt.value === value);
+        setFocusedIndex(idx >= 0 ? idx : 0);
+      } else {
+        setFocusedIndex(0);
+      }
+    } else {
+      setFocusedIndex(-1);
+    }
+  }, [isOpen, searchTerm, value]);
+
   // Determine direction based on space
   useEffect(() => {
     if (isOpen && dropdownRef.current) {
@@ -68,6 +103,18 @@ const SearchableDropdown = ({
       }
     }
   }, [isOpen]);
+
+  // Scroll focused item into view
+  useEffect(() => {
+    if (isOpen && focusedIndex >= 0) {
+      if (focusedIndex < filteredOptions.length && listRef.current) {
+        const activeEl = listRef.current.children[focusedIndex];
+        if (activeEl) {
+          activeEl.scrollIntoView({ block: 'nearest' });
+        }
+      }
+    }
+  }, [focusedIndex, isOpen, filteredOptions.length]);
 
   // Close dropdown when clicking/touching outside
   useEffect(() => {
@@ -90,10 +137,104 @@ const SearchableDropdown = ({
     setIsOpen(!isOpen);
   };
 
+
+
+  const handleBlur = (e) => {
+    // If focus leaves the dropdown wrapper container, close the dropdown
+    if (dropdownRef.current && !dropdownRef.current.contains(e.relatedTarget)) {
+      setIsOpen(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        if (!isOpen) {
+          setIsOpen(true);
+        } else if (totalItemCount > 0) {
+          setFocusedIndex(prev => (prev + 1) % totalItemCount);
+        }
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (!isOpen) {
+          setIsOpen(true);
+        } else if (totalItemCount > 0) {
+          setFocusedIndex(prev => (prev - 1 + totalItemCount) % totalItemCount);
+        }
+        break;
+      case 'Enter':
+        if (isOpen) {
+          e.preventDefault();
+          if (focusedIndex >= 0 && focusedIndex < filteredOptions.length) {
+            const opt = filteredOptions[focusedIndex];
+            if (isMulti) {
+              if (opt.value === '') {
+                onChange([]);
+              } else {
+                const currentVal = Array.isArray(value) ? value : [];
+                if (currentVal.includes(opt.value)) {
+                  onChange(currentVal.filter(v => v !== opt.value));
+                } else {
+                  onChange([...currentVal, opt.value]);
+                }
+              }
+            } else {
+              onChange(opt.value);
+              setIsOpen(false);
+              setSearchTerm("");
+              if (triggerRef.current) triggerRef.current.focus();
+            }
+          } else if (focusedIndex === filteredOptions.length && onAdd) {
+            onAdd();
+            setIsOpen(false);
+            if (triggerRef.current) triggerRef.current.focus();
+          }
+        } else {
+          e.preventDefault();
+          setIsOpen(true);
+        }
+        break;
+      case ' ':
+      case 'Space':
+        // Only toggle if focus is not in the search input
+        if (document.activeElement !== searchInputRef.current) {
+          e.preventDefault();
+          setIsOpen(!isOpen);
+        }
+        break;
+      case 'Escape':
+        if (isOpen) {
+          e.preventDefault();
+          setIsOpen(false);
+          setSearchTerm("");
+          if (triggerRef.current) triggerRef.current.focus();
+        }
+        break;
+      case 'Tab':
+        if (isOpen) {
+          if (triggerRef.current) {
+            triggerRef.current.focus();
+          }
+          setIsOpen(false);
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
-      {/* Selection Trigger - Using a real button for iPhone compatibility */}
+    <div 
+      className={`relative ${className}`} 
+      ref={dropdownRef}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+    >
+      {/* Selection Trigger */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={handleToggle}
         className={`w-full bg-gray-50 border border-gray-200 ${rounded} px-2 py-1 flex justify-between items-center cursor-pointer hover:border-amber-500 ${height} shadow-sm group outline-none focus:ring-2 focus:ring-amber-500/20`}
@@ -115,7 +256,7 @@ const SearchableDropdown = ({
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-[7px] text-gray-400" size={10} />
               <input
-                autoFocus
+                ref={searchInputRef}
                 type="text"
                 placeholder="Filter..."
                 value={searchTerm}
@@ -127,11 +268,12 @@ const SearchableDropdown = ({
           </div>
 
           {/* Options List */}
-          <div className="max-h-52 overflow-y-auto py-1 scrollbar-hide">
+          <div className="max-h-52 overflow-y-auto py-1 scrollbar-hide" ref={listRef}>
             {filteredOptions.length > 0 ? (
-              filteredOptions.map((opt) => (
+              filteredOptions.map((opt, idx) => (
                 <div
                   key={opt.value}
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (isMulti) {
@@ -151,10 +293,13 @@ const SearchableDropdown = ({
                       setSearchTerm("");
                     }
                   }}
-                  className={`px-3 py-1.5 text-xs cursor-pointer flex justify-between items-center hover:bg-slate-50 transition-colors group ${isSelected(opt.value)
-                      ? 'bg-slate-50/50'
-                      : ''
-                    }`}
+                  className={`px-3 py-1.5 text-xs cursor-pointer flex justify-between items-center transition-colors group ${
+                    isSelected(opt.value) ? 'bg-slate-50/50' : ''
+                  } ${
+                    focusedIndex === idx 
+                      ? 'bg-amber-100 text-amber-900 font-bold' 
+                      : 'hover:bg-slate-50'
+                  }`}
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     {isMulti ? (
@@ -184,7 +329,7 @@ const SearchableDropdown = ({
             )}
           </div>
 
-          {/* Always visible Add New at the bottom - Satisfies "every add button show in down" */}
+          {/* Always visible Add New at the bottom */}
           {onAdd && (
             <button
               type="button"
@@ -200,7 +345,11 @@ const SearchableDropdown = ({
                 onAdd();
                 setIsOpen(false);
               }}
-              className="w-full border-t border-gray-100 px-3 py-2 text-amber-600 hover:bg-amber-50 transition-all flex items-center justify-center gap-2 bg-white active:bg-amber-100"
+              className={`w-full border-t border-gray-100 px-3 py-2 text-amber-600 transition-all flex items-center justify-center gap-2 bg-white active:bg-amber-100 ${
+                focusedIndex === filteredOptions.length 
+                  ? 'bg-amber-100 font-bold' 
+                  : 'hover:bg-amber-50'
+              }`}
             >
               <Plus size={14} strokeWidth={3} />
               <span className="text-[10px] font-black uppercase tracking-widest">Add New</span>

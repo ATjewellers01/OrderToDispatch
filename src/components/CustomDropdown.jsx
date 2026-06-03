@@ -4,6 +4,7 @@ import { ChevronDown, Check, Plus } from 'lucide-react';
 /**
  * CustomDropdown Component
  * A custom select component without search functionality.
+ * Supports full keyboard accessibility (arrows, enter, escape, tab).
  * 
  * @param {Array} options - Array of { value, label } objects.
  * @param {any} value - Currently selected value.
@@ -24,12 +25,27 @@ const CustomDropdown = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [openUp, setOpenUp] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  
   const dropdownRef = useRef(null);
+  const triggerRef = useRef(null);
+  const listRef = useRef(null);
 
   const allOptions = [{ value: '', label: placeholder }, ...options];
-
-  // Find the label for the current value
   const selectedOption = allOptions.find(opt => opt.value === value);
+
+  const hasAddButton = !!onAdd;
+  const totalItemCount = allOptions.length + (hasAddButton ? 1 : 0);
+
+  // Initialize/reset focusedIndex when dropdown opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      const idx = allOptions.findIndex(opt => opt.value === value);
+      setFocusedIndex(idx >= 0 ? idx : 0);
+    } else {
+      setFocusedIndex(-1);
+    }
+  }, [isOpen, value]);
 
   // Determine direction based on space
   useEffect(() => {
@@ -44,6 +60,18 @@ const CustomDropdown = ({
       }
     }
   }, [isOpen]);
+
+  // Scroll focused item into view
+  useEffect(() => {
+    if (isOpen && focusedIndex >= 0) {
+      if (focusedIndex < allOptions.length && listRef.current) {
+        const activeEl = listRef.current.children[focusedIndex];
+        if (activeEl) {
+          activeEl.scrollIntoView({ block: 'nearest' });
+        }
+      }
+    }
+  }, [focusedIndex, isOpen, allOptions.length]);
 
   // Close dropdown when clicking/touching outside
   useEffect(() => {
@@ -68,10 +96,79 @@ const CustomDropdown = ({
     }
   };
 
+
+
+  const handleBlur = (e) => {
+    // If focus leaves the dropdown wrapper container, close the dropdown
+    if (dropdownRef.current && !dropdownRef.current.contains(e.relatedTarget)) {
+      setIsOpen(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (disabled) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        if (!isOpen) {
+          setIsOpen(true);
+        } else {
+          setFocusedIndex(prev => (prev + 1) % totalItemCount);
+        }
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (!isOpen) {
+          setIsOpen(true);
+        } else {
+          setFocusedIndex(prev => (prev - 1 + totalItemCount) % totalItemCount);
+        }
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (isOpen) {
+          if (focusedIndex >= 0 && focusedIndex < allOptions.length) {
+            onChange(allOptions[focusedIndex].value);
+            setIsOpen(false);
+            if (triggerRef.current) triggerRef.current.focus();
+          } else if (focusedIndex === allOptions.length && onAdd) {
+            onAdd();
+            setIsOpen(false);
+            if (triggerRef.current) triggerRef.current.focus();
+          }
+        } else {
+          setIsOpen(true);
+        }
+        break;
+      case 'Escape':
+        if (isOpen) {
+          e.preventDefault();
+          setIsOpen(false);
+          if (triggerRef.current) triggerRef.current.focus();
+        }
+        break;
+      case 'Tab':
+        if (isOpen) {
+          setIsOpen(false);
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <div 
+      className={`relative ${className}`} 
+      ref={dropdownRef}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+    >
       {/* Selection Trigger */}
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         onClick={handleToggle}
@@ -91,20 +188,26 @@ const CustomDropdown = ({
         <div className={`absolute left-0 right-0 ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'} bg-white border border-gray-200 rounded shadow-2xl z-[150] overflow-hidden min-w-[180px]`}>
           
           {/* Options List */}
-          <div className="max-h-40 overflow-y-auto py-1 scrollbar-hide">
+          <div className="max-h-40 overflow-y-auto py-1 scrollbar-hide" ref={listRef}>
             {allOptions.length > 0 ? (
-              allOptions.map((opt) => (
+              allOptions.map((opt, idx) => (
                 <div
                   key={opt.value}
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={(e) => {
                     e.stopPropagation();
                     onChange(opt.value);
                     setIsOpen(false);
                   }}
-                  className={`px-3 py-1.5 text-xs cursor-pointer flex justify-between items-center hover:bg-amber-50 transition-colors group ${value === opt.value
+                  className={`px-3 py-1.5 text-xs cursor-pointer flex justify-between items-center transition-colors group ${
+                    value === opt.value
                       ? 'bg-amber-50/50 text-amber-700 font-semibold'
                       : 'text-gray-700'
-                    }`}
+                  } ${
+                    focusedIndex === idx 
+                      ? 'bg-amber-100 text-amber-900 font-bold' 
+                      : 'hover:bg-amber-50'
+                  }`}
                 >
                   <span className="truncate">{opt.label}</span>
                   {value === opt.value && (
@@ -135,7 +238,11 @@ const CustomDropdown = ({
                 onAdd();
                 setIsOpen(false);
               }}
-              className="w-full border-t border-gray-100 px-3 py-2 text-amber-600 hover:bg-amber-50 transition-all flex items-center justify-center gap-2 bg-white active:bg-amber-100"
+              className={`w-full border-t border-gray-100 px-3 py-2 text-amber-600 transition-all flex items-center justify-center gap-2 bg-white active:bg-amber-100 ${
+                focusedIndex === allOptions.length 
+                  ? 'bg-amber-100 font-bold' 
+                  : 'hover:bg-amber-50'
+              }`}
             >
               <Plus size={14} strokeWidth={3} />
               <span className="text-[10px] font-black uppercase tracking-widest">Add New</span>

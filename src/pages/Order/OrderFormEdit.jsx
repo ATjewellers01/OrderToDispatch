@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Upload, Calendar } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ModalForm from '../../components/ModalForm';
 import CustomDropdown from '../../components/CustomDropdown';
 import SearchableDropdown from '../../components/SearchableDropdown';
+import DateInput from '../../components/DateInput';
 import { useKarigarOptions } from '../../hooks/useKarigarOptions';
 import { SEEDED_CATEGORIES } from '../Master/Category';
 
@@ -87,122 +88,7 @@ const compressImage = (base64Str, maxWidth = 800, maxHeight = 800, quality = 0.7
   });
 };
 
-const DateInput = ({ label, name, value, onChange, required }) => {
-  const dateInputRef = React.useRef(null);
-  const [isTouch, setIsTouch] = useState(false);
 
-  useEffect(() => {
-    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
-
-  const toYYYYMMDD = (val) => {
-    if (!val) return '';
-    const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (match) return `${match[3]}-${match[2]}-${match[1]}`;
-    return val;
-  };
-
-  const toDDMMYYYY = (val) => {
-    if (!val) return '';
-    const match = val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (match) return `${match[3]}/${match[2]}/${match[1]}`;
-    return val;
-  };
-
-  const handleDateChange = (e) => {
-    const rawValue = e.target.value;
-    if (!rawValue) return;
-    const formatted = toDDMMYYYY(rawValue);
-    onChange({ target: { name, value: formatted } });
-  };
-
-  const handleTextChange = (e) => {
-    let val = e.target.value;
-    onChange({ target: { name, value: val } });
-  };
-
-  const openDatePicker = () => {
-    if (dateInputRef.current) {
-      if (typeof dateInputRef.current.showPicker === 'function') {
-        try {
-          dateInputRef.current.showPicker();
-        } catch (e) {
-          dateInputRef.current.click();
-        }
-      } else {
-        dateInputRef.current.click();
-      }
-    }
-  };
-
-  return (
-    <div>
-      <label className="block text-xs font-semibold text-gray-700 mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {isTouch ? (
-        <div className="relative flex items-center">
-          {/* Visible Text Input - ALWAYS displays DD/MM/YYYY */}
-          <input
-            readOnly
-            required={required}
-            type="text"
-            placeholder="DD/MM/YYYY"
-            value={value || ''}
-            className="w-full p-2 pr-10 bg-gray-50 border border-gray-200 rounded-lg outline-none text-xs cursor-pointer"
-          />
-          
-          {/* Calendar Icon Button */}
-          <div className="absolute right-2.5 text-gray-400 pointer-events-none">
-            <Calendar size={14} />
-          </div>
-
-          {/* Overlaid Native Date Input */}
-          <input
-            required={required}
-            type="date"
-            value={toYYYYMMDD(value)}
-            onChange={handleDateChange}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
-        </div>
-      ) : (
-        <div className="relative flex items-center cursor-pointer" onClick={openDatePicker}>
-          {/* Visible Text Input - ALWAYS displays DD/MM/YYYY */}
-          <input
-            required={required}
-            type="text"
-            name={name}
-            placeholder="DD/MM/YYYY"
-            value={value || ''}
-            onChange={handleTextChange}
-            className="w-full p-2 pr-10 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs"
-          />
-          
-          {/* Calendar Icon Button */}
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); openDatePicker(); }}
-            className="absolute right-2.5 text-gray-400 hover:text-amber-500 transition-colors"
-            title="Choose Date"
-          >
-            <Calendar size={14} />
-          </button>
-
-          {/* Hidden Native Date Input */}
-          <input
-            ref={dateInputRef}
-            type="date"
-            value={toYYYYMMDD(value)}
-            onChange={handleDateChange}
-            onClick={(e) => e.stopPropagation()}
-            className="absolute w-0 h-0 opacity-0 pointer-events-none"
-          />
-        </div>
-      )}
-    </div>
-  );
-};
 
 const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
   const initialFormState = {

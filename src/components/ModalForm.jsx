@@ -25,6 +25,25 @@ const ModalForm = ({
 }) => {
   if (!isOpen) return null;
 
+  const formRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (formRef.current) {
+      const focusable = formRef.current.querySelectorAll(
+        'input:not([disabled]), button:not([disabled]), [tabindex="0"]:not([disabled])'
+      );
+      const firstField = Array.from(focusable).find(el => {
+        return true;
+      });
+      if (firstField) {
+        const timer = setTimeout(() => {
+          firstField.focus();
+        }, 150);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
+
   return (
     <div className={`fixed inset-0 lg:left-56 2xl:left-60 bg-black/60 backdrop-blur-[1px] flex items-center justify-center ${zIndex} p-3 md:p-4 animate-in fade-in duration-200`}>
       <style dangerouslySetInnerHTML={{
@@ -47,7 +66,7 @@ const ModalForm = ({
       `}} />
       <div
         className={`bg-white rounded-xl shadow-2xl w-full ${maxWidth} flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200 responsive-modal-height`}
-        style={{ maxHeight }}
+        style={{ scale: 1, maxHeight }}
       >
         {/* Ultra-Compact Header - No Cross Icon */}
         <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-center bg-white flex-shrink-0 z-20">
@@ -64,7 +83,7 @@ const ModalForm = ({
         >
 
           <div className="px-3 py-2 md:px-4 md:py-3 modal-scrollbar">
-            <form id="ultra-compact-form" onSubmit={onSubmit} autoComplete="off" className="space-y-1.5 md:space-y-2 text-left">
+            <form ref={formRef} id="ultra-compact-form" onSubmit={onSubmit} autoComplete="off" className="space-y-1.5 md:space-y-2 text-left">
               {children}
             </form>
           </div>
