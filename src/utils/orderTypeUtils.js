@@ -3,8 +3,8 @@
 //  Used across all Pending and History pages in the system.
 //
 //  Order Types & Color Map:
-//    Customer Order  →  Blue   (trusted, regular client work)
-//    Stock Order     →  Amber  (internal stock replenishment)
+//    Customer Order  →  White  (trusted, regular client work)
+//    Stock Order     →  Blue   (internal stock replenishment)
 //    Urgent Order    →  Red    (high priority, needs fast turnaround)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -16,9 +16,9 @@
 export const getOrderTypeColor = (orderType) => {
   switch (orderType?.trim()) {
     case 'Customer Order':
-      return 'bg-blue-100 text-blue-800 border-blue-300';
+      return 'bg-white text-slate-800 border-slate-300';
     case 'Stock Order':
-      return 'bg-amber-100 text-amber-800 border-amber-300';
+      return 'bg-blue-100 text-blue-800 border-blue-300';
     case 'Urgent Order':
       return 'bg-red-100 text-red-800 border-red-300';
     default:

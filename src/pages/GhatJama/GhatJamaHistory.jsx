@@ -1,7 +1,7 @@
 ﻿import React, { useState, useMemo } from 'react';
 import { Edit } from 'lucide-react';
 import DataTable from '../../components/DataTable';
-import { calculateDelay } from '../../utils/tatCalculator';
+import { calculateDelay, formatTargetDate } from '../../utils/tatCalculator';
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
 const parseDateString = (str) => {
@@ -89,8 +89,7 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
     "Target Date",
     "Done Date",
     "Delay",
-    "Est Days",
-    "Status",
+    "LEFT Days",
     "Karigar Name",
     "Melting",
     "Product",
@@ -142,7 +141,7 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
           {order.ghatJamaRemarks || '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
-          {formatDateTime(order.plannedDates?.['Ghat Jama'])}
+          {formatTargetDate(order.plannedDates?.['Ghat Jama'], 'Ghat Jama')}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
           {formatDateTime(order.ghatJamaTimestamp)}
@@ -153,11 +152,6 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
         <td className="px-4 py-3 text-center whitespace-nowrap font-medium text-xs">
           <span className={`px-2.5 py-1 rounded-full font-bold border ${leftDays < 0 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>
             {leftDays} Days
-          </span>
-        </td>
-        <td className="px-4 py-3 text-center whitespace-nowrap">
-          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getStageColor(order.orderStage)}`}>
-            {order.orderStage || 'New'}
           </span>
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || '-'}</td>
@@ -196,7 +190,7 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
             <span className="text-gray-700 font-semibold">{order.karigar || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Est Days</span>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">LEFT Days</span>
             <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
           </div>
           <div>

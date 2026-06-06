@@ -9,6 +9,7 @@ import MetalIssueForm from './MetalIssueForm';
 import MetalIssueEdit from './MetalIssueEdit';
 import { TabSwitcher } from '../../components/StandardButtons';
 import { syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
+import { SEEDED_KARIGARS } from '../Master/masterdata';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -84,6 +85,32 @@ const MetalIssue = () => {
     }
   }, []);
 
+  const [karigars, setKarigars] = useState(() => {
+    try {
+      const saved = localStorage.getItem('master_karigars');
+      return saved ? JSON.parse(saved) : SEEDED_KARIGARS;
+    } catch {
+      return SEEDED_KARIGARS;
+    }
+  });
+
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        const saved = localStorage.getItem('master_karigars');
+        if (saved) setKarigars(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, []);
+
+  const officeKarigars = useMemo(() => {
+    return new Set(karigars.filter(k => k.type === 'Office').map(k => k.name));
+  }, [karigars]);
+
   const handleSaveMetalIssue = (newIssue) => {
     const updated = [newIssue, ...metalIssues];
     setMetalIssues(updated);
@@ -155,13 +182,22 @@ const MetalIssue = () => {
 
   const basePendingOrders = useMemo(() => {
     const issuedIds = new Set(metalIssues.map(issue => issue.orderId));
-    return orders.filter(o => !issuedIds.has(o.id));
-  }, [orders, metalIssues]);
+    return orders.filter(o => 
+      !issuedIds.has(o.id) && 
+      o.orderStage?.toLowerCase() === 'in process' &&
+      o.karigar && 
+      officeKarigars.has(o.karigar)
+    );
+  }, [orders, metalIssues, officeKarigars]);
 
   const baseHistoryOrders = useMemo(() => {
     const issuedIds = new Set(metalIssues.map(issue => issue.orderId));
-    return orders.filter(o => issuedIds.has(o.id));
-  }, [orders, metalIssues]);
+    return orders.filter(o => 
+      issuedIds.has(o.id) && 
+      o.karigar && 
+      officeKarigars.has(o.karigar)
+    );
+  }, [orders, metalIssues, officeKarigars]);
 
   const activeBaseOrders = activeTab === 'pending' ? basePendingOrders : baseHistoryOrders;
 
@@ -190,18 +226,23 @@ const MetalIssue = () => {
   // Split orders based on issue status
   const pendingOrders = useMemo(() => {
     const issuedIds = new Set(metalIssues.map(issue => issue.orderId));
-    return filteredOrdersBase.filter(o => !issuedIds.has(o.id));
-  }, [filteredOrdersBase, metalIssues]);
+    return filteredOrdersBase.filter(o => 
+      !issuedIds.has(o.id) && 
+      o.orderStage?.toLowerCase() === 'in process' &&
+      o.karigar && 
+      officeKarigars.has(o.karigar)
+    );
+  }, [filteredOrdersBase, metalIssues, officeKarigars]);
 
   const historyOrdersWithIssues = useMemo(() => {
     const issueMap = new Map(metalIssues.map(issue => [issue.orderId, issue]));
     return filteredOrdersBase
-      .filter(o => issueMap.has(o.id))
+      .filter(o => issueMap.has(o.id) && o.karigar && officeKarigars.has(o.karigar))
       .map(o => ({
         order: o,
         issue: issueMap.get(o.id)
       }));
-  }, [filteredOrdersBase, metalIssues]);
+  }, [filteredOrdersBase, metalIssues, officeKarigars]);
 
   return (
     <div className="p-0 sm:p-2 md:p-6 space-y-2 md:space-y-6 flex flex-col h-full min-h-0">

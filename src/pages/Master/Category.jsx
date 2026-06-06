@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Plus, Search, RotateCcw, Layers, Trash2, Edit2 } from 'lucide-react';
 import DataTable from '../../components/DataTable';
@@ -115,7 +115,19 @@ export default function Category({
   const persist = (data) => {
     setCategories(data);
     localStorage.setItem('master_categories', JSON.stringify(data));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'master_categories', newValue: JSON.stringify(data) }));
   };
+
+  // Sync when another instance persists
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'master_categories' && e.newValue) {
+        try { setCategories(JSON.parse(e.newValue)); } catch {}
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const handleAdd = (e) => {
     e.preventDefault();

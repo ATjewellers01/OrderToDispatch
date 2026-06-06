@@ -90,65 +90,48 @@ const generateBaseHTML = (order, type) => {
 
   const logoHTML = '';
 
-  const customerHeader = `
-    <table style="width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #374151; font-weight: bold; margin: 0; padding: 0; line-height: 1.0;">
-      <tr>
-        <td style="padding: 0; text-align: left; width: 50%; line-height: 1.0;"><strong>Customer:</strong> ${order.company || '-'}</td>
-        <td style="padding: 0; text-align: right; width: 50%; line-height: 1.0;"><strong>Mobile:</strong> ${order.companyNumber || '-'}</td>
-      </tr>
-      <tr>
-        <td style="padding: 0; text-align: left; width: 50%; line-height: 1.0;"><strong>City:</strong> ${order.deliveryLocation || '-'}</td>
-        <td style="padding: 0; text-align: right; width: 50%; line-height: 1.0;"><strong>Delivery Location:</strong> ${order.deliveryLocation || '-'}</td>
-      </tr>
-    </table>
-  `;
+  const lbl = (t) => `<td style="width:90px;font-size:8px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:1px 6px 1px 0;white-space:nowrap;">${t}</td>`;
+  const val = (t) => `<td style="font-size:11px;color:#111827;font-weight:700;padding:1px 0;">${t || '-'}</td>`;
 
-  const karigarHeader = `
-    <table style="width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #374151; font-weight: bold; margin: 0; padding: 0; line-height: 1.0;">
-      <tr>
-        <td style="padding: 0; text-align: left; width: 50%; line-height: 1.0;"><strong>Karigar Name:</strong> ${order.karigar || '-'}</td>
-        <td style="padding: 0; text-align: right; width: 50%; line-height: 1.0;"><strong>City:</strong> Raipur</td>
-      </tr>
-    </table>
-  `;
+  const customerRows = `<table style="border-collapse:collapse;width:100%;">
+    <tr>${lbl('Customer')}${val(order.company)}</tr>
+    <tr>${lbl('Mobile')}${val(order.companyNumber)}</tr>
+    <tr>${lbl('City')}${val(order.deliveryLocation)}</tr>
+    <tr>${lbl('Delivery')}${val(order.deliveryLocation)}</tr>
+  </table>`;
+
+  const karigarRows = `<table style="border-collapse:collapse;width:100%;">
+    <tr>${lbl('Karigar Name')}${val(order.karigar)}</tr>
+    <tr>${lbl('City')}${val('Raipur')}</tr>
+  </table>`;
+
+  const infoSection = `
+    <div style="display:flex;align-items:stretch;gap:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+      <div style="width:150px;flex-shrink:0;padding:4px 14px 4px 0;border-right:2px solid #e5e7eb;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:8px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:3px;">Order No.</div>
+        <div style="font-size:24px;font-weight:900;color:#111827;letter-spacing:0.5px;line-height:1;">${order.orderNo || '-'}</div>
+      </div>
+      <div style="flex:1;padding:4px 0 4px 14px;">
+        ${isCustomer ? customerRows : karigarRows}
+      </div>
+    </div>`;
 
   const headerHTML = `
-    <div style="padding: 0 0 2px 0; border-bottom: 2px solid #111827; margin-bottom: 8px; position: relative; z-index: 10;">
-      <!-- Row 1: Logo (Left), Title & Order No (Center), Address Details (Right) -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; gap: 15px;">
-        <!-- Left: Logo -->
-        <div style="text-align: left; flex-shrink: 0; width: 140px;">
-          <img src="${pdfLogo}" style="height: 60px; max-width: 140px; display: block; object-fit: contain;" />
-        </div>
-        
-        <!-- Center: Title and Order Number -->
-        <div style="text-align: center; flex: 1;">
-          <h2 style="margin: 0; font-size: 20px; color: #111827; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: bold; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.1;">
-            ${isCustomer ? 'CUSTOMER REPORT' : 'KARIGAR REPORT'}
-          </h2>
-          <div style="font-size: 12px; font-weight: bold; color: #4b5563; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin-top: 1px;">
-            Order No: ${order.orderNo || '-'}
-          </div>
-        </div>
-        
-        <!-- Right: Address Details -->
-        <div style="text-align: right; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10px; color: #4b5563; line-height: 1.5; flex-shrink: 0; width: 220px; font-weight: bold;">
-          <div style="margin-top: 2px; color: #9ca3af; font-size: 9px; font-weight: bold;">Printed: ${formatTimestamp(new Date())}</div>
-        </div>
+    <div style="padding:0;border-bottom:2px solid #111827;margin-bottom:6px;position:relative;z-index:10;">
+      <div style="text-align:center;padding:5px 0 4px 0;">
+        <img src="${pdfLogo}" style="height:90px;max-width:220px;display:inline-block;object-fit:contain;" />
       </div>
-      
-      <!-- Row 2: Customer / Karigar Information -->
-      <div style="border-top: 1px solid #e5e7eb; padding-top: 2px;">
-        ${isCustomer ? customerHeader : karigarHeader}
+      <div style="border-top:1px solid #e5e7eb;padding:4px 0;">
+        ${infoSection}
       </div>
     </div>
   `;
 
-  const thStyle = 'border: 1px solid #e5e7eb; padding: 12px; background-color: #f9fafb; color: #4b5563; font-weight: bold; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px;';
-  const tdStyle = 'border: 1px solid #e5e7eb; padding: 12px; font-weight: normal; color: #111827; font-size: 12px;';
+  const thStyle = 'border: 1px solid #e5e7eb; padding: 6px 8px; background-color: #f9fafb; color: #4b5563; font-weight: bold; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;';
+  const tdStyle = 'border: 1px solid #e5e7eb; padding: 6px 8px; font-weight: normal; color: #111827; font-size: 11px;';
 
   const tableHTML = `
-    <div style="position: relative; z-index: 10; margin-bottom: 25px;">
+    <div style="position: relative; z-index: 10; margin-bottom: 10px;">
       <table style="width: 100%; border-collapse: collapse; text-align: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
         <tr>
           <td style="${thStyle}">Order Date</td>
@@ -193,16 +176,16 @@ const generateBaseHTML = (order, type) => {
   `;
 
   const specsHTML = `
-    <div style="position: relative; z-index: 10; margin-bottom: 25px;">
+    <div style="position: relative; z-index: 10; margin-bottom: 10px;">
       <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
         <tr>
           <td style="${thStyle} width: 60%;">Product Specifications</td>
           <td style="${thStyle} width: 40%;">General Specifications</td>
         </tr>
         <tr>
-          <td style="${tdStyle} padding: 16px; vertical-align: top;">
-            <div style="line-height: 2;">
-              <div style="display: flex; margin-bottom: 4px;">
+          <td style="${tdStyle} padding: 8px; vertical-align: top;">
+            <div style="line-height: 1.6;">
+              <div style="display: flex; margin-bottom: 2px;">
                 <span style="color: #9ca3af; width: 120px; font-size: 11px; text-transform: uppercase;">Order Stage</span> 
                 <span style="font-weight: 500;">${order.orderStage || 'in_process'}</span>
               </div>
@@ -249,11 +232,7 @@ const generateBaseHTML = (order, type) => {
     </div>
   `;
 
-  const footerHTML = `
-    <div style="position: absolute; bottom: 40px; left: 40px; right: 40px; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 20px; font-size: 9px; color: #9ca3af; letter-spacing: 1.5px; text-transform: uppercase;">
-      Generated by AT Jewel Factory &copy; ${new Date().getFullYear()} &nbsp;|&nbsp; Official Document
-    </div>
-  `;
+  const footerHTML = ``;
 
   const pagesHTML = [];
 
@@ -333,25 +312,13 @@ const generateBaseHTML = (order, type) => {
 
       const subHeaderHTML = `
         <div style="padding: 0 0 15px 0; border-bottom: 2px solid #111827; margin-bottom: 25px; position: relative; z-index: 10;">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-            <!-- Left: Logo -->
-            <div style="text-align: left; flex-shrink: 0; width: 140px;">
-              <img src="${pdfLogo}" style="height: 75px; max-width: 140px; display: block; object-fit: contain;" />
+          <div style="text-align: center; margin-bottom: 4px;">
+            <img src="${pdfLogo}" style="height: 60px; max-width: 160px; display: inline-block; object-fit: contain;" />
+            <div style="margin-top: 4px; font-size: 22px; font-weight: 900; color: #111827; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; letter-spacing: 1px;">
+              ${order.orderNo || '-'}
             </div>
-            
-            <!-- Center: Title and Order Number -->
-            <div style="text-align: center; flex: 1;">
-              <h2 style="margin: 0; font-size: 20px; color: #111827; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: bold; text-transform: uppercase; letter-spacing: -0.5px; line-height: 1.2;">
-                ${isCustomer ? 'CUSTOMER REPORT' : 'KARIGAR REPORT'}
-              </h2>
-              <div style="font-size: 12px; font-weight: bold; color: #4b5563; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin-top: 5px;">
-                Order No: ${order.orderNo || '-'} &nbsp;|&nbsp; Additional Images (Page ${pageNum})
-              </div>
-            </div>
-            
-            <!-- Right: Address Details -->
-            <div style="text-align: right; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 10px; color: #4b5563; line-height: 1.5; flex-shrink: 0; width: 220px; font-weight: bold;">
-              <div style="margin-top: 2px; color: #9ca3af; font-size: 9px; font-weight: bold;">Printed: ${formatTimestamp(new Date())}</div>
+            <div style="font-size: 11px; color: #6b7280; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin-top: 2px;">
+              Additional Images (Page ${pageNum})
             </div>
           </div>
         </div>

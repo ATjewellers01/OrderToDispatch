@@ -186,14 +186,93 @@ export const calculateDelay = (targetDateISO, doneDateISO) => {
   }
 };
 
-export const formatTargetDate = (dateStr) => {
+const getStageFromPath = (path) => {
+  if (!path) return '';
+  const p = path.toLowerCase();
+  if (p.includes('/metal-issue')) return 'Metal Issue';
+  if (p.includes('/follow-up')) return 'Follow Up';
+  if (p.includes('/qc1')) return 'QC1';
+  if (p.includes('/ghat-jama')) return 'Ghat Jama';
+  if (p.includes('/meena-inhouse')) return 'Meena Inhouse';
+  if (p.includes('/meena-outside')) return 'Meena Outside';
+  if (p.includes('/polish-inhouse')) return 'Polish Inhouse';
+  if (p.includes('/polish-outside')) return 'Polish Outside';
+  if (p.includes('/bangle-polish')) return 'Bangle Polish';
+  if (p.includes('/e-polish')) return 'E-Polish';
+  if (p.includes('/qc2')) return 'QC2';
+  if (p.includes('/dispatch')) return 'Dispatch';
+  if (p.includes('/receipt')) return 'RD (Receipt Department)';
+  if (p.includes('/qc3')) return 'QC3';
+  if (p.includes('/huid-label')) return 'HUID/Label';
+  if (p.includes('/receive-in-stock')) return 'Receive In Stock';
+  if (p.includes('/delivery')) return 'Delivery';
+  return '';
+};
+
+const getTatTypeForStage = (stageName) => {
+  if (!stageName) return 'day';
+  try {
+    const savedTats = localStorage.getItem('tatSetupDataV3');
+    const tats = savedTats ? JSON.parse(savedTats) : [
+      { id: 'tat-1', stageName: 'Order', value: 1, type: 'day' },
+      { id: 'tat-2', stageName: 'Metal Issue', value: 2, type: 'day' },
+      { id: 'tat-3', stageName: 'Follow Up', value: 2, type: 'day' },
+      { id: 'tat-4', stageName: 'QC1', value: 1, type: 'day' },
+      { id: 'tat-5', stageName: 'Ghat Jama', value: 1, type: 'day' },
+      { id: 'tat-6', stageName: 'Meena Inhouse', value: 1, type: 'day' },
+      { id: 'tat-7', stageName: 'Meena Outside', value: 2, type: 'day' },
+      { id: 'tat-8', stageName: 'Polish Inhouse', value: 1, type: 'day' },
+      { id: 'tat-9', stageName: 'Polish Outside', value: 2, type: 'day' },
+      { id: 'tat-10', stageName: 'Bangle Polish', value: 1, type: 'day' },
+      { id: 'tat-11', stageName: 'E-Polish', value: 1, type: 'day' },
+      { id: 'tat-12', stageName: 'QC2', value: 1, type: 'day' },
+      { id: 'tat-13', stageName: 'Dispatch', value: 1, type: 'day' },
+      { id: 'tat-14', stageName: 'RD (Receipt Department)', value: 1, type: 'day' },
+      { id: 'tat-15', stageName: 'QC3', value: 1, type: 'day' },
+      { id: 'tat-16', stageName: 'HUID/Label', value: 1, type: 'day' },
+      { id: 'tat-17', stageName: 'Receive In Stock', value: 1, type: 'day' },
+      { id: 'tat-18', stageName: 'Delivery', value: 1, type: 'day' }
+    ];
+    
+    const normStageName = (name) => {
+      let n = name?.toLowerCase().replace(/[\s\-_/]/g, '') || '';
+      if (n === 'label') return 'huidlabel';
+      if (n === 'receiveinstock') return 'receiveinstock';
+      if (n === 'rd') return 'rdreceiptdepartment';
+      if (n === 'receipt') return 'rdreceiptdepartment';
+      return n;
+    };
+    
+    const searchName = normStageName(stageName);
+    const tat = tats.find(t => normStageName(t.stageName) === searchName);
+    return tat ? tat.type : 'day';
+  } catch {
+    return 'day';
+  }
+};
+
+export const formatTargetDate = (dateStr, stageName) => {
   if (!dateStr) return '-';
   const parsed = new Date(dateStr);
   if (isNaN(parsed.getTime())) return dateStr;
+
   const dd = String(parsed.getDate()).padStart(2, '0');
   const mm = String(parsed.getMonth() + 1).padStart(2, '0');
   const yyyy = parsed.getFullYear();
-  const hrs = String(parsed.getHours()).padStart(2, '0');
-  const mins = String(parsed.getMinutes()).padStart(2, '0');
-  return `${dd}/${mm}/${yyyy} ${hrs}:${mins}`;
+
+  let resolvedStage = stageName;
+  if (!resolvedStage && typeof window !== 'undefined' && window.location) {
+    resolvedStage = getStageFromPath(window.location.pathname);
+  }
+
+  const type = getTatTypeForStage(resolvedStage);
+
+  if (type === 'hours' || type === 'minute') {
+    const hrs = String(parsed.getHours()).padStart(2, '0');
+    const mins = String(parsed.getMinutes()).padStart(2, '0');
+    const secs = String(parsed.getSeconds()).padStart(2, '0');
+    return `${dd}/${mm}/${yyyy} ${hrs}:${mins}:${secs}`;
+  }
+
+  return `${dd}/${mm}/${yyyy}`;
 };

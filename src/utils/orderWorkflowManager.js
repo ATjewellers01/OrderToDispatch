@@ -83,7 +83,7 @@ export const syncOrderPlannedDates = (prevOrder, nextOrder) => {
       targetStage = 'Follow Up';
     } else if (nextStage === 'QC' && prevStage !== 'QC') {
       targetStage = 'QC1';
-    } else if (nextOrder.status3 === 'QC Okay' && nextOrder.qc1Type === 'Complete' && prevOrder.status3 !== 'QC Okay') {
+    } else if (nextOrder.status3 === 'QC Okay' && (nextOrder.qc1Type === 'Complete' || nextOrder.qc1Type === 'Partly Clear') && prevOrder.status3 !== 'QC Okay') {
       targetStage = 'Ghat Jama';
     } else if (nextOrder.ghatJamaStatus === 'Complete' && prevOrder.ghatJamaStatus !== 'Complete') {
       targetStage = nextOrder.ghatJamaType || 'Polish Inhouse';

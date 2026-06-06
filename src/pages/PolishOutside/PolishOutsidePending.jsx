@@ -87,8 +87,7 @@ const PolishOutsidePending = ({ orders, onActionClick }) => {
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
     "Target Date",
-    "Est Days",
-    "Status",
+    "LEFT Days",
     "Karigar Name",
     "Melting",
     "Product",
@@ -142,11 +141,6 @@ const PolishOutsidePending = ({ orders, onActionClick }) => {
             {leftDays} Days
           </span>
         </td>
-        <td className="px-4 py-3 text-center whitespace-nowrap">
-          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getStageColor(order.orderStage)}`}>
-            {order.orderStage || 'New'}
-          </span>
-        </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || order.karigarName || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || order.categoryName || '-'}</td>
@@ -192,7 +186,7 @@ const PolishOutsidePending = ({ orders, onActionClick }) => {
             ) : <span className="text-gray-400">-</span>}
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Est Days</span>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">LEFT Days</span>
             <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
           </div>
           <div className="col-span-2">

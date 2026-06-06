@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Plus, Search, RotateCcw, MapPin, Trash2, Edit2 } from 'lucide-react';
 import DataTable from '../../components/DataTable';
@@ -49,7 +49,19 @@ export default function DeliveryLocation({
   const persist = (data) => {
     setLocations(data);
     localStorage.setItem('master_delivery_locations', JSON.stringify(data));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'master_delivery_locations', newValue: JSON.stringify(data) }));
   };
+
+  // Sync when another instance persists
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'master_delivery_locations' && e.newValue) {
+        try { setLocations(JSON.parse(e.newValue)); } catch {}
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const handleAdd = (e) => {
     e.preventDefault();

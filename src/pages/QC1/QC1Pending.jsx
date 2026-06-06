@@ -90,8 +90,7 @@ const QC1Pending = ({ orders, onQCClick }) => {
     "QC1 Status",
     "QC1 Type",
     "QC1 Remarks",
-    "Est Days",
-    "Status",
+    "LEFT Days",
     "Karigar Name",
     "Melting",
     "Product",
@@ -160,11 +159,6 @@ const QC1Pending = ({ orders, onQCClick }) => {
             {leftDays} Days
           </span>
         </td>
-        <td className="px-4 py-3 text-center whitespace-nowrap">
-          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getStageColor(order.orderStage)}`}>
-            {order.orderStage || 'New'}
-          </span>
-        </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
@@ -210,7 +204,7 @@ const QC1Pending = ({ orders, onQCClick }) => {
             ) : <span className="text-gray-400">-</span>}
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Est Days</span>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">LEFT Days</span>
             <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
           </div>
           <div>

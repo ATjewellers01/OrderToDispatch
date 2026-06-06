@@ -7,6 +7,7 @@ import SearchableDropdown from '../../components/SearchableDropdown';
 import DateInput from '../../components/DateInput';
 import { useKarigarOptions } from '../../hooks/useKarigarOptions';
 import { SEEDED_CATEGORIES } from '../Master/Category';
+import { SEEDED_MELTING } from '../Master/Melting';
 
 const companyNames = [
   "Kalyan Jewellers", "Malabar Gold", "Tanishq", "Joyalukkas", "Bhima Jewellers", 
@@ -156,7 +157,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
     if (saved) return JSON.parse(saved);
     const defaults = [
       { id: 'OS-001', stage: 'Pending',              timestamp: '2026-06-01T08:00:00' },
-      { id: 'OS-002', stage: 'In Progress',           timestamp: '2026-06-01T08:15:00' },
+      { id: 'OS-002', stage: 'In Process',            timestamp: '2026-06-01T08:15:00' },
       { id: 'OS-003', stage: 'Ready for Delivery',    timestamp: '2026-06-01T08:30:00' },
       { id: 'OS-004', stage: 'Completed',             timestamp: '2026-06-01T08:45:00' },
       { id: 'OS-005', stage: 'Reject',                timestamp: '2026-06-01T09:00:00' },
@@ -174,6 +175,17 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
     }
     localStorage.setItem('master_categories', JSON.stringify(SEEDED_CATEGORIES));
     return SEEDED_CATEGORIES;
+  });
+
+  // ── Master: Melting ──
+  const [meltingList, setMeltingList] = useState(() => {
+    const saved = localStorage.getItem('master_melting');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.length > 0) return parsed;
+    }
+    localStorage.setItem('master_melting', JSON.stringify(SEEDED_MELTING));
+    return SEEDED_MELTING;
   });
 
   useEffect(() => {
@@ -200,7 +212,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
       } else {
         const defaults = [
           { id: 'OS-001', stage: 'Pending',              timestamp: '2026-06-01T08:00:00' },
-          { id: 'OS-002', stage: 'In Progress',           timestamp: '2026-06-01T08:15:00' },
+          { id: 'OS-002', stage: 'In Process',            timestamp: '2026-06-01T08:15:00' },
           { id: 'OS-003', stage: 'Ready for Delivery',    timestamp: '2026-06-01T08:30:00' },
           { id: 'OS-004', stage: 'Completed',             timestamp: '2026-06-01T08:45:00' },
           { id: 'OS-005', stage: 'Reject',                timestamp: '2026-06-01T09:00:00' },
@@ -222,6 +234,15 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
         localStorage.setItem('master_categories', JSON.stringify(SEEDED_CATEGORIES));
         setCategories(SEEDED_CATEGORIES);
       }
+      // reload melting
+      const savedMelting = localStorage.getItem('master_melting');
+      if (savedMelting) {
+        const parsed = JSON.parse(savedMelting);
+        if (parsed.length > 0) setMeltingList(parsed);
+        else setMeltingList(SEEDED_MELTING);
+      } else {
+        setMeltingList(SEEDED_MELTING);
+      }
     }
   }, [isOpen]);
 
@@ -232,6 +253,11 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
   const categoryOptions = useMemo(() =>
     categories.map(c => ({ value: c.category, label: c.category })),
     [categories]
+  );
+
+  const meltingOptions = useMemo(() =>
+    meltingList.map(m => ({ value: m.melting, label: m.melting })),
+    [meltingList]
   );
 
   const deliveryLocationOptions = useMemo(() =>
@@ -285,11 +311,41 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
       if (name === 'expectedDeliveryDate') {
         const expectedDate = parseDateString(value);
         if (expectedDate && !isNaN(expectedDate.getTime())) {
-          expectedDate.setDate(expectedDate.getDate() - 3);
-          const dd = String(expectedDate.getDate()).padStart(2, '0');
-          const mm = String(expectedDate.getMonth() + 1).padStart(2, '0');
-          const yyyy = expectedDate.getFullYear();
+          // Auto-fill Delivery Date with same date as Expected Delivery Date
+          const ddD = String(expectedDate.getDate()).padStart(2, '0');
+          const mmD = String(expectedDate.getMonth() + 1).padStart(2, '0');
+          const yyyyD = expectedDate.getFullYear();
+          updated.deliveryDate = `${ddD}/${mmD}/${yyyyD}`;
+          // Karigar Delivery Date = Expected Delivery Date - 3 days
+          const karigarDate = new Date(expectedDate);
+          karigarDate.setDate(karigarDate.getDate() - 3);
+          const dd = String(karigarDate.getDate()).padStart(2, '0');
+          const mm = String(karigarDate.getMonth() + 1).padStart(2, '0');
+          const yyyy = karigarDate.getFullYear();
           updated.karigarDeliveryDate = `${dd}/${mm}/${yyyy}`;
+        } else {
+          updated.deliveryDate = '';
+          updated.karigarDeliveryDate = '';
+        }
+      }
+      if (name === 'deliveryDate') {
+        const deliveryDate = parseDateString(value);
+        if (deliveryDate && !isNaN(deliveryDate.getTime())) {
+          // Auto-fill Expected Delivery Date with same date as Delivery Date
+          const ddE = String(deliveryDate.getDate()).padStart(2, '0');
+          const mmE = String(deliveryDate.getMonth() + 1).padStart(2, '0');
+          const yyyyE = deliveryDate.getFullYear();
+          updated.expectedDeliveryDate = `${ddE}/${mmE}/${yyyyE}`;
+          // Karigar Delivery Date = Delivery Date - 3 days
+          const karigarDate = new Date(deliveryDate);
+          karigarDate.setDate(karigarDate.getDate() - 3);
+          const dd = String(karigarDate.getDate()).padStart(2, '0');
+          const mm = String(karigarDate.getMonth() + 1).padStart(2, '0');
+          const yyyy = karigarDate.getFullYear();
+          updated.karigarDeliveryDate = `${dd}/${mm}/${yyyy}`;
+        } else {
+          updated.expectedDeliveryDate = '';
+          updated.karigarDeliveryDate = '';
         }
       }
       return updated;
@@ -369,6 +425,10 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
       toast.error('Order Received Date is required');
       return;
     }
+    if (!formData.category) {
+      toast.error('Category is required');
+      return;
+    }
     if (!formData.quantity) {
       toast.error('Quantity is required');
       return;
@@ -391,6 +451,14 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
     }
     if (!formData.orderType) {
       toast.error('Order Type is required');
+      return;
+    }
+    if (!formData.expectedDeliveryDate) {
+      toast.error('Expected Delivery Date is required');
+      return;
+    }
+    if (!formData.deliveryDate) {
+      toast.error('Delivery Date is required');
       return;
     }
     if (!formData.karigarDeliveryDate) {
@@ -476,12 +544,12 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
           name="deliveryDate"
           value={formData.deliveryDate}
           onChange={handleInputChange}
-          required={false}
+          required={true}
         />
 
         {/* Row 3 */}
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">Category</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Category <span className="text-red-500">*</span></label>
           <SearchableDropdown
             options={categoryOptions}
             value={formData.category}
@@ -495,7 +563,21 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Quantity <span className="text-red-500">*</span></label>
-          <input required type="number" step="0.001" name="quantity" value={formData.quantity} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input
+            required
+            type="text"
+            name="quantity"
+            value={formData.quantity}
+            onChange={handleInputChange}
+            onKeyDown={(e) => {
+              // Allow: letters, digits, backspace, delete, arrows, tab, ctrl/cmd shortcuts
+              const isAlphaNum = /^[a-zA-Z0-9]$/.test(e.key);
+              const isControl = ['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab','Home','End'].includes(e.key) || e.ctrlKey || e.metaKey;
+              if (!isAlphaNum && !isControl) e.preventDefault();
+            }}
+            placeholder="e.g. 10 or 10A"
+            className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs"
+          />
         </div>
 
         {/* Row 4 */}
@@ -513,12 +595,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Melting <span className="text-red-500">*</span></label>
           <CustomDropdown
-            options={[
-              { value: '18K', label: '18K' },
-              { value: '20K', label: '20K' },
-              { value: '22K', label: '22K' },
-              { value: '24K', label: '24K' }
-            ]}
+            options={meltingOptions}
             value={formData.melting}
             onChange={(val) => handleInputChange({ target: { name: 'melting', value: val } })}
             placeholder="Select Melting"
@@ -628,7 +705,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
           name="expectedDeliveryDate"
           value={formData.expectedDeliveryDate}
           onChange={handleInputChange}
-          required={false}
+          required={true}
         />
 
         <DateInput

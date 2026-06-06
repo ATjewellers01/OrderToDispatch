@@ -101,8 +101,7 @@ const ReceiveInStockPending = ({ orders, onActionClick }) => {
     { label: 'Sent Company', className: 'text-center' },
     { label: 'Sent Pcs', className: 'text-center' },
     { label: 'Huid Remarks', className: 'text-center' },
-    { label: 'Est Days', className: 'text-center' },
-    { label: 'Stage', className: 'text-center' },
+    { label: 'LEFT Days', className: 'text-center' },
     { label: 'Karigar Name', className: 'text-center' },
     { label: 'Melting', className: 'text-center' },
     { label: 'Product', className: 'text-center' },
@@ -177,11 +176,6 @@ const ReceiveInStockPending = ({ orders, onActionClick }) => {
             {leftDays} Days
           </span>
         </td>
-        <td className="px-4 py-3 text-center whitespace-nowrap">
-          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getStageColor(order.orderStage)}`}>
-            {order.orderStage || 'New'}
-          </span>
-        </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || order.karigarName || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || order.categoryName || '-'}</td>
@@ -239,7 +233,7 @@ const ReceiveInStockPending = ({ orders, onActionClick }) => {
             <span className="text-gray-700 font-bold">{order.sentHuidLabelPcs || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Est Days</span>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">LEFT Days</span>
             <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
           </div>
         </div>

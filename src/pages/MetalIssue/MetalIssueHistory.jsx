@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Edit } from 'lucide-react';
+import { Edit, Briefcase } from 'lucide-react';
 import DataTable from '../../components/DataTable';
-import { calculateDelay } from '../../utils/tatCalculator';
+import { calculateDelay, formatTargetDate } from '../../utils/tatCalculator';
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
 const parseDateString = (str) => {
@@ -107,7 +107,7 @@ const MetalIssueHistory = ({ ordersWithIssues, onEditClick }) => {
     "Target Date",
     "Done Date",
     "Delay",
-    "Est Days",
+    "LEFT Days",
     "Status",
     "Karigar Name",
     "MELTING",
@@ -168,7 +168,7 @@ const MetalIssueHistory = ({ ordersWithIssues, onEditClick }) => {
           {issue.remarks || '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
-          {formatDateTime(order.plannedDates?.['Metal Issue'])}
+          {formatTargetDate(order.plannedDates?.['Metal Issue'], 'Metal Issue')}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
           {formatDateTime(issue.timestamp)}
@@ -186,7 +186,17 @@ const MetalIssueHistory = ({ ordersWithIssues, onEditClick }) => {
             {order.orderStage || 'New'}
           </span>
         </td>
-        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">
+          {order.karigar ? (
+            <div className="inline-flex items-center justify-center gap-1.5">
+              <span>{order.karigar}</span>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold border bg-green-50 text-green-700 border-green-200">
+                <Briefcase size={9} />
+                Office
+              </span>
+            </div>
+          ) : '-'}
+        </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || '-'} g</td>
@@ -228,10 +238,18 @@ const MetalIssueHistory = ({ ordersWithIssues, onEditClick }) => {
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight font-medium font-sans">Karigar</span>
-            <span className="text-gray-700 font-semibold">{order.karigar || '-'}</span>
+            <span className="text-gray-700 font-semibold flex items-center gap-1.5">
+              {order.karigar || '-'}
+              {order.karigar && (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold border bg-green-50 text-green-700 border-green-200">
+                  <Briefcase size={8} />
+                  Office
+                </span>
+              )}
+            </span>
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Est Days</span>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">LEFT Days</span>
             <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
           </div>
           <div>

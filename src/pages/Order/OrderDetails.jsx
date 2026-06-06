@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, Filter, Download, FileText, RotateCcw, Edit, Calendar, Eye } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Plus, Filter, Download, FileText, RotateCcw, Edit, Calendar, Eye, Briefcase, Factory } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import OrderForm from './OrderForm';
@@ -12,6 +12,7 @@ import { generateKarigarHTML, generateCustomerHTML } from './pdf/pdfGenerators';
 import { syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
 import { generateFilterOptions } from '../../utils/filterUtils';
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
+import { SEEDED_KARIGARS } from '../Master/masterdata';
 
 const toYYYYMMDD = (val) => {
   if (!val) return '';
@@ -73,6 +74,35 @@ const parseDateString = (str) => {
 
 const OrderDetails = () => {
   const [orders, setOrders] = useState([]);
+  const [karigars, setKarigars] = useState(() => {
+    try {
+      const saved = localStorage.getItem('master_karigars');
+      return saved ? JSON.parse(saved) : SEEDED_KARIGARS;
+    } catch {
+      return SEEDED_KARIGARS;
+    }
+  });
+
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        const saved = localStorage.getItem('master_karigars');
+        if (saved) setKarigars(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, []);
+
+  const karigarTypeMap = useMemo(() => {
+    const map = {};
+    karigars.forEach(k => {
+      map[k.name] = k.type;
+    });
+    return map;
+  }, [karigars]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOrderToEdit, setSelectedOrderToEdit] = useState(null);
@@ -198,7 +228,16 @@ const OrderDetails = () => {
   };
 
   const categoriesList = useMemo(() => generateFilterOptions(orders, 'category'), [orders]);
-  const karigarsList = useMemo(() => generateFilterOptions(orders, 'karigar'), [orders]);
+  const karigarsList = useMemo(() => {
+    const raw = generateFilterOptions(orders, 'karigar');
+    return raw.map(opt => {
+      const type = karigarTypeMap[opt.value];
+      return {
+        ...opt,
+        label: type ? `${opt.value} (${type})` : opt.value
+      };
+    });
+  }, [orders, karigarTypeMap]);
   const meltingList = useMemo(() => generateFilterOptions(orders, 'melting'), [orders]);
   const typesList = useMemo(() => generateFilterOptions(orders, 'orderType'), [orders]);
 
@@ -318,7 +357,23 @@ const OrderDetails = () => {
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">
+          {order.karigar ? (
+            <div className="inline-flex items-center justify-center gap-1.5">
+              <span>{order.karigar}</span>
+              {karigarTypeMap[order.karigar] && (
+                <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold border ${
+                  karigarTypeMap[order.karigar] === 'Factory' 
+                    ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                    : 'bg-green-50 text-green-700 border-green-200'
+                }`}>
+                  {karigarTypeMap[order.karigar] === 'Factory' ? <Factory size={9} /> : <Briefcase size={9} />}
+                  {karigarTypeMap[order.karigar]}
+                </span>
+              )}
+            </div>
+          ) : '-'}
+        </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.quantity || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.fromWeight || '-'}</td>
@@ -387,7 +442,19 @@ const OrderDetails = () => {
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>
-            <span className="text-gray-700 font-medium">{order.karigar || '-'}</span>
+            <span className="text-gray-700 font-medium flex items-center gap-1.5">
+              {order.karigar || '-'}
+              {order.karigar && karigarTypeMap[order.karigar] && (
+                <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold border ${
+                  karigarTypeMap[order.karigar] === 'Factory' 
+                    ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                    : 'bg-green-50 text-green-700 border-green-200'
+                }`}>
+                  {karigarTypeMap[order.karigar] === 'Factory' ? <Factory size={8} /> : <Briefcase size={8} />}
+                  {karigarTypeMap[order.karigar]}
+                </span>
+              )}
+            </span>
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Expected Delivery</span>

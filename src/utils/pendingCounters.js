@@ -1,3 +1,5 @@
+import { SEEDED_KARIGARS } from '../pages/Master/masterdata';
+
 export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
   if (!orders || orders.length === 0) return {};
 
@@ -18,6 +20,18 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
 
   const issuedIds = new Set(metalIssues?.map(issue => issue.orderId) || []);
 
+  let karigarsList = SEEDED_KARIGARS;
+  try {
+    const saved = localStorage.getItem('master_karigars');
+    if (saved) karigarsList = JSON.parse(saved);
+  } catch (e) {
+    console.error(e);
+  }
+
+  const officeKarigars = new Set(
+    karigarsList.filter(k => k.type === 'Office').map(k => k.name)
+  );
+
   const counts = {
     'Order Management': 0,
     'On Time Delivery': 0,
@@ -27,7 +41,12 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
   };
 
   // 1. Metal Issue
-  counts['Metal Issue'] = orders.filter(o => !issuedIds.has(o.id)).length;
+  counts['Metal Issue'] = orders.filter(o => 
+    !issuedIds.has(o.id) && 
+    o.orderStage?.toLowerCase() === 'in process' &&
+    o.karigar && 
+    officeKarigars.has(o.karigar)
+  ).length;
 
   // 2. Follow Up
   counts['Follow Up'] = orders.filter(o => {
@@ -40,6 +59,7 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
 
   // 3. QC1
   counts['QC1'] = orders.filter(o => {
+    if (o.id && String(o.id).includes('-P')) return false;
     if (o.status3 === 'QC Okay' && o.qc1Type === 'Complete') return false;
     const followUpLog = latestFollowUpMap.get(o.id) || latestFollowUpMap.get(o.orderNo);
     const isGhatJamaDone = followUpLog?.status === 'Ghat Jama Flw-up Done';
@@ -49,7 +69,7 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
   // 4. Ghat Jama
   counts['Ghat Jama'] = orders.filter(o => 
     o.status3 === 'QC Okay' && 
-    o.qc1Type === 'Complete' && 
+    (o.qc1Type === 'Complete' || (o.id && String(o.id).includes('-P'))) && 
     o.ghatJamaStatus !== 'Complete'
   ).length;
 

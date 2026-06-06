@@ -7,7 +7,7 @@ import { TabSwitcher } from '../../components/StandardButtons';
 import QC1Pending from './QC1Pending';
 import QC1History from './QC1History';
 import QCForm from './QCForm';
-import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
+import { saveOrderAndSyncPlannedDates, syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
 
 const QC1 = () => {
   const [activeTab, setActiveTab] = useState('pending');
@@ -39,6 +39,59 @@ const QC1 = () => {
   }, []);
 
   const handleSaveQC = (updatedOrder) => {
+    if (updatedOrder.status3 === 'QC Okay' && updatedOrder.qc1Type === 'Partly Clear' && !updatedOrder.id.includes('-P')) {
+      const originalOrder = orders.find(o => o.id === updatedOrder.id);
+      if (originalOrder) {
+        // Strip any existing serial suffix from orderNo
+        const baseOrderNo = originalOrder.orderNo.replace(/-\d+P$/, '');
+        
+        // Find next suffix
+        let maxSuffix = 0;
+        orders.forEach(o => {
+          if (o.orderNo) {
+            const match = o.orderNo.match(new RegExp(`^${baseOrderNo}-(\\d+)P$`));
+            if (match) {
+              const num = parseInt(match[1], 10);
+              if (num > maxSuffix) {
+                maxSuffix = num;
+              }
+            }
+          }
+        });
+        const nextSuffix = maxSuffix + 1;
+        const cloneOrderNo = `${baseOrderNo}-${nextSuffix}P`;
+        
+        // Create a clone representing the completed/cleared portion
+        const cloneOrder = {
+          ...originalOrder,
+          id: `${originalOrder.id}-P${nextSuffix}`,
+          orderNo: cloneOrderNo,
+          status3: 'QC Okay',
+          qc1Type: 'Partly Clear',
+          qcRemarks: updatedOrder.qcRemarks,
+          qc1Timestamp: new Date().toISOString()
+        };
+        
+        const syncedClone = syncOrderPlannedDates(originalOrder, cloneOrder);
+        
+        // Update original order status3/qc1Type/remarks to show in Pending
+        const resetOriginalOrder = {
+          ...originalOrder,
+          status3: 'QC Okay',
+          qc1Type: 'Partly Clear',
+          qcRemarks: updatedOrder.qcRemarks
+        };
+        
+        const updatedList = orders.map(o => o.id === originalOrder.id ? resetOriginalOrder : o);
+        updatedList.push(syncedClone);
+        
+        setOrders(updatedList);
+        localStorage.setItem('ordersDataV3', JSON.stringify(updatedList));
+        toast.success(`Partly Clear order ${cloneOrderNo} generated and moved to next stage`);
+        return;
+      }
+    }
+
     saveOrderAndSyncPlannedDates(orders, updatedOrder, setOrders);
     toast.success('QC1 status updated successfully');
   };
@@ -67,6 +120,7 @@ const QC1 = () => {
   // Base split without filters
   const basePendingOrders = useMemo(() => {
     return orders.filter(o => {
+      if (o.id && String(o.id).includes('-P')) return false;
       if (o.status3 === 'QC Okay' && o.qc1Type === 'Complete') return false;
       const followUpLog = latestFollowUpMap.get(o.id) || latestFollowUpMap.get(o.orderNo);
       const isGhatJamaDone = followUpLog?.status === 'Ghat Jama Flw-up Done';
@@ -75,7 +129,7 @@ const QC1 = () => {
   }, [orders, latestFollowUpMap]);
 
   const baseHistoryOrders = useMemo(() => {
-    return orders.filter(o => o.status3 === 'QC Okay' && o.qc1Type === 'Complete');
+    return orders.filter(o => o.status3 === 'QC Okay' && (o.qc1Type === 'Complete' || (o.id && String(o.id).includes('-P'))));
   }, [orders]);
 
   const activeBaseOrders = activeTab === 'pending' ? basePendingOrders : baseHistoryOrders;

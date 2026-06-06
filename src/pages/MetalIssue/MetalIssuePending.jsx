@@ -1,9 +1,10 @@
-﻿import React, { useState, useMemo } from 'react';
-import { Coins } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Coins, Briefcase } from 'lucide-react';
 import DataTable from '../../components/DataTable';
 import { formatTargetDate } from '../../utils/tatCalculator';
 
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
+import { SEEDED_KARIGARS } from '../Master/masterdata';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -85,11 +86,33 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
+  const [karigars, setKarigars] = useState(() => {
+    try {
+      const saved = localStorage.getItem('master_karigars');
+      return saved ? JSON.parse(saved) : SEEDED_KARIGARS;
+    } catch {
+      return SEEDED_KARIGARS;
+    }
+  });
+
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        const saved = localStorage.getItem('master_karigars');
+        if (saved) setKarigars(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, []);
+
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
     "Target Date",
-    "Est Days",
+    "LEFT Days",
     "Status",
     "Karigar Name",
     "MELTING",
@@ -103,13 +126,25 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
     "Expected Date"
   ];
 
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
+  const filteredOrders = useMemo(() => {
+    const officeKarigars = new Set(
+      karigars.filter(k => k.type === 'Office').map(k => k.name)
+    );
+    return (orders || []).filter(
+      (order) => 
+        order.orderStage?.toLowerCase() === 'in process' &&
+        order.karigar &&
+        officeKarigars.has(order.karigar)
+    );
+  }, [orders, karigars]);
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const paginatedOrders = useMemo(() => {
-    return orders.slice(
+    return filteredOrders.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     );
-  }, [orders, currentPage, itemsPerPage]);
+  }, [filteredOrders, currentPage, itemsPerPage]);
 
   const renderRow = (order, idx) => {
     const leftDays = calculateLeftDays(order.expectedDeliveryDate);
@@ -148,7 +183,17 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
             {order.orderStage || 'New'}
           </span>
         </td>
-        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">
+          {order.karigar ? (
+            <div className="inline-flex items-center justify-center gap-1.5">
+              <span>{order.karigar}</span>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold border bg-green-50 text-green-700 border-green-200">
+                <Briefcase size={9} />
+                Office
+              </span>
+            </div>
+          ) : '-'}
+        </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || '-'} g</td>
@@ -179,7 +224,15 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>
-            <span className="text-gray-700 font-semibold">{order.karigar || '-'}</span>
+            <span className="text-gray-700 font-semibold flex items-center gap-1.5">
+              {order.karigar || '-'}
+              {order.karigar && (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold border bg-green-50 text-green-700 border-green-200">
+                  <Briefcase size={8} />
+                  Office
+                </span>
+              )}
+            </span>
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Target Date</span>
@@ -192,7 +245,7 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
             ) : <span className="text-gray-400">-</span>}
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Est Days</span>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">LEFT Days</span>
             <span className={`font-bold ${leftDays < 0 ? 'text-red-600' : 'text-green-600'}`}>{leftDays} Days</span>
           </div>
           <div className="col-span-2">
@@ -224,7 +277,7 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
       itemsPerPage={itemsPerPage}
       onPageChange={setCurrentPage}
       onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
-      totalResults={orders.length}
+      totalResults={filteredOrders.length}
       itemsPerPageOptions={[50, 100, 200]}
     />
   );

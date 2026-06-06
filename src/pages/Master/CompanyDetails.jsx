@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Plus, Search, RotateCcw, Building, Phone, Mail, MapPin, Trash2, Edit2, Filter } from 'lucide-react';
 import DataTable from '../../components/DataTable';
@@ -103,6 +103,7 @@ export default function CompanyDetails({
     const updated = [...companies, { id: newId, name: newCompany.name.trim(), number: newCompany.number.trim(), gmail: newCompany.gmail.trim() || `${newCompany.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')}@gmail.com`, address: newCompany.address.trim() || 'Zaveri Bazaar, Mumbai' }];
     setCompanies(updated);
     localStorage.setItem('master_companies', JSON.stringify(updated));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'master_companies', newValue: JSON.stringify(updated) }));
     setNewCompany({ name: '', number: '', gmail: '', address: '' });
     setShowAddItemModal(false);
     toast.success('New company added successfully!');
@@ -116,6 +117,7 @@ export default function CompanyDetails({
     const updated = companies.map(c => c.id === editCompany.id ? { ...editCompany } : c);
     setCompanies(updated);
     localStorage.setItem('master_companies', JSON.stringify(updated));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'master_companies', newValue: JSON.stringify(updated) }));
     setShowEditItemModal(false);
     setSelectedCompany(null);
     toast.success('Company details updated successfully!');
@@ -126,9 +128,21 @@ export default function CompanyDetails({
       const updated = companies.filter(c => c.id !== id);
       setCompanies(updated);
       localStorage.setItem('master_companies', JSON.stringify(updated));
+      window.dispatchEvent(new StorageEvent('storage', { key: 'master_companies', newValue: JSON.stringify(updated) }));
       toast.success('Company deleted successfully!');
     }
   };
+
+  // Sync when another instance persists
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'master_companies' && e.newValue) {
+        try { setCompanies(JSON.parse(e.newValue)); } catch {}
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const handleOpenEditModal = (company) => {
     setEditCompany({ ...company });

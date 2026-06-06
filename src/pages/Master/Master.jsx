@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Plus, Search, RotateCcw, Filter, ChevronDown, Building2, HardHat, MapPin, Tag, Layers } from 'lucide-react';
+import { Plus, Search, RotateCcw, Filter, ChevronDown, Building2, HardHat, MapPin, Tag, Layers, Flame } from 'lucide-react';
 import CompanyDetails from './CompanyDetails';
 import KarigarDetails from './KarigarDetails';
 import DeliveryLocation from './DeliveryLocation';
 import OrderStage from './OrderStage';
 import Category from './Category';
+import Melting from './Melting';
 
 const VIEWS = [
   { id: 'company',  label: 'Company Details',    icon: Building2 },
@@ -12,6 +13,7 @@ const VIEWS = [
   { id: 'delivery', label: 'Delivery Locations',  icon: MapPin    },
   { id: 'orderstage', label: 'Order Stages',      icon: Tag       },
   { id: 'category', label: 'Category',            icon: Layers    },
+  { id: 'melting',  label: 'Melting',             icon: Flame     },
 ];
 
 export default function Master() {
@@ -45,6 +47,7 @@ export default function Master() {
       delivery:   'delivery-location-add-trigger',
       orderstage: 'order-stage-add-trigger',
       category:   'category-add-trigger',
+      melting:    'melting-add-trigger',
     };
     document.getElementById(map[activeView])?.click();
   };
@@ -166,6 +169,13 @@ export default function Master() {
                 filtersOnly={true}
               />
             )}
+            {activeView === 'melting' && (
+              <Melting
+                searchQuery={searchQuery}
+                onClearFilters={handleClearFilters}
+                filtersOnly={true}
+              />
+            )}
           </div>
         </div>
 
@@ -212,6 +222,12 @@ export default function Master() {
       )}
       {activeView === 'category' && (
         <Category
+          searchQuery={searchQuery}
+          onClearFilters={handleClearFilters}
+        />
+      )}
+      {activeView === 'melting' && (
+        <Melting
           searchQuery={searchQuery}
           onClearFilters={handleClearFilters}
         />
