@@ -163,16 +163,20 @@ const Dasboard = () => {
     }
   }, []);
 
+  const nonCloneOrders = useMemo(() => {
+    return orders.filter(o => !(o.id && String(o.id).includes('-P')));
+  }, [orders]);
+
   // Compute unique values for dropdown filters dynamically
-  const karigarStatusesList = useMemo(() => generateFilterOptions(orders, o => o.karigarStatus || o.kStatus), [orders]);
-  const orderTypesList = useMemo(() => generateFilterOptions(orders, o => o.orderType), [orders]);
-  const orderStagesList = useMemo(() => generateFilterOptions(orders, o => o.orderStage), [orders]);
-  const karigarNamesList = useMemo(() => generateFilterOptions(orders, o => o.karigar || o.karigarName), [orders]);
+  const karigarStatusesList = useMemo(() => generateFilterOptions(nonCloneOrders, o => o.karigarStatus || o.kStatus), [nonCloneOrders]);
+  const orderTypesList = useMemo(() => generateFilterOptions(nonCloneOrders, o => o.orderType), [nonCloneOrders]);
+  const orderStagesList = useMemo(() => generateFilterOptions(nonCloneOrders, o => o.orderStage), [nonCloneOrders]);
+  const karigarNamesList = useMemo(() => generateFilterOptions(nonCloneOrders, o => o.karigar || o.karigarName), [nonCloneOrders]);
 
   const lateStatusesList = useMemo(() => {
     let lateCount = 0;
     let onTimeCount = 0;
-    orders.forEach(o => {
+    nonCloneOrders.forEach(o => {
       const leftDays = calculateLeftDays(o.expectedDeliveryDate || o.deliveryDate);
       if (leftDays < 0) {
         lateCount += 1;
@@ -184,17 +188,17 @@ const Dasboard = () => {
       { value: "Late Only", label: "Late Only", count: lateCount },
       { value: "On Time Only", label: "On Time Only", count: onTimeCount }
     ];
-  }, [orders]);
+  }, [nonCloneOrders]);
 
   // Handle slide filter bounds dynamically
   const minMaxLeftDays = useMemo(() => {
-    if (orders.length === 0) return { min: -500, max: 500 };
-    const leftDaysVals = orders.map(o => calculateLeftDays(o.expectedDeliveryDate || o.deliveryDate));
+    if (nonCloneOrders.length === 0) return { min: -500, max: 500 };
+    const leftDaysVals = nonCloneOrders.map(o => calculateLeftDays(o.expectedDeliveryDate || o.deliveryDate));
     return {
       min: Math.min(...leftDaysVals, -500),
       max: Math.max(...leftDaysVals, 500)
     };
-  }, [orders]);
+  }, [nonCloneOrders]);
 
   // Adjust filters range once data loads
   useEffect(() => {
@@ -207,7 +211,7 @@ const Dasboard = () => {
 
   // ── Apply Filtering Logic ─────────────────────────────────
   const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
+    return nonCloneOrders.filter(o => {
       const orderNoStr = String(o.orderNo || o.orderNumber || '').toLowerCase();
       const clientStr = String(o.company || o.customerName || '').toLowerCase();
       const karigarStatusVal = o.karigarStatus || o.kStatus || '';
@@ -242,7 +246,7 @@ const Dasboard = () => {
 
       return true;
     });
-  }, [orders, filters]);
+  }, [nonCloneOrders, filters]);
 
   // Clear filters helper
   const handleClearFilters = () => {
@@ -264,13 +268,13 @@ const Dasboard = () => {
 
   // ── Compute Top KPI Stats ──────────────────────────────────
   const kpiStats = useMemo(() => {
-    const total = orders.length;
+    const total = nonCloneOrders.length;
     let lateCount = 0;
     let onTimeCount = 0;
     const uniqueKarigars = new Set();
     let urgentCount = 0;
 
-    orders.forEach(o => {
+    nonCloneOrders.forEach(o => {
       const leftDays = calculateLeftDays(o.expectedDeliveryDate || o.deliveryDate);
       if (leftDays < 0) {
         lateCount += 1;
@@ -294,12 +298,12 @@ const Dasboard = () => {
       karigarsCount: uniqueKarigars.size,
       urgentCount
     };
-  }, [orders]);
+  }, [nonCloneOrders]);
 
   // ── Calculate Order Portfolio dynamic data ──────────────────
   const orderTypeData = useMemo(() => {
     const counts = {};
-    orders.forEach(o => {
+    nonCloneOrders.forEach(o => {
       const type = o.orderType || "Other";
       counts[type] = (counts[type] || 0) + 1;
     });
@@ -309,12 +313,12 @@ const Dasboard = () => {
       value: counts[name],
       color: colors[idx % colors.length]
     }));
-  }, [orders]);
+  }, [nonCloneOrders]);
 
   // ── Calculate Production Stages dynamic data ─────────────────
   const orderStageData = useMemo(() => {
     const counts = {};
-    orders.forEach(o => {
+    nonCloneOrders.forEach(o => {
       const stage = o.orderStage ? o.orderStage.replace('_', ' ').toUpperCase() : "UNDEFINED";
       counts[stage] = (counts[stage] || 0) + 1;
     });
@@ -324,12 +328,12 @@ const Dasboard = () => {
       value: counts[name],
       color: colors[idx % colors.length]
     })).sort((a, b) => b.value - a.value);
-  }, [orders]);
+  }, [nonCloneOrders]);
 
   // ── Calculate Karigar Efficiency Rankings ───────────────────
   const karigarSummary = useMemo(() => {
     const map = {};
-    orders.forEach(o => {
+    nonCloneOrders.forEach(o => {
       const name = o.karigar || o.karigarName || 'Not Assigned';
       if (!map[name]) {
         map[name] = { name, late: 0, onTime: 0, total: 0, totalDays: 0 };
@@ -370,7 +374,7 @@ const Dasboard = () => {
         avgTime
       };
     }).sort((a, b) => b.total - a.total);
-  }, [orders]);
+  }, [nonCloneOrders]);
 
   // ── Detailed Table Row Map ──────────────────────────────
   const deliveryData = useMemo(() => {
