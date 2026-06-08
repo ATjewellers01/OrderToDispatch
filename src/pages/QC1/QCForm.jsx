@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import ModalForm from '../../components/ModalForm';
 import CustomDropdown from '../../components/CustomDropdown';
 
-const QCForm = ({ isOpen, onClose, onSave, order }) => {
+const QCForm = ({ isOpen, onClose, onSave, order, isEdit = false }) => {
   const initialFormState = {
     status3: '',
     qc1Type: '',
@@ -14,13 +14,21 @@ const QCForm = ({ isOpen, onClose, onSave, order }) => {
 
   useEffect(() => {
     if (isOpen && order) {
-      setFormData({
-        status3: order.status3 || '',
-        qc1Type: order.qc1Type || '',
-        remarks: order.qcRemarks || '',
-      });
+      if (isEdit) {
+        setFormData({
+          status3: order.status3 || '',
+          qc1Type: order.qc1Type || '',
+          remarks: order.qcRemarks || '',
+        });
+      } else {
+        setFormData({
+          status3: '',
+          qc1Type: '',
+          remarks: '',
+        });
+      }
     }
-  }, [isOpen, order]);
+  }, [isOpen, order, isEdit]);
 
   const handleInputChange = (e) => {
     let { name, value, type } = e.target;

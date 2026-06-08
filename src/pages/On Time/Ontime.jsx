@@ -145,13 +145,13 @@ const Dasboard = () => {
   const [filters, setFilters] = useState({
     orderNumber: "",
     clientName: "",
-    karigarStatus: "",
+    karigarStatus: [],
     orderType: [],
-    orderStage: "",
-    karigarName: "",
+    orderStage: [],
+    karigarName: [],
     leftDaysFrom: -500,
     leftDaysTo: 500,
-    lateStatus: "All Status",
+    lateStatus: [],
     overallSearch: ""
   });
 
@@ -164,24 +164,26 @@ const Dasboard = () => {
   }, []);
 
   // Compute unique values for dropdown filters dynamically
-  const uniqueKarigarStatuses = useMemo(() => {
-    const vals = orders.map(o => o.karigarStatus || o.kStatus).filter(Boolean);
-    return Array.from(new Set(vals)).sort();
-  }, [orders]);
+  const karigarStatusesList = useMemo(() => generateFilterOptions(orders, o => o.karigarStatus || o.kStatus), [orders]);
+  const orderTypesList = useMemo(() => generateFilterOptions(orders, o => o.orderType), [orders]);
+  const orderStagesList = useMemo(() => generateFilterOptions(orders, o => o.orderStage), [orders]);
+  const karigarNamesList = useMemo(() => generateFilterOptions(orders, o => o.karigar || o.karigarName), [orders]);
 
-  const uniqueOrderTypes = useMemo(() => {
-    const vals = orders.map(o => o.orderType).filter(Boolean);
-    return Array.from(new Set(vals)).sort();
-  }, [orders]);
-
-  const uniqueOrderStages = useMemo(() => {
-    const vals = orders.map(o => o.orderStage).filter(Boolean);
-    return Array.from(new Set(vals)).sort();
-  }, [orders]);
-
-  const uniqueKarigarNames = useMemo(() => {
-    const vals = orders.map(o => o.karigar || o.karigarName).filter(Boolean);
-    return Array.from(new Set(vals)).sort();
+  const lateStatusesList = useMemo(() => {
+    let lateCount = 0;
+    let onTimeCount = 0;
+    orders.forEach(o => {
+      const leftDays = calculateLeftDays(o.expectedDeliveryDate || o.deliveryDate);
+      if (leftDays < 0) {
+        lateCount += 1;
+      } else {
+        onTimeCount += 1;
+      }
+    });
+    return [
+      { value: "Late Only", label: "Late Only", count: lateCount },
+      { value: "On Time Only", label: "On Time Only", count: onTimeCount }
+    ];
   }, [orders]);
 
   // Handle slide filter bounds dynamically
@@ -227,8 +229,10 @@ const Dasboard = () => {
       if (leftDays < filters.leftDaysFrom || leftDays > filters.leftDaysTo) return false;
 
       // Late Status
-      if (filters.lateStatus === "Late Only" && isLateStr !== "Yes") return false;
-      if (filters.lateStatus === "On Time Only" && isLateStr !== "No") return false;
+      if (filters.lateStatus && filters.lateStatus.length > 0) {
+        if (filters.lateStatus.includes("Late Only") && !filters.lateStatus.includes("On Time Only") && isLateStr !== "Yes") return false;
+        if (filters.lateStatus.includes("On Time Only") && !filters.lateStatus.includes("Late Only") && isLateStr !== "No") return false;
+      }
 
       // Overall Search
       if (filters.overallSearch) {
@@ -245,13 +249,13 @@ const Dasboard = () => {
     setFilters({
       orderNumber: "",
       clientName: "",
-      karigarStatus: "",
+      karigarStatus: [],
       orderType: [],
-      orderStage: "",
-      karigarName: "",
+      orderStage: [],
+      karigarName: [],
       leftDaysFrom: minMaxLeftDays.min,
       leftDaysTo: minMaxLeftDays.max,
-      lateStatus: "All Status",
+      lateStatus: [],
       overallSearch: ""
     });
     setCurrentPage(1);
@@ -629,7 +633,8 @@ const Dasboard = () => {
             <div className="space-y-1 overflow-visible">
               <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Karigar Status</label>
               <SearchableDropdown
-                options={uniqueKarigarStatuses.map(s => ({ value: s, label: s }))}
+                options={karigarStatusesList}
+                isMulti={true}
                 value={filters.karigarStatus}
                 onChange={(val) => { setFilters({ ...filters, karigarStatus: val }); setCurrentPage(1); }}
                 placeholder="All Karigar Status"
@@ -642,7 +647,8 @@ const Dasboard = () => {
             <div className="space-y-1 overflow-visible">
               <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Order Type</label>
               <SearchableDropdown
-                options={uniqueOrderTypes.map(s => ({ value: s, label: s }))}
+                options={orderTypesList}
+                isMulti={true}
                 value={filters.orderType}
                 onChange={(val) => { setFilters({ ...filters, orderType: val }); setCurrentPage(1); }}
                 placeholder="All Order Types"
@@ -655,7 +661,8 @@ const Dasboard = () => {
             <div className="space-y-1 overflow-visible">
               <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Order Stage</label>
               <SearchableDropdown
-                options={uniqueOrderStages.map(s => ({ value: s, label: s.replace('_', ' ').toUpperCase() }))}
+                options={orderStagesList.map(opt => ({ ...opt, label: opt.label ? opt.label.replace('_', ' ').toUpperCase() : opt.label }))}
+                isMulti={true}
                 value={filters.orderStage}
                 onChange={(val) => { setFilters({ ...filters, orderStage: val }); setCurrentPage(1); }}
                 placeholder="All Order Stages"
@@ -668,7 +675,8 @@ const Dasboard = () => {
             <div className="space-y-1 overflow-visible">
               <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Karigar Name</label>
               <SearchableDropdown
-                options={uniqueKarigarNames.map(s => ({ value: s, label: s }))}
+                options={karigarNamesList}
+                isMulti={true}
                 value={filters.karigarName}
                 onChange={(val) => { setFilters({ ...filters, karigarName: val }); setCurrentPage(1); }}
                 placeholder="All Karigar Names"
@@ -680,11 +688,9 @@ const Dasboard = () => {
             {/* Late Status */}
             <div className="space-y-1 overflow-visible">
               <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Late Status</label>
-              <SearchableDropdown isMulti={true} options={[
-                  { value: "All Status", label: "All Sales Statuses" },
-                  { value: "Late Only", label: "Late Only" },
-                  { value: "On Time Only", label: "On Time Only" }
-                ]}
+              <SearchableDropdown 
+                isMulti={true} 
+                options={lateStatusesList}
                 value={filters.lateStatus}
                 onChange={(val) => { setFilters({ ...filters, lateStatus: val }); setCurrentPage(1); }}
                 placeholder="Select Late Status"

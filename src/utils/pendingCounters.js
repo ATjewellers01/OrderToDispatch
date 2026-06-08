@@ -1,5 +1,33 @@
 import { SEEDED_KARIGARS } from '../pages/Master/masterdata';
 
+const parseDateString = (str) => {
+  if (!str) return null;
+  let match = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
+    if (!isNaN(d.getTime())) return d;
+  }
+  match = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (match) {
+    const p1 = parseInt(match[1], 10);
+    const p2 = parseInt(match[2], 10);
+    const y = parseInt(match[3], 10);
+    if (p1 > 12) {
+      const d = new Date(y, p2 - 1, p1);
+      if (!isNaN(d.getTime())) return d;
+    } else if (p2 > 12) {
+      const d = new Date(y, p1 - 1, p2);
+      if (!isNaN(d.getTime())) return d;
+    } else {
+      const d = new Date(y, p2 - 1, p1);
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d;
+  return null;
+};
+
 export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
   if (!orders || orders.length === 0) return {};
 
@@ -69,7 +97,7 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
   // 4. Ghat Jama
   counts['Ghat Jama'] = orders.filter(o => 
     o.status3 === 'QC Okay' && 
-    (o.qc1Type === 'Complete' || (o.id && String(o.id).includes('-P'))) && 
+    (o.qc1Type === 'Complete' || (o.qc1Type === 'Partly Clear' && o.id && String(o.id).includes('-P'))) && 
     o.ghatJamaStatus !== 'Complete'
   ).length;
 

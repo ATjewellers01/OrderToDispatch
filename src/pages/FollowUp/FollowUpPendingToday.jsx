@@ -112,14 +112,31 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
 
   // Today's Pending logic: Filter by Call Date = Today or earlier, or never called
   const todayOrders = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const today = new Date();
     today.setHours(0,0,0,0);
 
     return ordersWithLogs.filter(item => {
+      const o = item.order;
       // Must be active order
-      const stage = item.order.orderStage?.toLowerCase() || '';
+      const stage = o.orderStage?.toLowerCase() || '';
       if (stage === 'delivered' || stage === 'order cancel') return false;
+
+      // Determine Karigar Delivery Date (3 days before expected delivery date if not set)
+      let kDate = null;
+      if (o.karigarDeliveryDate) {
+        kDate = parseDateString(o.karigarDeliveryDate);
+      } else {
+        const exp = parseDateString(o.expectedDeliveryDate);
+        if (exp && !isNaN(exp.getTime())) {
+          kDate = new Date(exp);
+          kDate.setDate(kDate.getDate() - 3);
+        }
+      }
+
+      // If today is before the Karigar Delivery Date, it is not pending today
+      if (kDate && !isNaN(kDate.getTime()) && today < kDate) {
+        return false;
+      }
 
       // Never called is pending
       if (!item.latestLog) return true;
@@ -278,7 +295,17 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{o.totalWeight || '-'} g</td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{o.karigar || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.orderRecDate)}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.karigarDeliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">
+          {o.karigarDeliveryDate ? formatDate(o.karigarDeliveryDate) : (() => {
+            const exp = parseDateString(o.expectedDeliveryDate);
+            if (exp && !isNaN(exp.getTime())) {
+              const before3Days = new Date(exp);
+              before3Days.setDate(before3Days.getDate() - 3);
+              return formatDate(before3Days);
+            }
+            return '-';
+          })()}
+        </td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.deliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-800 whitespace-nowrap">{formatDate(o.expectedDeliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">

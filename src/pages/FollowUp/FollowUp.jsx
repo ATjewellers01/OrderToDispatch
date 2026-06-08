@@ -9,6 +9,33 @@ import FollowUpPendingTotal from './FollowUpPendingTotal';
 import FollowUpHistory from './FollowUpHistory';
 import FollowUpForm from './FollowUpForm';
 import { syncOrderPlannedDates } from '../../utils/orderWorkflowManager';
+const parseDateString = (str) => {
+  if (!str) return null;
+  let match = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const d = new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
+    if (!isNaN(d.getTime())) return d;
+  }
+  match = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (match) {
+    const p1 = parseInt(match[1], 10);
+    const p2 = parseInt(match[2], 10);
+    const y = parseInt(match[3], 10);
+    if (p1 > 12) {
+      const d = new Date(y, p2 - 1, p1);
+      if (!isNaN(d.getTime())) return d;
+    } else if (p2 > 12) {
+      const d = new Date(y, p1 - 1, p2);
+      if (!isNaN(d.getTime())) return d;
+    } else {
+      const d = new Date(y, p2 - 1, p1);
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d;
+  return null;
+};
 
 const FollowUp = () => {
   const [activeTab, setActiveTab] = useState('today');
@@ -91,12 +118,29 @@ const FollowUp = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return activeOrders.filter(o => {
+      // Determine Karigar Delivery Date (3 days before expected delivery date if not set)
+      let kDate = null;
+      if (o.karigarDeliveryDate) {
+        kDate = parseDateString(o.karigarDeliveryDate);
+      } else {
+        const exp = parseDateString(o.expectedDeliveryDate);
+        if (exp && !isNaN(exp.getTime())) {
+          kDate = new Date(exp);
+          kDate.setDate(kDate.getDate() - 3);
+        }
+      }
+
+      // If today is before the Karigar Delivery Date, it is not pending today
+      if (kDate && !isNaN(kDate.getTime()) && today < kDate) {
+        return false;
+      }
+
       const log = latestLogMap.get(o.id);
       if (!log) return true;
       const nextCall = log.nextDate || log.nextCallDate;
       if (!nextCall) return false;
-      const d = new Date(nextCall);
-      return !isNaN(d.getTime()) && d <= today;
+      const d = parseDateString(nextCall);
+      return d && !isNaN(d.getTime()) && d <= today;
     }).length;
   }, [activeOrders, latestLogMap]);
 

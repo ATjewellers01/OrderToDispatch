@@ -72,7 +72,8 @@ const QC1 = () => {
           qc1Timestamp: new Date().toISOString()
         };
         
-        const syncedClone = syncOrderPlannedDates(originalOrder, cloneOrder);
+        const prevForSync = { ...originalOrder, status3: undefined, qc1Type: undefined };
+        const syncedClone = syncOrderPlannedDates(prevForSync, cloneOrder);
         
         // Update original order status3/qc1Type/remarks to show in Pending
         const resetOriginalOrder = {
@@ -337,6 +338,7 @@ const QC1 = () => {
         }}
         onSave={handleSaveQC}
         order={selectedOrder}
+        isEdit={activeTab === 'history'}
       />
     </div>
   );

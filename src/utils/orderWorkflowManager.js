@@ -32,6 +32,7 @@ export const syncOrderPlannedDates = (prevOrder, nextOrder) => {
   // Check key transitions
   const stageChanged = prevStage !== nextStage;
   const qc1Changed = prevOrder.status3 !== nextOrder.status3;
+  const qc1TypeChanged = prevOrder.qc1Type !== nextOrder.qc1Type;
   const ghatChanged = prevOrder.ghatJamaStatus !== nextOrder.ghatJamaStatus;
 
   // Polish / Meena completed
@@ -67,6 +68,7 @@ export const syncOrderPlannedDates = (prevOrder, nextOrder) => {
   if (
     stageChanged || 
     qc1Changed || 
+    qc1TypeChanged || 
     ghatChanged || 
     polishOrMeenaCompleted || 
     qc2Done || 
@@ -83,7 +85,11 @@ export const syncOrderPlannedDates = (prevOrder, nextOrder) => {
       targetStage = 'Follow Up';
     } else if (nextStage === 'QC' && prevStage !== 'QC') {
       targetStage = 'QC1';
-    } else if (nextOrder.status3 === 'QC Okay' && (nextOrder.qc1Type === 'Complete' || nextOrder.qc1Type === 'Partly Clear') && prevOrder.status3 !== 'QC Okay') {
+    } else if (
+      nextOrder.status3 === 'QC Okay' && 
+      (nextOrder.qc1Type === 'Complete' || nextOrder.qc1Type === 'Partly Clear') && 
+      (prevOrder.status3 !== 'QC Okay' || prevOrder.qc1Type !== nextOrder.qc1Type)
+    ) {
       targetStage = 'Ghat Jama';
     } else if (nextOrder.ghatJamaStatus === 'Complete' && prevOrder.ghatJamaStatus !== 'Complete') {
       targetStage = nextOrder.ghatJamaType || 'Polish Inhouse';

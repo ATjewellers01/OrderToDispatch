@@ -55,7 +55,7 @@ const GhatJama = () => {
   const basePendingOrders = useMemo(() => {
     return orders.filter(o => 
       o.status3 === 'QC Okay' && 
-      (o.qc1Type === 'Complete' || (o.id && String(o.id).includes('-P'))) && 
+      (o.qc1Type === 'Complete' || (o.qc1Type === 'Partly Clear' && o.id && String(o.id).includes('-P'))) && 
       o.ghatJamaStatus !== 'Complete'
     );
   }, [orders]);
@@ -63,7 +63,7 @@ const GhatJama = () => {
   const baseHistoryOrders = useMemo(() => {
     return orders.filter(o => 
       o.status3 === 'QC Okay' && 
-      (o.qc1Type === 'Complete' || (o.id && String(o.id).includes('-P'))) && 
+      (o.qc1Type === 'Complete' || (o.qc1Type === 'Partly Clear' && o.id && String(o.id).includes('-P'))) && 
       o.ghatJamaStatus === 'Complete'
     );
   }, [orders]);

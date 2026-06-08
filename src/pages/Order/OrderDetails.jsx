@@ -227,9 +227,13 @@ const OrderDetails = () => {
     toast.success('Filters cleared');
   };
 
-  const categoriesList = useMemo(() => generateFilterOptions(orders, 'category'), [orders]);
+  const nonCloneOrders = useMemo(() => {
+    return orders.filter(o => !(o.id && String(o.id).includes('-P')));
+  }, [orders]);
+
+  const categoriesList = useMemo(() => generateFilterOptions(nonCloneOrders, 'category'), [nonCloneOrders]);
   const karigarsList = useMemo(() => {
-    const raw = generateFilterOptions(orders, 'karigar');
+    const raw = generateFilterOptions(nonCloneOrders, 'karigar');
     return raw.map(opt => {
       const type = karigarTypeMap[opt.value];
       return {
@@ -237,12 +241,12 @@ const OrderDetails = () => {
         label: type ? `${opt.value} (${type})` : opt.value
       };
     });
-  }, [orders, karigarTypeMap]);
-  const meltingList = useMemo(() => generateFilterOptions(orders, 'melting'), [orders]);
-  const typesList = useMemo(() => generateFilterOptions(orders, 'orderType'), [orders]);
+  }, [nonCloneOrders, karigarTypeMap]);
+  const meltingList = useMemo(() => generateFilterOptions(nonCloneOrders, 'melting'), [nonCloneOrders]);
+  const typesList = useMemo(() => generateFilterOptions(nonCloneOrders, 'orderType'), [nonCloneOrders]);
 
   const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
+    return nonCloneOrders.filter(o => {
       if (filters.category && filters.category.length > 0 && !filters.category.includes(o.category)) return false;
       if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(o.karigar)) return false;
       if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
@@ -255,7 +259,7 @@ const OrderDetails = () => {
       }
       return true;
     });
-  }, [orders, filters]);
+  }, [nonCloneOrders, filters]);
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const paginatedOrders = filteredOrders.slice(

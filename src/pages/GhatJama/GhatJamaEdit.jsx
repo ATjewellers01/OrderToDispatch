@@ -20,7 +20,7 @@ const GhatJamaEdit = ({ isOpen, onClose, onSave, order }) => {
         ghatJamaStatus: order.ghatJamaType || order.ghatJamaStatus || '',
         ghatJamaWeight: order.ghatJamaWeight || '',
         voucherNumber: order.voucherNumber || '',
-        pcs: order.pcs || '',
+        pcs: order.pcs || order.quantity || '',
         ghatJamaRemarks: order.ghatJamaRemarks || '',
       });
     } else if (!isOpen) {
