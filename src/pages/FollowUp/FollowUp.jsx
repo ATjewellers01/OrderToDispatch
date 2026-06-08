@@ -99,19 +99,16 @@ const FollowUp = () => {
     return map;
   }, [historyLogs]);
 
-  // Active orders (not Delivered, QC, or Order Cancel, AND Metal Issue is complete, AND follow-up status is not completed)
+  // Active orders (not Delivered or Order Cancel, AND Metal Issue is complete)
   const activeOrders = useMemo(() => {
     const issuedIds = new Set(metalIssues.map(issue => issue.orderId));
     return orders.filter(o => {
       const s = o.orderStage?.toLowerCase() || '';
-      const isDeliveredOrQC = s === 'delivered' || s === 'order cancel' || s === 'qc';
-      
-      const log = latestLogMap.get(o.id);
-      const isCompletedStatus = log?.status === 'Ghat Jama Flw-up Done' || log?.status === 'Finished Jama';
+      const isDeliveredOrCancelled = s === 'delivered' || s === 'order cancel';
 
-      return !isDeliveredOrQC && issuedIds.has(o.id) && !isCompletedStatus;
+      return !isDeliveredOrCancelled && issuedIds.has(o.id);
     });
-  }, [orders, metalIssues, latestLogMap]);
+  }, [orders, metalIssues]);
 
   // Today count: active orders with no log OR nextCallDate <= today
   const todayCount = useMemo(() => {

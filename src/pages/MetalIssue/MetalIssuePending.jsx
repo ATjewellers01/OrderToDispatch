@@ -88,7 +88,7 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
 
   const [karigars, setKarigars] = useState(() => {
     try {
-      const saved = localStorage.getItem('master_karigars');
+      const saved = localStorage.getItem('master_karigars_v3');
       return saved ? JSON.parse(saved) : SEEDED_KARIGARS;
     } catch {
       return SEEDED_KARIGARS;
@@ -98,7 +98,7 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
   useEffect(() => {
     const refresh = () => {
       try {
-        const saved = localStorage.getItem('master_karigars');
+        const saved = localStorage.getItem('master_karigars_v3');
         if (saved) setKarigars(JSON.parse(saved));
       } catch (e) {
         console.error(e);

@@ -8,6 +8,7 @@ import DateInput from '../../components/DateInput';
 import { useKarigarOptions } from '../../hooks/useKarigarOptions';
 import { SEEDED_CATEGORIES } from '../Master/Category';
 import { SEEDED_MELTING } from '../Master/Melting';
+import { SEEDED_COMPANIES } from '../Master/CompanyDetails';
 
 const companyNames = [
   "Kalyan Jewellers", "Malabar Gold", "Tanishq", "Joyalukkas", "Bhima Jewellers", 
@@ -133,17 +134,10 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
 
   const [formData, setFormData] = useState(initialFormState);
   const [companies, setCompanies] = useState(() => {
-    const saved = localStorage.getItem('master_companies');
+    const saved = localStorage.getItem('master_companies_v3');
     if (saved) return JSON.parse(saved);
-    const defaultCompanies = companyNames.map((name, index) => ({
-      id: `CO-${String(index + 1).padStart(3, '0')}`,
-      name,
-      number: `98${String(index + 1).padStart(2, '0')}123456`,
-      gmail: `${name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')}@gmail.com`,
-      address: `${index + 12}, Gold Plaza, Zaveri Bazaar, Mumbai`
-    }));
-    localStorage.setItem('master_companies', JSON.stringify(defaultCompanies));
-    return defaultCompanies;
+    localStorage.setItem('master_companies_v3', JSON.stringify(SEEDED_COMPANIES));
+    return SEEDED_COMPANIES;
   });
 
   // ── Master: Delivery Locations ──
@@ -199,7 +193,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
 
   useEffect(() => {
     if (isOpen) {
-      const saved = localStorage.getItem('master_companies');
+      const saved = localStorage.getItem('master_companies_v3');
       if (saved) {
         setCompanies(JSON.parse(saved));
       }
@@ -280,7 +274,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
     [meltingList]
   );
 
-  // Karigar options — live from master_karigars localStorage
+  // Karigar options — live from master_karigars_v3 localStorage
   const karigarOptions = useKarigarOptions();
 
 
@@ -453,7 +447,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
       return;
     }
     if (!formData.companyNumber) {
-      toast.error('Company Number is required');
+      toast.error('Mobile Number is required');
       return;
     }
     if (!formData.orderRecDate) {
@@ -561,7 +555,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">Company Number <span className="text-red-500">*</span></label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Number <span className="text-red-500">*</span></label>
             <input required type="text" name="companyNumber" value={formData.companyNumber} onChange={handleInputChange} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs" />
           </div>
         </div>
@@ -660,7 +654,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         {/* Row 6 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Length</label>
-          <input type="number" step="0.001" name="length" value={formData.length} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input type="text" name="length" value={formData.length} onChange={handleInputChange} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs" />
         </div>
 
         <div>
@@ -671,7 +665,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         {/* Row 7 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Broadness</label>
-          <input type="number" step="0.001" name="broadness" value={formData.broadness} onChange={handleInputChange} onKeyDown={handlePreventInvalidChars} onWheel={(e) => e.target.blur()} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none no-spinners text-xs" />
+          <input type="text" name="broadness" value={formData.broadness} onChange={handleInputChange} className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs" />
         </div>
 
         <div>
@@ -755,7 +749,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
         {/* Row 12 */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Karigar <span className="text-red-500">*</span></label>
-          <CustomDropdown
+          <SearchableDropdown
             options={karigarOptions}
             value={formData.karigar}
             onChange={(val) => handleInputChange({ target: { name: 'karigar', value: val } })}

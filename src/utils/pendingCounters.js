@@ -50,7 +50,7 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
 
   let karigarsList = SEEDED_KARIGARS;
   try {
-    const saved = localStorage.getItem('master_karigars');
+    const saved = localStorage.getItem('master_karigars_v3');
     if (saved) karigarsList = JSON.parse(saved);
   } catch (e) {
     console.error(e);

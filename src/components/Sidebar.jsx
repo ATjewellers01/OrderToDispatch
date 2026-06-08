@@ -60,7 +60,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const adminMenuItems = [
-    { path: '/dashboard', icon: TrendingUp, label: 'On Time Delivery' },
+    { path: '/dashboard', icon: LayoutGrid, label: 'Dashboard' },
+    { path: '/on-time', icon: TrendingUp, label: 'On Time Delivery' },
 
     { path: '/order-history', icon: History, label: 'Order Management' },
     { path: '/metal-issue', icon: Coins, label: 'Metal Issue' },
@@ -86,6 +87,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   ];
 
   const employeeMenuItems = [
+    { path: '/dashboard', icon: LayoutGrid, label: 'Dashboard' },
+    { path: '/on-time', icon: TrendingUp, label: 'On Time Delivery' },
 
     { path: '/order-history', icon: History, label: 'Order Management' },
     { path: '/metal-issue', icon: Coins, label: 'Metal Issue' },

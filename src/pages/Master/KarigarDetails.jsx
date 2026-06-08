@@ -89,21 +89,9 @@ export default function KarigarDetails({
   const isEmbedded = externalSearch !== undefined;
 
   const [karigars, setKarigars] = useState(() => {
-    const saved = localStorage.getItem('master_karigars');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Migrate: reset if any seeded record is missing image data
-      const needsMigration = parsed.some(k =>
-        !k.karigarImage || !k.aadharImage ||
-        k.email === undefined || k.karigarCode === undefined
-      );
-      if (needsMigration) {
-        localStorage.setItem('master_karigars', JSON.stringify(SEEDED_KARIGARS));
-        return SEEDED_KARIGARS;
-      }
-      return parsed;
-    }
-    localStorage.setItem('master_karigars', JSON.stringify(SEEDED_KARIGARS));
+    const saved = localStorage.getItem('master_karigars_v3');
+    if (saved) return JSON.parse(saved);
+    localStorage.setItem('master_karigars_v3', JSON.stringify(SEEDED_KARIGARS));
     return SEEDED_KARIGARS;
   });
 
@@ -117,7 +105,7 @@ export default function KarigarDetails({
   const [localTypeFilter, setLocalTypeFilter] = useState([]);
   const [localShowMobileFilters, setLocalShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   const effectiveSearch = isEmbedded ? (externalSearch || '') : localSearch;
   const effectiveTypeFilter = isEmbedded ? (externalTypeFilter || []) : localTypeFilter;
@@ -130,13 +118,13 @@ export default function KarigarDetails({
 
   const persist = (data) => {
     setKarigars(data);
-    localStorage.setItem('master_karigars', JSON.stringify(data));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'master_karigars', newValue: JSON.stringify(data) }));
+    localStorage.setItem('master_karigars_v3', JSON.stringify(data));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'master_karigars_v3', newValue: JSON.stringify(data) }));
   };
 
   useEffect(() => {
     const onStorage = (e) => {
-      if (e.key === 'master_karigars' && e.newValue) {
+      if (e.key === 'master_karigars_v3' && e.newValue) {
         try { setKarigars(JSON.parse(e.newValue)); } catch {}
       }
     };
@@ -462,7 +450,7 @@ export default function KarigarDetails({
           onPageChange={setCurrentPage}
           onItemsPerPageChange={(val) => { setItemsPerPage(val); setCurrentPage(1); }}
           totalResults={filtered.length}
-          itemsPerPageOptions={[50, 100, 200, 500]}
+          itemsPerPageOptions={[20, 50, 100, 200, 500]}
         />
       </div>
 

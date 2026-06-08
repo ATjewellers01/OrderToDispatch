@@ -6,7 +6,8 @@ import Login from './pages/Login';
 import Settings from './pages/Settings';
 import Master from './pages/Master/Master';
 
-import Dasboard from './pages/On Time/Ontime';
+import Ontime from './pages/On Time/Ontime';
+import Dashboard from './pages/Dashboard/Dashboard';
 import OrderHistory from './pages/Order/OrderHistory';
 import MetalIssue from './pages/MetalIssue/MetalIssue';
 import FollowUp from './pages/FollowUp/FollowUp';
@@ -59,7 +60,8 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<IndexRedirect />} />
-            <Route path="dashboard" element={<Dasboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="on-time" element={<Ontime />} />
             <Route path="settings" element={<Settings />} />
             <Route path="master" element={<Master />} />
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Search, Plus, Filter, Download, FileText, RotateCcw, Edit, Calendar, Eye, Briefcase, Factory } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -73,10 +74,21 @@ const parseDateString = (str) => {
 };
 
 const OrderDetails = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState(null);
   const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    if (location.state && location.state.filter) {
+      setStatusFilter(location.state.filter);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
+
   const [karigars, setKarigars] = useState(() => {
     try {
-      const saved = localStorage.getItem('master_karigars');
+      const saved = localStorage.getItem('master_karigars_v3');
       return saved ? JSON.parse(saved) : SEEDED_KARIGARS;
     } catch {
       return SEEDED_KARIGARS;
@@ -86,7 +98,7 @@ const OrderDetails = () => {
   useEffect(() => {
     const refresh = () => {
       try {
-        const saved = localStorage.getItem('master_karigars');
+        const saved = localStorage.getItem('master_karigars_v3');
         if (saved) setKarigars(JSON.parse(saved));
       } catch (e) {
         console.error(e);
@@ -223,6 +235,7 @@ const OrderDetails = () => {
       orderType: [],
       date: ''
     });
+    setStatusFilter(null);
     setCurrentPage(1);
     toast.success('Filters cleared');
   };
@@ -247,6 +260,25 @@ const OrderDetails = () => {
 
   const filteredOrders = useMemo(() => {
     return nonCloneOrders.filter(o => {
+      if (statusFilter) {
+        const stage = o.orderStage?.toLowerCase() || '';
+        if (statusFilter === 'pending') {
+          if (stage === 'delivered' || stage === 'order cancel') return false;
+        } else if (statusFilter === 'new') {
+          if (stage !== 'new') return false;
+        } else if (statusFilter === 'inprogress') {
+          if (stage === 'new' || stage === 'delivered' || stage === 'order cancel') return false;
+        } else if (statusFilter === 'overdue') {
+          if (stage === 'delivered' || stage === 'order cancel') return false;
+          const left = calculateLeftDays(o.expectedDeliveryDate || o.deliveryDate);
+          if (left === '-' || left >= 0) return false;
+        } else if (statusFilter === 'completed') {
+          if (stage !== 'delivered') return false;
+        } else if (statusFilter === 'dispatched') {
+          if (o.dispatchStatus !== 'Done') return false;
+        }
+      }
+
       if (filters.category && filters.category.length > 0 && !filters.category.includes(o.category)) return false;
       if (filters.karigar && filters.karigar.length > 0 && !filters.karigar.includes(o.karigar)) return false;
       if (filters.melting && filters.melting.length > 0 && !filters.melting.includes(o.melting)) return false;
@@ -259,7 +291,7 @@ const OrderDetails = () => {
       }
       return true;
     });
-  }, [nonCloneOrders, filters]);
+  }, [nonCloneOrders, filters, statusFilter]);
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
   const paginatedOrders = filteredOrders.slice(
@@ -627,6 +659,21 @@ const OrderDetails = () => {
           </button>
         </div>
       </div>
+
+      {statusFilter && (
+        <div className="flex items-center justify-between bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-lg text-xs md:text-sm text-amber-800 font-semibold shadow-sm mx-2 sm:mx-0">
+          <div className="flex items-center gap-2">
+            <span className="uppercase text-[9px] bg-amber-200 text-amber-950 px-2 py-0.5 rounded font-black tracking-wider">Active Filter</span>
+            <span>Showing only <span className="font-extrabold capitalize text-amber-950">{statusFilter === 'inprogress' ? 'In Progress' : statusFilter === 'overdue' ? 'Over Due' : statusFilter}</span> orders</span>
+          </div>
+          <button 
+            onClick={() => setStatusFilter(null)}
+            className="text-amber-700 hover:text-amber-900 hover:underline text-xs font-bold bg-white border border-amber-200 px-2 py-1 rounded shadow-sm hover:bg-amber-100/50 transition-colors"
+          >
+            Clear Filter
+          </button>
+        </div>
+      )}
 
       {/* Table content displaying logs */}
       <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
