@@ -189,6 +189,7 @@ const GhatPrint = ({ order, onClose }) => {
           </div>
         </div>
       </div>
+      </div>
 
       {/* Global Print Styles */}
       <style dangerouslySetInnerHTML={{__html: `
