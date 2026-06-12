@@ -19,7 +19,14 @@ const GhatPrint = ({ order, onClose }) => {
     try {
       setIsDownloading(true);
       toast.loading('Generating PDF...', { id: 'pdf-toast' });
-      const canvas = await html2canvas(printRef.current, { scale: 2, useCORS: true });
+      const element = printRef.current;
+      const canvas = await html2canvas(element, { 
+        scale: 2, 
+        useCORS: true,
+        windowHeight: element.scrollHeight,
+        windowWidth: element.scrollWidth,
+        scrollY: -window.scrollY
+      });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -86,8 +93,9 @@ const GhatPrint = ({ order, onClose }) => {
         </div>
 
         {/* Printable Area */}
-        <div className="flex-1 overflow-y-auto p-3 md:p-5 print:overflow-visible print:p-0 bg-white hide-scrollbar" ref={printRef}>
-          <div className="mb-3 md:mb-4 text-center border-b-2 border-gray-800 pb-2 md:pb-3">
+        <div className="flex-1 overflow-y-auto p-3 md:p-5 print:overflow-visible print:p-0 bg-white hide-scrollbar">
+          <div ref={printRef} className="bg-white pb-2">
+            <div className="mb-3 md:mb-4 text-center border-b-2 border-gray-800 pb-2 md:pb-3">
             <h1 className="text-lg md:text-xl font-black text-gray-900 tracking-wider uppercase">Ghat Jama Slip</h1>
             <p className="text-[10px] md:text-xs text-gray-500 font-medium mt-0.5">Order Ref: {order.orderNo || '-'}</p>
           </div>
@@ -179,7 +187,6 @@ const GhatPrint = ({ order, onClose }) => {
               <p className="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Authorized Signatory</p>
             </div>
           </div>
-
         </div>
       </div>
 
