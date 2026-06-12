@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ClipboardCheck } from 'lucide-react';
 import DataTable from '../../components/DataTable';
 import { formatTargetDate } from '../../utils/tatCalculator';
@@ -54,6 +54,13 @@ const formatDate = (dateStr) => {
   return `${dd}/${mm}/${yyyy}`;
 };
 
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '-';
+  return d.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+};
+
 const getStageColor = (stage) => {
   switch(stage?.toLowerCase()) {
     case 'delivered': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
@@ -89,6 +96,7 @@ const QC1Pending = ({ orders, onQCClick }) => {
     "Target Date",
     "QC1 Status",
     "QC1 Type",
+    "QC1 Timestamp",
     "QC1 Remarks",
     "LEFT Days",
     "Karigar Name",
@@ -99,9 +107,10 @@ const QC1Pending = ({ orders, onQCClick }) => {
     "Order Type",
     "Customer Name",
     "Category",
-    "Order Date",
-    "Karigar Delivery Date",
-    "Expected Date"
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date"
   ];
 
   const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -153,6 +162,9 @@ const QC1Pending = ({ orders, onQCClick }) => {
             </span>
           ) : <span className="text-gray-400">-</span>}
         </td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
+          {order.qc1Timestamp ? formatDateTime(order.qc1Timestamp) : <span className="text-gray-400">-</span>}
+        </td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap truncate max-w-[150px]" title={order.qcRemarks}>{order.qcRemarks || '-'}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap font-medium text-xs">
           <span className={`px-2.5 py-1 rounded-full font-bold border ${leftDays < 0 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>
@@ -167,9 +179,10 @@ const QC1Pending = ({ orders, onQCClick }) => {
         <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate)}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(order.orderRecDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-bold text-gray-800 whitespace-nowrap">{formatDate(order.expectedDeliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
       </tr>
     );
   };

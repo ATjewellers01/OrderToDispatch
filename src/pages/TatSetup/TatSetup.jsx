@@ -13,7 +13,7 @@ const STANDARD_TAT_IDS = [
 const STAGE_NAME_OPTIONS = [
   { value: 'Order', label: 'Order' },
   { value: 'Metal Issue', label: 'Metal Issue' },
-  { value: 'Follow Up', label: 'Follow Up' },
+
   { value: 'QC1', label: 'QC1' },
   { value: 'Ghat Jama', label: 'Ghat Jama' },
   { value: 'Meena Inhouse', label: 'Meena Inhouse' },
@@ -39,16 +39,23 @@ const formatTatDuration = (value, type) => {
   }
   if (type === 'hours') {
     const totalSeconds = Math.round(valNum * 3600);
-    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const s = String(totalSeconds % 60).padStart(2, '0');
-    return `${h}:${m}:${s}`;
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    let parts = [];
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0) parts.push(`${m}m`);
+    if (s > 0) parts.push(`${s}s`);
+    return parts.length > 0 ? parts.join(' ') : '0h';
   }
   if (type === 'minute') {
     const totalSeconds = Math.round(valNum * 60);
-    const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-    const s = String(totalSeconds % 60).padStart(2, '0');
-    return `${m}:${s}`;
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    let parts = [];
+    if (m > 0) parts.push(`${m}m`);
+    if (s > 0) parts.push(`${s}s`);
+    return parts.length > 0 ? parts.join(' ') : '0m';
   }
   return `${valNum}`;
 };
@@ -93,7 +100,7 @@ const getTatFormFromStage = (stage) => {
 const getStageValueFromForm = (form) => {
   const type = form.type;
   if (type === 'day') {
-    return Math.max(0, parseInt(form.days, 10) || 0);
+    return Math.max(0, parseFloat(form.days) || 0);
   }
   if (type === 'hours') {
     const h = Math.max(0, parseInt(form.hours, 10) || 0);
@@ -154,12 +161,14 @@ const TatSetup = () => {
 
     const savedTats = localStorage.getItem('tatSetupDataV3');
     if (savedTats) {
-      setTatStages(JSON.parse(savedTats));
+      const parsedTats = JSON.parse(savedTats).filter(t => t.stageName !== 'Follow Up');
+      setTatStages(parsedTats);
+      localStorage.setItem('tatSetupDataV3', JSON.stringify(parsedTats));
     } else {
       const defaultTats = [
         { id: 'tat-1', stageName: 'Order', value: 1, type: 'day' },
         { id: 'tat-2', stageName: 'Metal Issue', value: 2, type: 'day' },
-        { id: 'tat-3', stageName: 'Follow Up', value: 2, type: 'day' },
+
         { id: 'tat-4', stageName: 'QC1', value: 1, type: 'day' },
         { id: 'tat-5', stageName: 'Ghat Jama', value: 1, type: 'day' },
         { id: 'tat-6', stageName: 'Meena Inhouse', value: 1, type: 'day' },
@@ -240,6 +249,10 @@ const TatSetup = () => {
 
     setShifts(updatedShifts);
     localStorage.setItem('companyShiftsDataV3', JSON.stringify(updatedShifts));
+    
+    // Dispatch event to notify other components to re-fetch
+    window.dispatchEvent(new Event('companyShiftsUpdated'));
+
     toast.success(editingShift ? 'Shift updated successfully' : 'Shift added successfully');
     setIsShiftModalOpen(false);
   };
@@ -258,6 +271,7 @@ const TatSetup = () => {
 
     setShifts(updated);
     localStorage.setItem('companyShiftsDataV3', JSON.stringify(updated));
+    window.dispatchEvent(new Event('companyShiftsUpdated'));
     toast.success('Shift deleted successfully');
   };
 
@@ -330,6 +344,10 @@ const TatSetup = () => {
 
     setTatStages(updatedTats);
     localStorage.setItem('tatSetupDataV3', JSON.stringify(updatedTats));
+    
+    // Dispatch event so other components know TAT is updated
+    window.dispatchEvent(new Event('tatSetupUpdated'));
+
     setIsTatModalOpen(false);
     setEditingTatStage(null);
     setCustomStageText('');
@@ -340,6 +358,7 @@ const TatSetup = () => {
       const updated = tatStages.filter(t => t.id !== id);
       setTatStages(updated);
       localStorage.setItem('tatSetupDataV3', JSON.stringify(updated));
+      window.dispatchEvent(new Event('tatSetupUpdated'));
       toast.success('TAT stage deleted successfully');
     }
   };

@@ -58,7 +58,7 @@ const QC2 = () => {
        o.meenaOutsideStatus === 'Complete' ||
        o.polishOutsideStatus === 'Complete' ||
        o.banglePolishStatus === 'Complete' ||
-       o.ePolishStatus === 'Complete') &&
+       (o.ePolishStatus === 'Complete' && o.ePolishType !== 'Meena Inhouse')) &&
       o.qc2Status !== 'QC Okay' &&
       o.status12 !== 'QC Okay'
     );

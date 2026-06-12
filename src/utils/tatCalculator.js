@@ -16,10 +16,10 @@ export const calculatePlannedDate = (startVal, stageName) => {
     { id: 'shift-1', name: 'General Shift', startTime: '09:00', endTime: '18:00', isDefault: 'Yes' }
   ];
   
-  const tats = savedTats ? JSON.parse(savedTats) : [
+  const tats = savedTats ? JSON.parse(savedTats).filter(t => t.stageName !== 'Follow Up') : [
     { id: 'tat-1', stageName: 'Order', value: 1, type: 'day' },
     { id: 'tat-2', stageName: 'Metal Issue', value: 2, type: 'day' },
-    { id: 'tat-3', stageName: 'Follow Up', value: 2, type: 'day' },
+
     { id: 'tat-4', stageName: 'QC1', value: 1, type: 'day' },
     { id: 'tat-5', stageName: 'Ghat Jama', value: 1, type: 'day' },
     { id: 'tat-6', stageName: 'Meena Inhouse', value: 1, type: 'day' },
@@ -130,7 +130,7 @@ export const calculatePlannedDate = (startVal, stageName) => {
 
 
 /**
- * Calculate delay between Target Date and Done Date.
+ * Calculate delay between Planned Date and Done Date.
  * Uses the default shift to convert excess minutes into meaningful units.
  *
  * @param {string|null} targetDateISO  - The planned/target date (ISO string)
@@ -213,10 +213,10 @@ const getTatTypeForStage = (stageName) => {
   if (!stageName) return 'day';
   try {
     const savedTats = localStorage.getItem('tatSetupDataV3');
-    const tats = savedTats ? JSON.parse(savedTats) : [
+    const tats = savedTats ? JSON.parse(savedTats).filter(t => t.stageName !== 'Follow Up') : [
       { id: 'tat-1', stageName: 'Order', value: 1, type: 'day' },
       { id: 'tat-2', stageName: 'Metal Issue', value: 2, type: 'day' },
-      { id: 'tat-3', stageName: 'Follow Up', value: 2, type: 'day' },
+
       { id: 'tat-4', stageName: 'QC1', value: 1, type: 'day' },
       { id: 'tat-5', stageName: 'Ghat Jama', value: 1, type: 'day' },
       { id: 'tat-6', stageName: 'Meena Inhouse', value: 1, type: 'day' },

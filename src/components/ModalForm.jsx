@@ -97,6 +97,7 @@ const ModalForm = ({
             submitText={submitText}
             className="w-full"
             formId="ultra-compact-form"
+            extraButton={extraFooterAction}
           />
         </div>
       </div>

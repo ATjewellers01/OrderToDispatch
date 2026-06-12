@@ -9,7 +9,6 @@ const MeenaInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
     meenaInhouseStatus: '',
     inhouseChillaiWeight: '',
     inhouseAfterMeenaPolish: '',
-    inhouseRemarks: '',
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -20,7 +19,6 @@ const MeenaInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
         meenaInhouseStatus: order.meenaInhouseType || order.meenaInhouseStatus || '',
         inhouseChillaiWeight: order.inhouseChillaiWeight || '',
         inhouseAfterMeenaPolish: order.inhouseAfterMeenaPolish || '',
-        inhouseRemarks: order.inhouseRemarks || '',
       });
     } else if (!isOpen) {
       setFormData(initialFormState);
@@ -41,7 +39,7 @@ const MeenaInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.meenaInhouseStatus) {
-      toast.error('Meena Inhouse Status is required');
+      toast.error('Issue To is required');
       return;
     }
 
@@ -51,7 +49,6 @@ const MeenaInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
       meenaInhouseType: formData.meenaInhouseStatus,
       inhouseChillaiWeight: formData.inhouseChillaiWeight,
       inhouseAfterMeenaPolish: formData.inhouseAfterMeenaPolish,
-      inhouseRemarks: formData.inhouseRemarks,
     });
 
     onClose();
@@ -86,7 +83,7 @@ const MeenaInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
             <span className="text-gray-900 font-bold">{order.karigar || order.karigarName || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block font-medium uppercase text-[9px] tracking-wide">Category / Product</span>
+            <span className="text-gray-400 block font-medium uppercase text-[9px] tracking-wide">Category</span>
             <span className="text-gray-900 font-bold">{order.category || order.categoryName || '-'}</span>
           </div>
           <div>
@@ -108,10 +105,10 @@ const MeenaInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
         {/* Form Fields */}
         <div className="space-y-3">
 
-          {/* Meena Inhouse Status */}
+          {/* Issue To */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Meena Inhouse Status <span className="text-red-500">*</span>
+              Issue To <span className="text-red-500">*</span>
             </label>
             <CustomDropdown
               options={[
@@ -149,7 +146,7 @@ const MeenaInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
           {/* After Meena Polish Weight */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Inhouse After Meena Polish
+              Inhouse After Meena Weight
             </label>
             <input
               type="number"
@@ -160,21 +157,6 @@ const MeenaInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
               onKeyDown={preventInvalidDecimalChars}
               placeholder="e.g. 12.450"
               className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium"
-            />
-          </div>
-
-          {/* Remarks */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Inhouse Remarks
-            </label>
-            <textarea
-              name="inhouseRemarks"
-              rows="3"
-              value={formData.inhouseRemarks}
-              onChange={handleInputChange}
-              placeholder="Enter inhouse remarks..."
-              className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium resize-none"
             />
           </div>
 

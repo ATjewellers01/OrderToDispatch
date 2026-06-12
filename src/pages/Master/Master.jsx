@@ -5,6 +5,7 @@ import KarigarDetails from './KarigarDetails';
 import DeliveryLocation from './DeliveryLocation';
 import OrderStage from './OrderStage';
 import Category from './Category';
+import Subcategory from './Subcategory';
 import Melting from './Melting';
 
 const VIEWS = [
@@ -13,6 +14,7 @@ const VIEWS = [
   { id: 'delivery', label: 'Delivery Locations',  icon: MapPin    },
   { id: 'orderstage', label: 'Order Stages',      icon: Tag       },
   { id: 'category', label: 'Category',            icon: Layers    },
+  { id: 'subcategory', label: 'Subcategory',      icon: Layers    },
   { id: 'melting',  label: 'Melting',             icon: Flame     },
 ];
 
@@ -47,6 +49,7 @@ export default function Master() {
       delivery:   'delivery-location-add-trigger',
       orderstage: 'order-stage-add-trigger',
       category:   'category-add-trigger',
+      subcategory:'subcategory-add-trigger',
       melting:    'melting-add-trigger',
     };
     document.getElementById(map[activeView])?.click();
@@ -169,6 +172,13 @@ export default function Master() {
                 filtersOnly={true}
               />
             )}
+            {activeView === 'subcategory' && (
+              <Subcategory
+                searchQuery={searchQuery}
+                onClearFilters={handleClearFilters}
+                filtersOnly={true}
+              />
+            )}
             {activeView === 'melting' && (
               <Melting
                 searchQuery={searchQuery}
@@ -222,6 +232,12 @@ export default function Master() {
       )}
       {activeView === 'category' && (
         <Category
+          searchQuery={searchQuery}
+          onClearFilters={handleClearFilters}
+        />
+      )}
+      {activeView === 'subcategory' && (
+        <Subcategory
           searchQuery={searchQuery}
           onClearFilters={handleClearFilters}
         />

@@ -283,6 +283,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
         migratedOrder.images = migratedOrder.image ? [migratedOrder.image] : [];
       }
       delete migratedOrder.image;
+      migratedOrder.orderStage = migratedOrder.manualOrderStage || migratedOrder.orderStage;
       setFormData(migratedOrder);
     } else {
       setFormData(initialFormState);
@@ -305,11 +306,6 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
       if (name === 'expectedDeliveryDate') {
         const expectedDate = parseDateString(value);
         if (expectedDate && !isNaN(expectedDate.getTime())) {
-          // Auto-fill Delivery Date with same date as Expected Delivery Date
-          const ddD = String(expectedDate.getDate()).padStart(2, '0');
-          const mmD = String(expectedDate.getMonth() + 1).padStart(2, '0');
-          const yyyyD = expectedDate.getFullYear();
-          updated.deliveryDate = `${ddD}/${mmD}/${yyyyD}`;
           // Karigar Delivery Date = Expected Delivery Date - 3 days
           const karigarDate = new Date(expectedDate);
           karigarDate.setDate(karigarDate.getDate() - 3);
@@ -318,7 +314,6 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
           const yyyy = karigarDate.getFullYear();
           updated.karigarDeliveryDate = `${dd}/${mm}/${yyyy}`;
         } else {
-          updated.deliveryDate = '';
           updated.karigarDeliveryDate = '';
         }
       }
@@ -455,6 +450,13 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
       toast.error('Delivery Date is required');
       return;
     }
+
+    const orderRecObj = parseDateString(formData.orderRecDate);
+    const deliveryObj = parseDateString(formData.deliveryDate);
+    if (orderRecObj && deliveryObj && deliveryObj < orderRecObj) {
+      toast.error('Delivery Date cannot be before Order Received Date');
+      return;
+    }
     if (!formData.karigarDeliveryDate) {
       toast.error('Karigar Delivery Date is required');
       return;
@@ -476,7 +478,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
       return;
     }
     
-    onSave(formData);
+    onSave({ ...formData, manualOrderStage: formData.orderStage });
     onClose();
   };
 
@@ -539,6 +541,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
           value={formData.deliveryDate}
           onChange={handleInputChange}
           required={true}
+          minDate={formData.orderRecDate}
         />
 
         {/* Row 3 */}
@@ -700,6 +703,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
           value={formData.expectedDeliveryDate}
           onChange={handleInputChange}
           required={true}
+          minDate={formData.orderRecDate}
         />
 
         <DateInput
@@ -708,6 +712,7 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
           value={formData.karigarDeliveryDate}
           onChange={handleInputChange}
           required={true}
+          minDate={formData.orderRecDate}
         />
 
         {/* Row 12 */}

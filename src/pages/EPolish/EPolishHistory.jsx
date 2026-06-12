@@ -100,19 +100,21 @@ const EPolishHistory = ({ orders, onEditClick }) => {
     "E-Polish Status (Type)",
     "E-Polish Weight",
     "E-Polish Loss",
-    "Target Date",
+    "Planned Date",
     "Done Date",
     "Delay",
     "LEFT Days",
     "Karigar Name",
-    "Melting",
-    "Product",
+    "Melting",
     "Metal Issue Type",
     "Total Weight",
     "Order Type",
     "Customer Name",
-    "Order Date",
-    "Expected Date"
+    "Category",
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date"
   ];
 
   const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -166,14 +168,17 @@ const EPolishHistory = ({ orders, onEditClick }) => {
           </span>
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || order.karigarName || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || order.categoryName || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-amber-600 font-semibold whitespace-nowrap">{order.metalIssueType || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || order.weight || '-'} {order.totalWeight ? 'g' : ''}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || order.customerName || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
+        
+                <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.expectedDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
       </tr>
     );
   };
@@ -192,6 +197,10 @@ const EPolishHistory = ({ orders, onEditClick }) => {
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Customer</span>
             <span className="text-gray-700 font-bold">{order.company || order.customerName || '-'}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Category</span>
+            <span className="text-gray-700 font-bold">{order.category || '-'}</span>
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>

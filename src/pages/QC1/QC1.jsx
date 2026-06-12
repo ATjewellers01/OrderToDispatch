@@ -25,6 +25,7 @@ const QC1 = () => {
   });
 
   const [followUpLogs, setFollowUpLogs] = useState([]);
+  const [metalIssues, setMetalIssues] = useState([]);
 
   // Load from localStorage
   useEffect(() => {
@@ -35,6 +36,10 @@ const QC1 = () => {
     const savedLogs = localStorage.getItem('followUpHistoryDataV3');
     if (savedLogs) {
       setFollowUpLogs(JSON.parse(savedLogs));
+    }
+    const savedIssues = localStorage.getItem('metalIssuesDataV3');
+    if (savedIssues) {
+      setMetalIssues(JSON.parse(savedIssues));
     }
   }, []);
 
@@ -80,7 +85,8 @@ const QC1 = () => {
           ...originalOrder,
           status3: 'QC Okay',
           qc1Type: 'Partly Clear',
-          qcRemarks: updatedOrder.qcRemarks
+          qcRemarks: updatedOrder.qcRemarks,
+          qc1Timestamp: new Date().toISOString()
         };
         
         const updatedList = orders.map(o => o.id === originalOrder.id ? resetOriginalOrder : o);
@@ -118,6 +124,23 @@ const QC1 = () => {
     return map;
   }, [followUpLogs]);
 
+  const issueMap = useMemo(() => {
+    const map = new Map();
+    metalIssues.forEach(issue => {
+      map.set(issue.orderId, issue);
+    });
+    return map;
+  }, [metalIssues]);
+
+  const enrichOrder = (o) => {
+    const baseId = String(o.id).replace(/-P\d+$/, '');
+    const issue = issueMap.get(baseId);
+    return {
+      ...o,
+      metalIssueType: o.metalIssueType || issue?.metalIssueType || '-'
+    };
+  };
+
   // Base split without filters
   const basePendingOrders = useMemo(() => {
     return orders.filter(o => {
@@ -125,13 +148,13 @@ const QC1 = () => {
       if (o.status3 === 'QC Okay' && o.qc1Type === 'Complete') return false;
       const followUpLog = latestFollowUpMap.get(o.id) || latestFollowUpMap.get(o.orderNo);
       const isGhatJamaDone = followUpLog?.status === 'Ghat Jama Flw-up Done';
-      return o.orderStage === 'QC' && isGhatJamaDone;
-    });
-  }, [orders, latestFollowUpMap]);
+      return (o.orderStage === 'QC' || o.orderStage === 'QC1') && isGhatJamaDone;
+    }).map(enrichOrder);
+  }, [orders, latestFollowUpMap, issueMap]);
 
   const baseHistoryOrders = useMemo(() => {
-    return orders.filter(o => o.status3 === 'QC Okay' && (o.qc1Type === 'Complete' || (o.id && String(o.id).includes('-P'))));
-  }, [orders]);
+    return orders.filter(o => o.status3 === 'QC Okay' && (o.qc1Type === 'Complete' || (o.id && String(o.id).includes('-P')))).map(enrichOrder);
+  }, [orders, issueMap]);
 
   const activeBaseOrders = activeTab === 'pending' ? basePendingOrders : baseHistoryOrders;
 

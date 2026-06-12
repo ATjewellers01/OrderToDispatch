@@ -53,9 +53,12 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
       toast.error('Labeling Status is required');
       return;
     }
-    if (!formData.sentCompanyName) {
-      toast.error('Sent Company Name is required');
-      return;
+
+    if (formData.huidStatus === 'Sent To Huid') {
+      if (!formData.sentCompanyName) {
+        toast.error('Party Name is required');
+        return;
+      }
     }
     if (formData.sentHuidLabelPcs === '' || isNaN(formData.sentHuidLabelPcs)) {
       toast.error('Sent Huid/Label Pcs must be a valid number');
@@ -66,7 +69,7 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
       ...order,
       huidStatus: formData.huidStatus,
       labelingStatus: formData.labelingStatus,
-      sentCompanyName: formData.sentCompanyName,
+      sentCompanyName: formData.huidStatus === 'Sent To Huid' ? formData.sentCompanyName : '',
       sentHuidLabelPcs: Number(formData.sentHuidLabelPcs),
       huidRemarks: formData.huidRemarks,
       huidTimestamp: new Date().toISOString(),
@@ -104,7 +107,7 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
             <span className="text-gray-900 font-bold">{order.karigar || order.karigarName || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block font-medium uppercase text-[9px] tracking-wide">Category / Product</span>
+            <span className="text-gray-400 block font-medium uppercase text-[9px] tracking-wide">Category</span>
             <span className="text-gray-900 font-bold">{order.category || order.categoryName || '-'}</span>
           </div>
           <div>
@@ -126,9 +129,9 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
             </label>
             <CustomDropdown
               options={[
+                { value: 'Sent To Huid', label: 'Sent To Huid' },
                 { value: 'Huid Complete', label: 'Huid Complete' },
-                { value: 'Sent In Huid', label: 'Sent In Huid' },
-                { value: 'No Huid', label: 'No Huid' }
+                { value: 'No HUID', label: 'No HUID' }
               ]}
               value={formData.huidStatus}
               onChange={(val) => handleInputChange({ target: { name: 'huidStatus', value: val } })}
@@ -139,7 +142,7 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
             />
           </div>
 
-          {/* Labeling Status */}
+          {/* Labeling Status (Always shown) */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
               Labeling Status <span className="text-red-500">*</span>
@@ -158,31 +161,32 @@ const LabelForm = ({ isOpen, onClose, onSave, order }) => {
             />
           </div>
 
-          {/* Sent Company Name */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Sent Company Name <span className="text-red-500">*</span>
-            </label>
-            <CustomDropdown
-              options={[
-                { value: 'Nakoda', label: 'Nakoda' },
-                { value: 'Vinayaka', label: 'Vinayaka' },
-                { value: 'Raipur', label: 'Raipur' },
-                { value: 'No Huid', label: 'No Huid' }
-              ]}
-              value={formData.sentCompanyName}
-              onChange={(val) => handleInputChange({ target: { name: 'sentCompanyName', value: val } })}
-              placeholder="Select Sent Company Name"
-              className="w-full text-xs"
-              height="h-[34px]"
-              rounded="rounded-lg"
-            />
-          </div>
+          {/* Conditional: Sent To Huid */}
+          {formData.huidStatus === 'Sent To Huid' && (
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Party Name <span className="text-red-500">*</span>
+              </label>
+              <CustomDropdown
+                options={[
+                  { value: 'Raipur', label: 'Raipur' },
+                  { value: 'Kolkata', label: 'Kolkata' },
+                  { value: 'Mumbai', label: 'Mumbai' }
+                ]}
+                value={formData.sentCompanyName}
+                onChange={(val) => handleInputChange({ target: { name: 'sentCompanyName', value: val } })}
+                placeholder="Select Party Name"
+                className="w-full text-xs"
+                height="h-[34px]"
+                rounded="rounded-lg"
+              />
+            </div>
+          )}
 
           {/* Sent Huid/Label Pcs */}
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Sent Huid/Label Pcs <span className="text-red-500">*</span>
+              Pcs <span className="text-red-500">*</span>
             </label>
             <input required
               type="number" step="0.001"

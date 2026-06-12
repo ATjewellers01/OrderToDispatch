@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Pencil, Layers, ShieldCheck, Tag } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import DataTable from '../../components/DataTable';
-import { formatTargetDate } from '../../utils/tatCalculator';
+import { formatTargetDate, calculatePlannedDate, calculateDelay } from '../../utils/tatCalculator';
 
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
@@ -231,10 +231,9 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
-    "Target Date",
     "Calling Date", "Next Date Of Call", "Customer Name", "Category Name", "Melting", "Weight", 
-    "Total Quantity", "Karigar Now", "Order Date", "Karigar Delivery Date", 
-    "Delivery Date", "New Expected Date", "Metal Issue Status", "Paid Weight", "Metal Issue Type", "Order Stage", "Follow-up Status", 
+    "Total Quantity", "Karigar Now", "Order Rec. Date", "Delivery Date", 
+    "Expected Delivery Date", "Karigar Delivery Date", "Metal Issue Status", "Paid Weight", "Metal Issue Type", "Order Stage", "Follow-up Status", 
     "Order Status", "Order Type", "Remarks"
   ];
 
@@ -258,18 +257,60 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
           {o.orderNo || '-'}
         </td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs">
-          {o.currentStagePlannedDate ? (
-            <span className={`px-2 py-1 rounded font-bold border ${
-              new Date() > new Date(o.currentStagePlannedDate)
-                ? 'bg-red-100 text-red-800 border-red-200 animate-pulse'
-                : 'bg-blue-100 text-blue-800 border-blue-200'
-            }`}>
-              {formatTargetDate(o.currentStagePlannedDate)}
-            </span>
-          ) : <span className="text-gray-400">-</span>}
-        </td>
-        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap font-medium">
-          {l ? new Date(l.timestamp).toLocaleDateString('en-GB') : '-'}
+          {(() => {
+            if (!issue?.timestamp) return <span className="text-gray-400">-</span>;
+            let callingDateStr = null;
+            if (l && (l.nextDate || l.nextCallDate)) {
+              const nextD = parseDateString(l.nextDate || l.nextCallDate);
+              if (nextD && !isNaN(nextD.getTime())) {
+                const cDate = new Date(nextD);
+                cDate.setDate(cDate.getDate() - 1);
+                callingDateStr = cDate.toISOString();
+              }
+            }
+            if (!callingDateStr) {
+              const kDate = o?.karigarDeliveryDate ? parseDateString(o.karigarDeliveryDate) : (() => {
+                const exp = parseDateString(o?.expectedDeliveryDate);
+                if (exp && !isNaN(exp.getTime())) {
+                  const b3 = new Date(exp);
+                  b3.setDate(b3.getDate() - 3);
+                  return b3;
+                }
+                return null;
+              })();
+              if (kDate && !isNaN(kDate.getTime())) {
+                const cDate = new Date(kDate);
+                cDate.setDate(cDate.getDate() - 3);
+                callingDateStr = cDate.toISOString();
+              }
+            }
+            if (!callingDateStr) return <span className="text-gray-400">-</span>;
+            
+            let delayDisplay = null;
+            let isPastDue = false;
+            if (callingDateStr) {
+              const tDate = new Date();
+              tDate.setHours(0,0,0,0);
+              const cDateObj = new Date(callingDateStr);
+              cDateObj.setHours(0,0,0,0);
+              if (tDate > cDateObj) {
+                isPastDue = true;
+                const delayObj = calculateDelay(callingDateStr, new Date().toISOString());
+                if (delayObj.isDelayed) delayDisplay = delayObj.display;
+              }
+            }
+
+            return (
+              <span className={`px-2 py-1 rounded font-bold border ${
+                isPastDue
+                  ? 'bg-red-100 text-red-800 border-red-200 animate-pulse'
+                  : 'bg-blue-100 text-blue-800 border-blue-200'
+              }`}>
+                {formatTargetDate(callingDateStr)}
+                {delayDisplay && <span className="ml-1 text-[9px] text-red-600 font-black">({delayDisplay})</span>}
+              </span>
+            );
+          })()}
         </td>
         <td className="px-4 py-3 text-center text-xs text-red-600 whitespace-nowrap font-bold">
           {l ? formatDate(l.nextDate || l.nextCallDate) : 'Call Pending'}
@@ -281,9 +322,19 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{o.quantity || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{o.karigar || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.orderRecDate)}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.karigarDeliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.deliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-800 whitespace-nowrap">{formatDate(o.expectedDeliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">
+          {o.karigarDeliveryDate ? formatDate(o.karigarDeliveryDate) : (() => {
+            const exp = parseDateString(o.expectedDeliveryDate);
+            if (exp && !isNaN(exp.getTime())) {
+              const before3Days = new Date(exp);
+              before3Days.setDate(before3Days.getDate() - 3);
+              return formatDate(before3Days);
+            }
+            return '-';
+          })()}
+        </td>
         <td className="px-4 py-3 text-center text-xs whitespace-nowrap">
           {issue ? (
             <span className={`px-2 py-0.5 rounded font-bold border ${issue.metalIssueStatus === 'Metal On Delivery' ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-amber-100 text-amber-800 border-amber-200'}`}>
@@ -317,6 +368,7 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
   const renderCard = (item, idx) => {
     const o = item.order;
     const l = item.latestLog;
+    const issue = metalIssueMap.get(o.id);
     
     return (
       <div key={o.id || idx} className="bg-white rounded-xl border border-amber-50 shadow-sm p-4 space-y-3 transition-all hover:shadow-md hover:border-amber-100">
@@ -336,14 +388,61 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
             <span className="text-gray-700 font-semibold">{o.karigar || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Target Date</span>
-            {o.currentStagePlannedDate ? (
-              <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
-                new Date() > new Date(o.currentStagePlannedDate)
-                  ? 'bg-red-100 text-red-800 border-red-200'
-                  : 'bg-blue-100 text-blue-800 border-blue-200'
-              }`}>{formatTargetDate(o.currentStagePlannedDate)}</span>
-            ) : <span className="text-gray-400">-</span>}
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Calling Date</span>
+            {(() => {
+              if (!issue?.timestamp) return <span className="text-gray-400">-</span>;
+              let callingDateStr = null;
+              if (l && (l.nextDate || l.nextCallDate)) {
+                const nextD = parseDateString(l.nextDate || l.nextCallDate);
+                if (nextD && !isNaN(nextD.getTime())) {
+                  const cDate = new Date(nextD);
+                  cDate.setDate(cDate.getDate() - 1);
+                  callingDateStr = cDate.toISOString();
+                }
+              }
+              if (!callingDateStr) {
+                const kDate = o?.karigarDeliveryDate ? parseDateString(o.karigarDeliveryDate) : (() => {
+                  const exp = parseDateString(o?.expectedDeliveryDate);
+                  if (exp && !isNaN(exp.getTime())) {
+                    const b3 = new Date(exp);
+                    b3.setDate(b3.getDate() - 3);
+                    return b3;
+                  }
+                  return null;
+                })();
+                if (kDate && !isNaN(kDate.getTime())) {
+                  const cDate = new Date(kDate);
+                  cDate.setDate(cDate.getDate() - 3);
+                  callingDateStr = cDate.toISOString();
+                }
+              }
+              if (!callingDateStr) return <span className="text-gray-400">-</span>;
+
+              let delayDisplay = null;
+              let isPastDue = false;
+              if (callingDateStr) {
+                const tDate = new Date();
+                tDate.setHours(0,0,0,0);
+                const cDateObj = new Date(callingDateStr);
+                cDateObj.setHours(0,0,0,0);
+                if (tDate > cDateObj) {
+                  isPastDue = true;
+                  const delayObj = calculateDelay(callingDateStr, new Date().toISOString());
+                  if (delayObj.isDelayed) delayDisplay = delayObj.display;
+                }
+              }
+
+              return (
+                <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
+                  isPastDue
+                    ? 'bg-red-100 text-red-800 border-red-200'
+                    : 'bg-blue-100 text-blue-800 border-blue-200'
+                }`}>
+                  {formatTargetDate(callingDateStr)}
+                  {delayDisplay && <span className="ml-1 text-[8px] text-red-600 font-black">({delayDisplay})</span>}
+                </span>
+              );
+            })()}
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Scheduled Call</span>
@@ -370,8 +469,18 @@ const FollowUpPendingTotal = ({ orders, historyLogs, filters, metalIssues, onUpd
 
   return (
     <div className="space-y-4 flex flex-col h-auto md:h-full min-h-0">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         
+        {/* Big Pending Count Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-center items-center min-h-[260px] relative overflow-hidden">
+          <div className="absolute -bottom-4 -right-4 p-4 opacity-5 text-amber-500">
+            <Layers size={120} />
+          </div>
+          <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 mb-2 relative z-10 text-center">Total Pending</h3>
+          <span className="text-8xl font-black text-amber-500 drop-shadow-sm relative z-10">{filteredOrders.length}</span>
+          <p className="text-xs font-bold mt-4 text-slate-500 tracking-wide relative z-10 text-center">ALL ORDERS TO CALL</p>
+        </div>
+
         {/* Order Stage Distribution Metric Card */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col min-h-[260px]">
           <div className="flex items-center gap-2 mb-2">

@@ -93,7 +93,7 @@ const QCForm = ({ isOpen, onClose, onSave, order, isEdit = false }) => {
             <span className="text-gray-800 font-bold">{order.melting || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block font-medium">Product / Category</span>
+            <span className="text-gray-400 block font-medium">Category</span>
             <span className="text-gray-800 font-bold">{order.category || '-'}</span>
           </div>
           <div>

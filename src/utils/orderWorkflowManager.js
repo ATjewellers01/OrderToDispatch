@@ -29,96 +29,59 @@ export const syncOrderPlannedDates = (prevOrder, nextOrder) => {
   const prevStage = prevOrder.orderStage || '';
   const nextStage = nextOrder.orderStage || '';
 
-  // Check key transitions
-  const stageChanged = prevStage !== nextStage;
-  const qc1Changed = prevOrder.status3 !== nextOrder.status3;
-  const qc1TypeChanged = prevOrder.qc1Type !== nextOrder.qc1Type;
-  const ghatChanged = prevOrder.ghatJamaStatus !== nextOrder.ghatJamaStatus;
+  let targetStage = nextStage;
 
-  // Polish / Meena completed
-  const polishInhouseDone = prevOrder.polishInhouseStatus !== 'Complete' && nextOrder.polishInhouseStatus === 'Complete';
-  const polishOutsideDone = prevOrder.polishOutsideStatus !== 'Complete' && nextOrder.polishOutsideStatus === 'Complete';
-  const banglePolishDone = prevOrder.banglePolishStatus !== 'Complete' && nextOrder.banglePolishStatus === 'Complete';
-  const ePolishDone = prevOrder.ePolishStatus !== 'Complete' && nextOrder.ePolishStatus === 'Complete';
-  const meenaInhouseDone = prevOrder.meenaInhouseStatus !== 'Complete' && nextOrder.meenaInhouseStatus === 'Complete';
-  const meenaOutsideDone = prevOrder.meenaOutsideStatus !== 'Complete' && nextOrder.meenaOutsideStatus === 'Complete';
-  const polishOrMeenaCompleted = polishInhouseDone || polishOutsideDone || banglePolishDone || ePolishDone || meenaInhouseDone || meenaOutsideDone;
+  // Normalizing Follow Up
+  if (nextStage === 'Follow Up') {
+    targetStage = 'Follow Up';
+  } else if (nextStage === 'QC' && prevStage !== 'QC') {
+    targetStage = 'QC1';
+  }
 
-  // QC2 completed
-  const qc2Done = (prevOrder.qc2Status !== 'QC Okay' && nextOrder.qc2Status === 'QC Okay') || 
-                  (prevOrder.status12 !== 'QC Okay' && nextOrder.status12 === 'QC Okay');
-
-  // Dispatch completed
-  const dispatchDone = prevOrder.dispatchStatus !== 'Done' && nextOrder.dispatchStatus === 'Done';
-
-  // Receipt completed
-  const receiptDone = prevOrder.receiptStatus !== 'Done' && nextOrder.receiptStatus === 'Done';
-
-  // QC3 completed
-  const qc3Done = (prevOrder.qc3Status !== 'QC Ok' && nextOrder.qc3Status === 'QC Ok') ||
-                  (prevOrder.qc3Status !== 'QC Okay' && nextOrder.qc3Status === 'QC Okay') ||
-                  (prevOrder.status15 !== 'Complete' && nextOrder.status15 === 'Complete');
-
-  // HUID completed
-  const huidDone = !prevOrder.huidStatus && !!nextOrder.huidStatus;
-
-  // Receive In Stock completed
-  const stockDone = prevOrder.receiveInStockStatus !== 'Received' && nextOrder.receiveInStockStatus === 'Received';
-
-  if (
-    stageChanged || 
-    qc1Changed || 
-    qc1TypeChanged || 
-    ghatChanged || 
-    polishOrMeenaCompleted || 
-    qc2Done || 
-    dispatchDone || 
-    receiptDone || 
-    qc3Done || 
-    huidDone || 
-    stockDone
+  // Determine the furthest completed stage
+  if (nextOrder.deliveryStatus === 'Cancel') {
+    targetStage = 'Order Cancel';
+  } else if (nextOrder.deliveryStatus === 'Complete' || nextStage?.toLowerCase() === 'delivered') {
+    targetStage = 'Delivered';
+  } else if (nextOrder.receiveInStockStatus === 'Received') {
+    targetStage = 'Delivery';
+  } else if (nextOrder.huidStatus) {
+    targetStage = 'Receive In Stock';
+  } else if (nextOrder.qc3Status === 'QC Ok' || nextOrder.qc3Status === 'QC Okay' || nextOrder.status15 === 'Complete') {
+    targetStage = 'HUID/Label';
+  } else if (nextOrder.receiptStatus === 'Done') {
+    targetStage = 'QC3';
+  } else if (nextOrder.dispatchStatus === 'Done') {
+    targetStage = 'RD (Receipt Department)';
+  } else if (nextOrder.qc2Status === 'QC Okay' || nextOrder.status12 === 'QC Okay') {
+    targetStage = 'Dispatch';
+  } else if (
+    nextOrder.polishInhouseStatus === 'Complete' || 
+    nextOrder.polishOutsideStatus === 'Complete' || 
+    nextOrder.banglePolishStatus === 'Complete' || 
+    nextOrder.ePolishStatus === 'Complete' || 
+    nextOrder.meenaInhouseStatus === 'Complete' || 
+    nextOrder.meenaOutsideStatus === 'Complete'
   ) {
-    let targetStage = nextStage;
+    targetStage = 'QC2';
+  } else if (nextOrder.ghatJamaStatus === 'Complete') {
+    targetStage = nextOrder.ghatJamaType || 'Polish Inhouse';
+  } else if (nextOrder.status3 === 'QC Okay' && (nextOrder.qc1Type === 'Complete' || nextOrder.qc1Type === 'Partly Clear')) {
+    targetStage = 'Ghat Jama';
+  }
 
-    // Normalizing transitions
-    if (nextStage === 'Follow Up') {
-      targetStage = 'Follow Up';
-    } else if (nextStage === 'QC' && prevStage !== 'QC') {
-      targetStage = 'QC1';
-    } else if (
-      nextOrder.status3 === 'QC Okay' && 
-      (nextOrder.qc1Type === 'Complete' || nextOrder.qc1Type === 'Partly Clear') && 
-      (prevOrder.status3 !== 'QC Okay' || prevOrder.qc1Type !== nextOrder.qc1Type)
-    ) {
-      targetStage = 'Ghat Jama';
-    } else if (nextOrder.ghatJamaStatus === 'Complete' && prevOrder.ghatJamaStatus !== 'Complete') {
-      targetStage = nextOrder.ghatJamaType || 'Polish Inhouse';
-    } else if (polishOrMeenaCompleted) {
-      targetStage = 'QC2';
-    } else if (qc2Done) {
-      targetStage = 'Dispatch';
-    } else if (dispatchDone) {
-      targetStage = 'RD (Receipt Department)';
-    } else if (receiptDone) {
-      targetStage = 'QC3';
-    } else if (qc3Done) {
-      targetStage = 'HUID/Label';
-    } else if (huidDone) {
-      targetStage = 'Receive In Stock';
-    } else if (stockDone) {
-      targetStage = 'Delivery';
-    } else if (nextStage?.toLowerCase() === 'delivered') {
-      targetStage = 'Delivery';
-    }
-
-    if (targetStage) {
-      const plannedDate = calculatePlannedDate(new Date(), targetStage);
-      updatedOrder.plannedDates = {
-        ...updatedOrder.plannedDates,
-        [targetStage]: plannedDate
-      };
-      updatedOrder.currentStagePlannedDate = plannedDate;
-    }
+  if (targetStage && targetStage !== prevStage) {
+    const plannedDate = calculatePlannedDate(new Date(), targetStage);
+    updatedOrder.plannedDates = {
+      ...updatedOrder.plannedDates,
+      [targetStage]: plannedDate
+    };
+    updatedOrder.currentStagePlannedDate = plannedDate;
+  }
+  
+  // Always ensure orderStage reflects the true calculated targetStage
+  if (targetStage) {
+    updatedOrder.orderStage = targetStage;
   }
 
   return updatedOrder;

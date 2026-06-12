@@ -7,7 +7,6 @@ const PolishInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
   const initialFormState = {
     inhouseAfterPolishWeight: '',
     inhouseMeenaPolishLoss: '',
-    inhouseRemarks: '',
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -17,7 +16,6 @@ const PolishInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
       setFormData({
         inhouseAfterPolishWeight: order.inhouseAfterPolishWeight || '',
         inhouseMeenaPolishLoss: order.inhouseMeenaPolishLoss || '',
-        inhouseRemarks: order.inhouseRemarks || '',
       });
     } else if (!isOpen) {
       setFormData(initialFormState);
@@ -43,7 +41,6 @@ const PolishInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
       polishInhouseStatus: 'Complete',
       inhouseAfterPolishWeight: formData.inhouseAfterPolishWeight,
       inhouseMeenaPolishLoss: formData.inhouseMeenaPolishLoss,
-      inhouseRemarks: formData.inhouseRemarks,
     });
 
     onClose();
@@ -78,7 +75,7 @@ const PolishInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
             <span className="text-gray-900 font-bold">{order.karigar || order.karigarName || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block font-medium uppercase text-[9px] tracking-wide">Category / Product</span>
+            <span className="text-gray-400 block font-medium uppercase text-[9px] tracking-wide">Category</span>
             <span className="text-gray-900 font-bold">{order.category || order.categoryName || '-'}</span>
           </div>
           <div>
@@ -130,21 +127,6 @@ const PolishInhouseEdit = ({ isOpen, onClose, onSave, order }) => {
               onKeyDown={preventInvalidDecimalChars}
               placeholder="e.g. 0.050"
               className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium"
-            />
-          </div>
-
-          {/* Remarks */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Inhouse Remarks
-            </label>
-            <textarea
-              name="inhouseRemarks"
-              rows="3"
-              value={formData.inhouseRemarks}
-              onChange={handleInputChange}
-              placeholder="Enter remarks..."
-              className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs font-medium resize-none"
             />
           </div>
         </div>

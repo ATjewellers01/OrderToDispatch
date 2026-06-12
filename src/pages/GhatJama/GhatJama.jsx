@@ -8,6 +8,7 @@ import GhatJamaPending from './GhatJamaPending';
 import GhatJamaHistory from './GhatJamaHistory';
 import GhatJamaForm from './GhatJamaForm';
 import GhatJamaEdit from './GhatJamaEdit';
+import GhatPrint from './GhatPrint';
 import { saveOrderAndSyncPlannedDates } from '../../utils/orderWorkflowManager';
 
 const GhatJama = () => {
@@ -18,6 +19,7 @@ const GhatJama = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editOrder, setEditOrder] = useState(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [printOrder, setPrintOrder] = useState(null);
 
   const [filters, setFilters] = useState({
     searchQuery: '',
@@ -258,6 +260,7 @@ const GhatJama = () => {
               setEditOrder(order);
               setIsEditOpen(true);
             }}
+            onPrintClick={setPrintOrder}
           />
         )}
       </div>
@@ -271,6 +274,7 @@ const GhatJama = () => {
         }}
         onSave={handleSaveGhatJama}
         order={selectedOrder}
+        onPrint={() => setPrintOrder(selectedOrder)}
       />
 
       {/* Edit Modal (History) */}
@@ -282,7 +286,16 @@ const GhatJama = () => {
         }}
         onSave={handleSaveGhatJama}
         order={editOrder}
+        onPrint={() => setPrintOrder(editOrder)}
       />
+
+      {/* Print Overlay */}
+      {printOrder && (
+        <GhatPrint
+          order={printOrder}
+          onClose={() => setPrintOrder(null)}
+        />
+      )}
     </div>
   );
 };

@@ -57,8 +57,9 @@ const BanglePolish = () => {
       o.ghatJamaStatus === 'Complete' && 
       (
         o.ghatJamaType === 'Bangle Polish' || 
-        (o.ghatJamaType === 'Meena Inhouse' && o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Bangle Polish') ||
-        (o.ghatJamaType === 'Meena Outside' && o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Bangle Polish')
+        (o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Bangle Polish') ||
+        (o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Bangle Polish') ||
+        (o.ePolishStatus === 'Complete' && o.ePolishType === 'Bangle Polish')
       ) &&
       (!o.banglePolishStatus || o.banglePolishStatus === '' || o.banglePolishStatus === 'Pending')
     );

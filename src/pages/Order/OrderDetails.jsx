@@ -330,6 +330,7 @@ const OrderDetails = () => {
     "Order Stage",
     "Total Weight",
     "Delivery Location",
+    "Process Stage",
     "Images (view)",
     { label: 'Pdf Download', className: 'sticky right-0 bg-gray-50 z-20 shadow-[-1px_0_0_#e5e7eb]' }
   ];
@@ -426,12 +427,17 @@ const OrderDetails = () => {
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.qc || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.sampleWeight || '-'}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap">
-          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getStageColor(order.orderStage)}`}>
-            {order.orderStage || 'New'}
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getStageColor(order.manualOrderStage || order.orderStage)}`}>
+            {order.manualOrderStage || order.orderStage || 'New'}
           </span>
         </td>
         <td className="px-4 py-3 text-center text-xs font-black text-gray-900 whitespace-nowrap">{order.totalWeight || '-'} g</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.deliveryLocation || '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getStageColor(order.orderStage)}`}>
+            {order.orderStage?.toLowerCase() === 'in process' ? 'Metal Issue' : order.orderStage || 'New'}
+          </span>
+        </td>
         <td className="px-4 py-3 text-center whitespace-nowrap">
           <button
             onClick={() => setViewingImages({ orderNo: order.orderNo, images: order.images || [] })}
@@ -462,9 +468,14 @@ const OrderDetails = () => {
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-gray-900 uppercase truncate max-w-[150px]">Order: {order.orderNo || '-'}</span>
           </div>
-          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase border ${getStageColor(order.orderStage)}`}>
-            {order.orderStage || 'New'}
-          </span>
+          <div className="flex gap-1">
+            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase border ${getStageColor(order.orderStage)}`} title="Process Stage">
+              {order.orderStage?.toLowerCase() === 'in process' ? 'Metal Issue' : order.orderStage || 'New'}
+            </span>
+            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase border ${getStageColor(order.manualOrderStage || order.orderStage)}`} title="Order Stage">
+              {order.manualOrderStage || order.orderStage || 'New'}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 rounded-lg p-2 border border-slate-100/50">

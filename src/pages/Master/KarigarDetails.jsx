@@ -11,7 +11,7 @@ const KARIGAR_TYPES = ['Office', 'Factory'];
 const EMPTY_FORM = {
   name: '', number: '', address: '', type: 'Office',
   karigarCode: '', email: '', aadharNumber: '',
-  karigarImage: '', aadharImage: '',
+  karigarImage: '', aadharImage: '', verifyBy: ''
 };
 
 // ── Image compression helper ──────────────────────────────────────────────────
@@ -89,9 +89,9 @@ export default function KarigarDetails({
   const isEmbedded = externalSearch !== undefined;
 
   const [karigars, setKarigars] = useState(() => {
-    const saved = localStorage.getItem('master_karigars_v3');
+    const saved = localStorage.getItem('master_karigars_v4');
     if (saved) return JSON.parse(saved);
-    localStorage.setItem('master_karigars_v3', JSON.stringify(SEEDED_KARIGARS));
+    localStorage.setItem('master_karigars_v4', JSON.stringify(SEEDED_KARIGARS));
     return SEEDED_KARIGARS;
   });
 
@@ -118,13 +118,13 @@ export default function KarigarDetails({
 
   const persist = (data) => {
     setKarigars(data);
-    localStorage.setItem('master_karigars_v3', JSON.stringify(data));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'master_karigars_v3', newValue: JSON.stringify(data) }));
+    localStorage.setItem('master_karigars_v4', JSON.stringify(data));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'master_karigars_v4', newValue: JSON.stringify(data) }));
   };
 
   useEffect(() => {
     const onStorage = (e) => {
-      if (e.key === 'master_karigars_v3' && e.newValue) {
+      if (e.key === 'master_karigars_v4' && e.newValue) {
         try { setKarigars(JSON.parse(e.newValue)); } catch {}
       }
     };
@@ -153,6 +153,7 @@ export default function KarigarDetails({
       aadharNumber: newKarigar.aadharNumber.trim(),
       karigarImage: newKarigar.karigarImage || '',
       aadharImage: newKarigar.aadharImage || '',
+      verifyBy: newKarigar.verifyBy || '',
     }]);
     setNewKarigar({ ...EMPTY_FORM });
     setShowAddModal(false);
@@ -198,7 +199,8 @@ export default function KarigarDetails({
         (k.email || '').toLowerCase().includes(q) ||
         (k.aadharNumber || '').toLowerCase().includes(q) ||
         k.address.toLowerCase().includes(q) ||
-        k.type.toLowerCase().includes(q)
+        k.type.toLowerCase().includes(q) ||
+        (k.verifyBy || '').toLowerCase().includes(q)
       );
     }
     return true;
@@ -207,7 +209,7 @@ export default function KarigarDetails({
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const tableHeaders = ['Sr.No', 'Code', 'Karigar Name', 'Number', 'Email', 'Aadhar No', 'Photo', 'Aadhar', 'Address', 'Type', 'Action'];
+  const tableHeaders = ['Sr.No', 'Code', 'Karigar Name', 'Number', 'Email', 'Aadhar No', 'Photo', 'Aadhar', 'Address', 'Type', 'Verify By', 'Action'];
 
   const renderRow = (k, idx) => {
     const globalIdx = (currentPage - 1) * itemsPerPage + idx + 1;
@@ -242,6 +244,7 @@ export default function KarigarDetails({
             {isFactory ? <Factory size={9} /> : <Briefcase size={9} />}{k.type}
           </span>
         </td>
+        <td className="px-3 py-2.5 text-center text-[11px] text-gray-700 whitespace-nowrap font-medium">{k.verifyBy || '-'}</td>
         <td className="px-3 py-2.5 text-center text-xs whitespace-nowrap">
           <div className="flex justify-center items-center gap-2">
             <button onClick={() => { setEditKarigar({ ...EMPTY_FORM, ...k }); setShowEditModal(true); }} className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"><Edit2 size={14} /></button>
@@ -277,6 +280,7 @@ export default function KarigarDetails({
           {k.email && <div className="flex items-center gap-1.5 text-gray-700"><Mail size={11} className="text-gray-400 flex-shrink-0" /><span className="truncate">{k.email}</span></div>}
           {k.aadharNumber && <div className="flex items-center gap-1.5 text-gray-700"><CreditCard size={11} className="text-gray-400 flex-shrink-0" /><span>{k.aadharNumber}</span></div>}
           <div className="flex items-center gap-1.5 text-gray-700"><MapPin size={11} className="text-gray-400 flex-shrink-0" /><span className="truncate">{k.address}</span></div>
+          {k.verifyBy && <div className="flex items-center gap-1.5 text-gray-700"><User size={11} className="text-gray-400 flex-shrink-0" /><span>Verified By: {k.verifyBy}</span></div>}
         </div>
         <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
           {k.karigarImage && (
@@ -352,16 +356,25 @@ export default function KarigarDetails({
           </div>
         </div>
       </div>
-      {/* Row 4: Type */}
-      <div className="space-y-1">
-        <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight">Karigar Type *</label>
-        <div className="flex gap-3">
-          {KARIGAR_TYPES.map(t => (
-            <label key={t} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border-2 cursor-pointer text-xs font-bold transition-all ${data.type === t ? (t === 'Factory' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-green-500 bg-green-50 text-green-700') : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'}`}>
-              <input type="radio" name={`karigar-type-${data.id || 'new'}`} value={t} checked={data.type === t} onChange={() => setData({ ...data, type: t })} className="sr-only" />
-              {t === 'Factory' ? <Factory size={13} /> : <Briefcase size={13} />}{t}
-            </label>
-          ))}
+      {/* Row 4: Type + Verify By */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight">Karigar Type *</label>
+          <div className="flex gap-3">
+            {KARIGAR_TYPES.map(t => (
+              <label key={t} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border-2 cursor-pointer text-xs font-bold transition-all ${data.type === t ? (t === 'Factory' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-green-500 bg-green-50 text-green-700') : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'}`}>
+                <input type="radio" name={`karigar-type-${data.id || 'new'}`} value={t} checked={data.type === t} onChange={() => setData({ ...data, type: t })} className="sr-only" />
+                {t === 'Factory' ? <Factory size={13} /> : <Briefcase size={13} />}{t}
+              </label>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="block text-[11px] md:text-[13px] text-gray-700 uppercase tracking-tight">Verify By</label>
+          <div className="relative">
+            <User className="absolute left-2.5 top-[9px] text-gray-400" size={13} />
+            <input type="text" value={data.verifyBy || ''} onChange={e => setData({ ...data, verifyBy: e.target.value })} placeholder="Verified by" className="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs h-[32px] md:h-[36px]" />
+          </div>
         </div>
       </div>
       {/* Row 5: Images */}

@@ -55,15 +55,15 @@ export const HuidLabel = () => {
   const basePendingOrders = useMemo(() => {
     return orders.filter(o => 
       (o.qc3Status === 'QC Ok' || o.qc3Status === 'QC Okay' || o.status15 === 'Complete') &&
-      !o.huidStatus
+      (!o.huidStatus || o.huidStatus === 'Sent To Huid' || o.huidStatus === 'Sent In Huid')
     );
   }, [orders]);
 
   const baseHistoryOrders = useMemo(() => {
     return orders.filter(o => 
       o.huidStatus === 'Huid Complete' ||
-      o.huidStatus === 'Sent In Huid' ||
-      o.huidStatus === 'No Huid'
+      o.huidStatus === 'No Huid' ||
+      o.huidStatus === 'No HUID'
     );
   }, [orders]);
 

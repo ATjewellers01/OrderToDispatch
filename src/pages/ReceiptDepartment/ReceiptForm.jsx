@@ -94,7 +94,7 @@ const ReceiptForm = ({ isOpen, onClose, onSave, order }) => {
             <span className="text-gray-900 font-bold">{order.karigar || order.karigarName || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block font-medium uppercase text-[9px] tracking-wide">Category / Product</span>
+            <span className="text-gray-400 block font-medium uppercase text-[9px] tracking-wide">Category</span>
             <span className="text-gray-900 font-bold">{order.category || order.categoryName || '-'}</span>
           </div>
           <div>

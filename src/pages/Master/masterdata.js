@@ -45,7 +45,8 @@ export const SEEDED_KARIGARS = [
     "email": "rishabh.antique.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2001 3001 1001"
+    "aadharNumber": "2001 3001 1001",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-002",
@@ -55,7 +56,8 @@ export const SEEDED_KARIGARS = [
     "email": "bikash.jana@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2002 3002 1002"
+    "aadharNumber": "2002 3002 1002",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-003",
@@ -65,7 +67,8 @@ export const SEEDED_KARIGARS = [
     "email": "mv.jew.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2003 3003 1003"
+    "aadharNumber": "2003 3003 1003",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-004",
@@ -75,7 +78,8 @@ export const SEEDED_KARIGARS = [
     "email": "my.gold.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2004 3004 1004"
+    "aadharNumber": "2004 3004 1004",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-005",
@@ -85,7 +89,8 @@ export const SEEDED_KARIGARS = [
     "email": "s.vs.rpr@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2005 3005 1005"
+    "aadharNumber": "2005 3005 1005",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-006",
@@ -95,7 +100,8 @@ export const SEEDED_KARIGARS = [
     "email": "swarn.mangal.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2006 3006 1006"
+    "aadharNumber": "2006 3006 1006",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-007",
@@ -105,7 +111,8 @@ export const SEEDED_KARIGARS = [
     "email": "ajay.rajkot@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2007 3007 1007"
+    "aadharNumber": "2007 3007 1007",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-008",
@@ -115,7 +122,8 @@ export const SEEDED_KARIGARS = [
     "email": "rm@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2008 3008 1008"
+    "aadharNumber": "2008 3008 1008",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-009",
@@ -125,7 +133,8 @@ export const SEEDED_KARIGARS = [
     "email": "sumit.oro@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2009 3009 1009"
+    "aadharNumber": "2009 3009 1009",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-010",
@@ -135,7 +144,8 @@ export const SEEDED_KARIGARS = [
     "email": "maity.g@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2010 3010 1010"
+    "aadharNumber": "2010 3010 1010",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-011",
@@ -145,7 +155,8 @@ export const SEEDED_KARIGARS = [
     "email": "srk@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2011 3011 1011"
+    "aadharNumber": "2011 3011 1011",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-012",
@@ -155,7 +166,8 @@ export const SEEDED_KARIGARS = [
     "email": "jai.gulab@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2012 3012 1012"
+    "aadharNumber": "2012 3012 1012",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-013",
@@ -165,7 +177,8 @@ export const SEEDED_KARIGARS = [
     "email": "imb@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2013 3013 1013"
+    "aadharNumber": "2013 3013 1013",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-014",
@@ -175,7 +188,8 @@ export const SEEDED_KARIGARS = [
     "email": "muskan.ornament@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2014 3014 1014"
+    "aadharNumber": "2014 3014 1014",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-015",
@@ -185,7 +199,8 @@ export const SEEDED_KARIGARS = [
     "email": "jf.shivam@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2015 3015 1015"
+    "aadharNumber": "2015 3015 1015",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-016",
@@ -195,7 +210,8 @@ export const SEEDED_KARIGARS = [
     "email": "ujjal.karigar.antique@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2016 3016 1016"
+    "aadharNumber": "2016 3016 1016",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-017",
@@ -205,7 +221,8 @@ export const SEEDED_KARIGARS = [
     "email": "bhavin.jew.sanghvi@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2017 3017 1017"
+    "aadharNumber": "2017 3017 1017",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-018",
@@ -215,7 +232,8 @@ export const SEEDED_KARIGARS = [
     "email": "sujata.gold.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2018 3018 1018"
+    "aadharNumber": "2018 3018 1018",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-019",
@@ -225,7 +243,8 @@ export const SEEDED_KARIGARS = [
     "email": "srishti.chain@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2019 3019 1019"
+    "aadharNumber": "2019 3019 1019",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-020",
@@ -235,7 +254,8 @@ export const SEEDED_KARIGARS = [
     "email": "local.casting@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2020 3020 1020"
+    "aadharNumber": "2020 3020 1020",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-021",
@@ -245,7 +265,8 @@ export const SEEDED_KARIGARS = [
     "email": "classic.ornament@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2021 3021 1021"
+    "aadharNumber": "2021 3021 1021",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-022",
@@ -255,7 +276,8 @@ export const SEEDED_KARIGARS = [
     "email": "sky.chain@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2022 3022 1022"
+    "aadharNumber": "2022 3022 1022",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-023",
@@ -265,7 +287,8 @@ export const SEEDED_KARIGARS = [
     "email": "sanjay.hazra@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2023 3023 1023"
+    "aadharNumber": "2023 3023 1023",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-024",
@@ -275,7 +298,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.surajit.jana@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2024 3024 1024"
+    "aadharNumber": "2024 3024 1024",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-025",
@@ -285,7 +309,8 @@ export const SEEDED_KARIGARS = [
     "email": "jewer.ornament@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2025 3025 1025"
+    "aadharNumber": "2025 3025 1025",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-026",
@@ -295,7 +320,8 @@ export const SEEDED_KARIGARS = [
     "email": "zar@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2026 3026 1026"
+    "aadharNumber": "2026 3026 1026",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-027",
@@ -305,7 +331,8 @@ export const SEEDED_KARIGARS = [
     "email": "stock@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2027 3027 1027"
+    "aadharNumber": "2027 3027 1027",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-028",
@@ -315,7 +342,8 @@ export const SEEDED_KARIGARS = [
     "email": "sharda@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2028 3028 1028"
+    "aadharNumber": "2028 3028 1028",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-029",
@@ -325,7 +353,8 @@ export const SEEDED_KARIGARS = [
     "email": "m.art@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2029 3029 1029"
+    "aadharNumber": "2029 3029 1029",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-030",
@@ -335,7 +364,8 @@ export const SEEDED_KARIGARS = [
     "email": "manoj.jew.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2030 3030 1030"
+    "aadharNumber": "2030 3030 1030",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-031",
@@ -345,7 +375,8 @@ export const SEEDED_KARIGARS = [
     "email": "leshya.km@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2031 3031 1031"
+    "aadharNumber": "2031 3031 1031",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-032",
@@ -355,7 +386,8 @@ export const SEEDED_KARIGARS = [
     "email": "vikash.karigar@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2032 3032 1032"
+    "aadharNumber": "2032 3032 1032",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-033",
@@ -365,7 +397,8 @@ export const SEEDED_KARIGARS = [
     "email": "sbr.gold.&.art@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2033 3033 1033"
+    "aadharNumber": "2033 3033 1033",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-034",
@@ -375,7 +408,8 @@ export const SEEDED_KARIGARS = [
     "email": "digvijay@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2034 3034 1034"
+    "aadharNumber": "2034 3034 1034",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-035",
@@ -385,7 +419,8 @@ export const SEEDED_KARIGARS = [
     "email": "dagina@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2035 3035 1035"
+    "aadharNumber": "2035 3035 1035",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-036",
@@ -395,7 +430,8 @@ export const SEEDED_KARIGARS = [
     "email": "solid.gold@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2036 3036 1036"
+    "aadharNumber": "2036 3036 1036",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-037",
@@ -405,7 +441,8 @@ export const SEEDED_KARIGARS = [
     "email": "ad.gold@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2037 3037 1037"
+    "aadharNumber": "2037 3037 1037",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-038",
@@ -415,7 +452,8 @@ export const SEEDED_KARIGARS = [
     "email": "navnath@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2038 3038 1038"
+    "aadharNumber": "2038 3038 1038",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-039",
@@ -425,7 +463,8 @@ export const SEEDED_KARIGARS = [
     "email": "darewala@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2039 3039 1039"
+    "aadharNumber": "2039 3039 1039",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-040",
@@ -435,7 +474,8 @@ export const SEEDED_KARIGARS = [
     "email": "motichand@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2040 3040 1040"
+    "aadharNumber": "2040 3040 1040",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-041",
@@ -445,7 +485,8 @@ export const SEEDED_KARIGARS = [
     "email": "rohit.gold@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2041 3041 1041"
+    "aadharNumber": "2041 3041 1041",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-042",
@@ -455,7 +496,8 @@ export const SEEDED_KARIGARS = [
     "email": "rishabh.gold.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2042 3042 1042"
+    "aadharNumber": "2042 3042 1042",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-043",
@@ -465,7 +507,8 @@ export const SEEDED_KARIGARS = [
     "email": "sr.chain@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2043 3043 1043"
+    "aadharNumber": "2043 3043 1043",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-044",
@@ -475,7 +518,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.sbps@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2044 3044 1044"
+    "aadharNumber": "2044 3044 1044",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-045",
@@ -485,7 +529,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.ranjan.jana@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2045 3045 1045"
+    "aadharNumber": "2045 3045 1045",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-046",
@@ -495,7 +540,8 @@ export const SEEDED_KARIGARS = [
     "email": "ready.delivery@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2046 3046 1046"
+    "aadharNumber": "2046 3046 1046",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-047",
@@ -505,7 +551,8 @@ export const SEEDED_KARIGARS = [
     "email": "malay.hajra@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2047 3047 1047"
+    "aadharNumber": "2047 3047 1047",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-048",
@@ -515,7 +562,8 @@ export const SEEDED_KARIGARS = [
     "email": "arunansu.das@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2048 3048 1048"
+    "aadharNumber": "2048 3048 1048",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-049",
@@ -525,7 +573,8 @@ export const SEEDED_KARIGARS = [
     "email": "debashish@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2049 3049 1049"
+    "aadharNumber": "2049 3049 1049",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-050",
@@ -535,7 +584,8 @@ export const SEEDED_KARIGARS = [
     "email": "biswanath@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2050 3050 1050"
+    "aadharNumber": "2050 3050 1050",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-051",
@@ -545,7 +595,8 @@ export const SEEDED_KARIGARS = [
     "email": "netram@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2051 3051 1051"
+    "aadharNumber": "2051 3051 1051",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-052",
@@ -555,7 +606,8 @@ export const SEEDED_KARIGARS = [
     "email": "g.kanji@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2052 3052 1052"
+    "aadharNumber": "2052 3052 1052",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-053",
@@ -565,7 +617,8 @@ export const SEEDED_KARIGARS = [
     "email": "matra.smruti@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2053 3053 1053"
+    "aadharNumber": "2053 3053 1053",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-054",
@@ -575,7 +628,8 @@ export const SEEDED_KARIGARS = [
     "email": "m.rajkot@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2054 3054 1054"
+    "aadharNumber": "2054 3054 1054",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-055",
@@ -585,7 +639,8 @@ export const SEEDED_KARIGARS = [
     "email": "sb.gold@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2055 3055 1055"
+    "aadharNumber": "2055 3055 1055",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-056",
@@ -595,7 +650,8 @@ export const SEEDED_KARIGARS = [
     "email": "heera.jew@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2056 3056 1056"
+    "aadharNumber": "2056 3056 1056",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-057",
@@ -605,7 +661,8 @@ export const SEEDED_KARIGARS = [
     "email": "manibhatra.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2057 3057 1057"
+    "aadharNumber": "2057 3057 1057",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-058",
@@ -615,7 +672,8 @@ export const SEEDED_KARIGARS = [
     "email": "shubhas.panja@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2058 3058 1058"
+    "aadharNumber": "2058 3058 1058",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-059",
@@ -625,7 +683,8 @@ export const SEEDED_KARIGARS = [
     "email": "ajay.rkt@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2059 3059 1059"
+    "aadharNumber": "2059 3059 1059",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-060",
@@ -635,7 +694,8 @@ export const SEEDED_KARIGARS = [
     "email": "mohnish.rkt@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2060 3060 1060"
+    "aadharNumber": "2060 3060 1060",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-061",
@@ -645,7 +705,8 @@ export const SEEDED_KARIGARS = [
     "email": "nirmal.ji.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2061 3061 1061"
+    "aadharNumber": "2061 3061 1061",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-062",
@@ -655,7 +716,8 @@ export const SEEDED_KARIGARS = [
     "email": "punjab.gold@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2062 3062 1062"
+    "aadharNumber": "2062 3062 1062",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-063",
@@ -665,7 +727,8 @@ export const SEEDED_KARIGARS = [
     "email": "gys@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2063 3063 1063"
+    "aadharNumber": "2063 3063 1063",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-064",
@@ -675,7 +738,8 @@ export const SEEDED_KARIGARS = [
     "email": "rishabh.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2064 3064 1064"
+    "aadharNumber": "2064 3064 1064",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-065",
@@ -685,7 +749,8 @@ export const SEEDED_KARIGARS = [
     "email": "action.gold.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2065 3065 1065"
+    "aadharNumber": "2065 3065 1065",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-066",
@@ -695,7 +760,8 @@ export const SEEDED_KARIGARS = [
     "email": "asthika.cl@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2066 3066 1066"
+    "aadharNumber": "2066 3066 1066",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-067",
@@ -705,7 +771,8 @@ export const SEEDED_KARIGARS = [
     "email": "vibhash@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2067 3067 1067"
+    "aadharNumber": "2067 3067 1067",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-068",
@@ -715,7 +782,8 @@ export const SEEDED_KARIGARS = [
     "email": "tridev@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2068 3068 1068"
+    "aadharNumber": "2068 3068 1068",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-069",
@@ -725,7 +793,8 @@ export const SEEDED_KARIGARS = [
     "email": "c.l.office@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2069 3069 1069"
+    "aadharNumber": "2069 3069 1069",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-070",
@@ -735,7 +804,8 @@ export const SEEDED_KARIGARS = [
     "email": "dhruvil.creation@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2070 3070 1070"
+    "aadharNumber": "2070 3070 1070",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-071",
@@ -745,7 +815,8 @@ export const SEEDED_KARIGARS = [
     "email": "anand.ji.kolapur@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2071 3071 1071"
+    "aadharNumber": "2071 3071 1071",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-072",
@@ -755,7 +826,8 @@ export const SEEDED_KARIGARS = [
     "email": "nirwaan@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2072 3072 1072"
+    "aadharNumber": "2072 3072 1072",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-073",
@@ -765,7 +837,8 @@ export const SEEDED_KARIGARS = [
     "email": "derewala@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2073 3073 1073"
+    "aadharNumber": "2073 3073 1073",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-074",
@@ -775,7 +848,8 @@ export const SEEDED_KARIGARS = [
     "email": "veer@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2074 3074 1074"
+    "aadharNumber": "2074 3074 1074",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-075",
@@ -785,7 +859,8 @@ export const SEEDED_KARIGARS = [
     "email": "bhavika@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2075 3075 1075"
+    "aadharNumber": "2075 3075 1075",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-076",
@@ -795,7 +870,8 @@ export const SEEDED_KARIGARS = [
     "email": "joy.guru@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2076 3076 1076"
+    "aadharNumber": "2076 3076 1076",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-077",
@@ -805,7 +881,8 @@ export const SEEDED_KARIGARS = [
     "email": "vk@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2077 3077 1077"
+    "aadharNumber": "2077 3077 1077",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-078",
@@ -815,7 +892,8 @@ export const SEEDED_KARIGARS = [
     "email": "auram@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2078 3078 1078"
+    "aadharNumber": "2078 3078 1078",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-079",
@@ -825,7 +903,8 @@ export const SEEDED_KARIGARS = [
     "email": "mukesh.art@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2079 3079 1079"
+    "aadharNumber": "2079 3079 1079",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-080",
@@ -835,7 +914,8 @@ export const SEEDED_KARIGARS = [
     "email": "dilip.ghosh@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2080 3080 1080"
+    "aadharNumber": "2080 3080 1080",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-081",
@@ -845,7 +925,8 @@ export const SEEDED_KARIGARS = [
     "email": "r.v@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2081 3081 1081"
+    "aadharNumber": "2081 3081 1081",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-082",
@@ -855,7 +936,8 @@ export const SEEDED_KARIGARS = [
     "email": "vnk@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2082 3082 1082"
+    "aadharNumber": "2082 3082 1082",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-083",
@@ -865,7 +947,8 @@ export const SEEDED_KARIGARS = [
     "email": "shree.shyam.gold@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2083 3083 1083"
+    "aadharNumber": "2083 3083 1083",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-084",
@@ -875,7 +958,8 @@ export const SEEDED_KARIGARS = [
     "email": "chandra.varsha@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2084 3084 1084"
+    "aadharNumber": "2084 3084 1084",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-085",
@@ -885,7 +969,8 @@ export const SEEDED_KARIGARS = [
     "email": "meet@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2085 3085 1085"
+    "aadharNumber": "2085 3085 1085",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-086",
@@ -895,7 +980,8 @@ export const SEEDED_KARIGARS = [
     "email": "swastik.creation@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2086 3086 1086"
+    "aadharNumber": "2086 3086 1086",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-087",
@@ -905,7 +991,8 @@ export const SEEDED_KARIGARS = [
     "email": "yug@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2087 3087 1087"
+    "aadharNumber": "2087 3087 1087",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-088",
@@ -915,7 +1002,8 @@ export const SEEDED_KARIGARS = [
     "email": "sabri.kt@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2088 3088 1088"
+    "aadharNumber": "2088 3088 1088",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-089",
@@ -925,7 +1013,8 @@ export const SEEDED_KARIGARS = [
     "email": "r.milan.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2089 3089 1089"
+    "aadharNumber": "2089 3089 1089",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-090",
@@ -935,7 +1024,8 @@ export const SEEDED_KARIGARS = [
     "email": "pb@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2090 3090 1090"
+    "aadharNumber": "2090 3090 1090",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-091",
@@ -945,7 +1035,8 @@ export const SEEDED_KARIGARS = [
     "email": "rk@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2091 3091 1091"
+    "aadharNumber": "2091 3091 1091",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-092",
@@ -955,7 +1046,8 @@ export const SEEDED_KARIGARS = [
     "email": "piyush.dmd@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2092 3092 1092"
+    "aadharNumber": "2092 3092 1092",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-093",
@@ -965,7 +1057,8 @@ export const SEEDED_KARIGARS = [
     "email": "bramhand.bmy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2093 3093 1093"
+    "aadharNumber": "2093 3093 1093",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-094",
@@ -975,7 +1068,8 @@ export const SEEDED_KARIGARS = [
     "email": "rm@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2094 3094 1094"
+    "aadharNumber": "2094 3094 1094",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-095",
@@ -985,7 +1079,8 @@ export const SEEDED_KARIGARS = [
     "email": "nb@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2095 3095 1095"
+    "aadharNumber": "2095 3095 1095",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-096",
@@ -995,7 +1090,8 @@ export const SEEDED_KARIGARS = [
     "email": "saheb@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2096 3096 1096"
+    "aadharNumber": "2096 3096 1096",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-097",
@@ -1005,7 +1101,8 @@ export const SEEDED_KARIGARS = [
     "email": "sp@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2097 3097 1097"
+    "aadharNumber": "2097 3097 1097",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-098",
@@ -1015,7 +1112,8 @@ export const SEEDED_KARIGARS = [
     "email": "sks@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2098 3098 1098"
+    "aadharNumber": "2098 3098 1098",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-099",
@@ -1025,7 +1123,8 @@ export const SEEDED_KARIGARS = [
     "email": "lk@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2099 3099 1099"
+    "aadharNumber": "2099 3099 1099",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-100",
@@ -1035,7 +1134,8 @@ export const SEEDED_KARIGARS = [
     "email": "ak@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2100 3100 1100"
+    "aadharNumber": "2100 3100 1100",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-101",
@@ -1045,7 +1145,8 @@ export const SEEDED_KARIGARS = [
     "email": "jp@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2101 3101 1101"
+    "aadharNumber": "2101 3101 1101",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-102",
@@ -1055,7 +1156,8 @@ export const SEEDED_KARIGARS = [
     "email": "ska@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2102 3102 1102"
+    "aadharNumber": "2102 3102 1102",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-103",
@@ -1065,7 +1167,8 @@ export const SEEDED_KARIGARS = [
     "email": "pk@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2103 3103 1103"
+    "aadharNumber": "2103 3103 1103",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-104",
@@ -1075,7 +1178,8 @@ export const SEEDED_KARIGARS = [
     "email": "ck@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2104 3104 1104"
+    "aadharNumber": "2104 3104 1104",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-105",
@@ -1085,7 +1189,8 @@ export const SEEDED_KARIGARS = [
     "email": "govind.ji@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2105 3105 1105"
+    "aadharNumber": "2105 3105 1105",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-106",
@@ -1095,7 +1200,8 @@ export const SEEDED_KARIGARS = [
     "email": "ss@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2106 3106 1106"
+    "aadharNumber": "2106 3106 1106",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-107",
@@ -1105,7 +1211,8 @@ export const SEEDED_KARIGARS = [
     "email": "jk@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2107 3107 1107"
+    "aadharNumber": "2107 3107 1107",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-108",
@@ -1115,7 +1222,8 @@ export const SEEDED_KARIGARS = [
     "email": "jewels.creation@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2108 3108 1108"
+    "aadharNumber": "2108 3108 1108",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-109",
@@ -1125,7 +1233,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.tarak.dutta@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2109 3109 1109"
+    "aadharNumber": "2109 3109 1109",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-110",
@@ -1135,7 +1244,8 @@ export const SEEDED_KARIGARS = [
     "email": "sales.return/tag.difference@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2110 3110 1110"
+    "aadharNumber": "2110 3110 1110",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-111",
@@ -1145,7 +1255,8 @@ export const SEEDED_KARIGARS = [
     "email": "at.raipur.(wholesale).(ajo)@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2111 3111 1111"
+    "aadharNumber": "2111 3111 1111",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-112",
@@ -1155,7 +1266,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.anil.kumar.dhar(ka).&.gita.dhar@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2112 3112 1112"
+    "aadharNumber": "2112 3112 1112",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-113",
@@ -1165,7 +1277,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.bikash.bera@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2113 3113 1113"
+    "aadharNumber": "2113 3113 1113",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-114",
@@ -1175,7 +1288,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.bidyut.bera@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2114 3114 1114"
+    "aadharNumber": "2114 3114 1114",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-115",
@@ -1185,7 +1299,8 @@ export const SEEDED_KARIGARS = [
     "email": "shamal.paul@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2115 3115 1115"
+    "aadharNumber": "2115 3115 1115",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-116",
@@ -1195,7 +1310,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.shri.gannayak.jewellers(kailash.ji)@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2116 3116 1116"
+    "aadharNumber": "2116 3116 1116",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-117",
@@ -1205,7 +1321,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.shri.gannayak.jewellers(kailash.ji)@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2117 3117 1117"
+    "aadharNumber": "2117 3117 1117",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-118",
@@ -1215,7 +1332,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.suresh.pal.&.jewellers(suresh.pal)@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2118 3118 1118"
+    "aadharNumber": "2118 3118 1118",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-119",
@@ -1225,7 +1343,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.dibakar.sahoo@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2119 3119 1119"
+    "aadharNumber": "2119 3119 1119",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-120",
@@ -1235,7 +1354,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.ram.dhan@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2120 3120 1120"
+    "aadharNumber": "2120 3120 1120",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-121",
@@ -1245,7 +1365,8 @@ export const SEEDED_KARIGARS = [
     "email": "amar.maji@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2121 3121 1121"
+    "aadharNumber": "2121 3121 1121",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-122",
@@ -1255,7 +1376,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.manohar.ali@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2122 3122 1122"
+    "aadharNumber": "2122 3122 1122",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-123",
@@ -1265,7 +1387,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.m.j.jewellers.(jayanta.das.)@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2123 3123 1123"
+    "aadharNumber": "2123 3123 1123",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-124",
@@ -1275,7 +1398,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.anita.narendra.sunalia.(manish.kumar.sonalia)@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2124 3124 1124"
+    "aadharNumber": "2124 3124 1124",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-125",
@@ -1285,7 +1409,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.pradeep.jamuwal@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2125 3125 1125"
+    "aadharNumber": "2125 3125 1125",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-126",
@@ -1295,7 +1420,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.samir.dhara@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2126 3126 1126"
+    "aadharNumber": "2126 3126 1126",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-127",
@@ -1305,7 +1431,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.ashish.international.(ashish).ji@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2127 3127 1127"
+    "aadharNumber": "2127 3127 1127",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-128",
@@ -1315,7 +1442,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.sujan.roy@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2128 3128 1128"
+    "aadharNumber": "2128 3128 1128",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-129",
@@ -1325,7 +1453,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.dinesh.chandra.mandan(chandra.prakash.mandan@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2129 3129 1129"
+    "aadharNumber": "2129 3129 1129",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-130",
@@ -1335,7 +1464,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.suresh.soniliya@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2130 3130 1130"
+    "aadharNumber": "2130 3130 1130",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-131",
@@ -1345,7 +1475,8 @@ export const SEEDED_KARIGARS = [
     "email": "cl.gaurav.soni.&.vikas.soni@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Factory",
-    "aadharNumber": "2131 3131 1131"
+    "aadharNumber": "2131 3131 1131",
+    "verifyBy": "Admin"
   },
   {
     "id": "KR-132",
@@ -1355,6 +1486,7 @@ export const SEEDED_KARIGARS = [
     "email": "muskseed@gmail.com",
     "address": "Raipur, Chhattisgarh",
     "type": "Office",
-    "aadharNumber": "2132 3132 1132"
+    "aadharNumber": "2132 3132 1132",
+    "verifyBy": "Admin"
   }
 ];

@@ -337,11 +337,6 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
       if (name === 'expectedDeliveryDate') {
         const expectedDate = parseDateString(value);
         if (expectedDate && !isNaN(expectedDate.getTime())) {
-          // Auto-fill Delivery Date with same date as Expected Delivery Date
-          const ddD = String(expectedDate.getDate()).padStart(2, '0');
-          const mmD = String(expectedDate.getMonth() + 1).padStart(2, '0');
-          const yyyyD = expectedDate.getFullYear();
-          updated.deliveryDate = `${ddD}/${mmD}/${yyyyD}`;
           // Karigar Delivery Date = Expected Delivery Date - 3 days
           const karigarDate = new Date(expectedDate);
           karigarDate.setDate(karigarDate.getDate() - 3);
@@ -350,7 +345,6 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
           const yyyy = karigarDate.getFullYear();
           updated.karigarDeliveryDate = `${dd}/${mm}/${yyyy}`;
         } else {
-          updated.deliveryDate = '';
           updated.karigarDeliveryDate = '';
         }
       }
@@ -490,6 +484,13 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
       toast.error('Delivery Date is required');
       return;
     }
+
+    const orderRecObj = parseDateString(formData.orderRecDate);
+    const deliveryObj = parseDateString(formData.deliveryDate);
+    if (orderRecObj && deliveryObj && deliveryObj < orderRecObj) {
+      toast.error('Delivery Date cannot be before Order Received Date');
+      return;
+    }
     if (!formData.karigarDeliveryDate) {
       toast.error('Karigar Delivery Date is required');
       return;
@@ -511,7 +512,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
       return;
     }
     
-    onSave({ ...formData, id: Date.now().toString(), timestamp: new Date().toISOString() });
+    onSave({ ...formData, manualOrderStage: formData.orderStage, id: Date.now().toString(), timestamp: new Date().toISOString() });
     setFormData(initialFormState);
     onClose();
   };
@@ -575,6 +576,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
           value={formData.deliveryDate}
           onChange={handleInputChange}
           required={true}
+          minDate={formData.orderRecDate}
         />
 
         {/* Row 3 */}
@@ -736,6 +738,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
           value={formData.expectedDeliveryDate}
           onChange={handleInputChange}
           required={true}
+          minDate={formData.orderRecDate}
         />
 
         <DateInput
@@ -744,6 +747,7 @@ const OrderForm = ({ isOpen, onClose, onSave, orders = [] }) => {
           value={formData.karigarDeliveryDate}
           onChange={handleInputChange}
           required={true}
+          minDate={formData.orderRecDate}
         />
 
         {/* Row 12 */}

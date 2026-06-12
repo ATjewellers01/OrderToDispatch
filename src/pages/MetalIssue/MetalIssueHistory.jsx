@@ -111,14 +111,14 @@ const MetalIssueHistory = ({ ordersWithIssues, onEditClick }) => {
     "Status",
     "Karigar Name",
     "MELTING",
-    "Product",
     "Total Weight",
     "Order Type",
     "Customer Name",
     "Category",
-    "Total Order Date",
-    "Karigar Delivery Date",
-    "Expected Date"
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date"
   ];
 
   const totalPages = Math.ceil(ordersWithIssues.length / itemsPerPage);
@@ -198,14 +198,15 @@ const MetalIssueHistory = ({ ordersWithIssues, onEditClick }) => {
           ) : '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || '-'} g</td>
         <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate)}</td>
+        
+                <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.expectedDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate)}</td>
       </tr>
     );
   };

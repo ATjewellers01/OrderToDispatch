@@ -163,7 +163,7 @@ const FollowUpForm = ({ isOpen, onClose, onSave, order }) => {
             <span className="text-gray-800 font-bold">{order.karigar || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block font-medium">Product / Category</span>
+            <span className="text-gray-400 block font-medium">Category</span>
             <span className="text-gray-800 font-bold">{order.category || '-'}</span>
           </div>
           <div>
@@ -192,14 +192,12 @@ const FollowUpForm = ({ isOpen, onClose, onSave, order }) => {
               </label>
               <CustomDropdown
                 options={[
-                  { value: 'Work Started',            label: 'Work Started' },
-                  { value: 'Not Started',             label: 'Not Started' },
                   { value: 'Change Karigar And Dates', label: 'Change Karigar And Dates' },
-                  { value: 'Ghat Jama Flw-up Done',   label: 'Ghat Jama Flw-up Done' },
-                  { value: 'Finished Jama',           label: 'Finished Jama' },
-                  { value: 'Order Cancel',            label: 'Order Cancel' },
-                  { value: 'Prakash',                 label: 'Prakash' },
-                  { value: 'Management',              label: 'Management' },
+                  { value: 'Ghat Jama Flw-up Done', label: 'Ghat Jama Flw-up Done' },
+                  { value: 'Finished Jama', label: 'Finished Jama' },
+                  { value: 'Order Cancel', label: 'Order Cancel' },
+                  { value: 'Prakash', label: 'Prakash' },
+                  { value: 'Management', label: 'Management' },
                 ]}
                 value={formData.status}
                 onChange={(val) => handleInputChange({ target: { name: 'status', value: val } })}
@@ -212,11 +210,11 @@ const FollowUpForm = ({ isOpen, onClose, onSave, order }) => {
 
 
             {/* Next Date of Follow-up — shown for non-cancel, non-change-karigar statuses */}
-            {formData.status && 
-             formData.status !== 'Order Cancel' && 
-             formData.status !== 'Change Karigar And Dates' && 
-             formData.status !== 'Ghat Jama Flw-up Done' && 
-             formData.status !== 'Finished Jama' ? (
+            {formData.status &&
+              formData.status !== 'Order Cancel' &&
+              formData.status !== 'Change Karigar And Dates' &&
+              formData.status !== 'Ghat Jama Flw-up Done' &&
+              formData.status !== 'Finished Jama' ? (
               <div className="animate-in slide-in-from-top-2 duration-200">
                 <DateInput
                   label="Next Date of Follow-up"

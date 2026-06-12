@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Edit } from 'lucide-react';
 import DataTable from '../../components/DataTable';
 import { calculateDelay, formatTargetDate } from '../../utils/tatCalculator';
@@ -97,23 +97,24 @@ const MeenaInhouseHistory = ({ orders, onEditClick }) => {
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
-    "Meena Inhouse Status",
+    "Issue To",
     "Inhouse Chillai Weight",
     "Inhouse After Meena Polish",
-    "Inhouse Remarks",
-    "Target Date",
+    "Planned Date",
     "Done Date",
     "Delay",
     "LEFT Days",
     "Karigar Name",
-    "Melting",
-    "Product",
+    "Melting",
     "Metal Issue Type",
     "Total Weight",
     "Order Type",
     "Customer Name",
-    "Order Date",
-    "Expected Date"
+    "Category",
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date"
   ];
 
   const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -152,9 +153,6 @@ const MeenaInhouseHistory = ({ orders, onEditClick }) => {
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs font-bold text-gray-900">
           {order.inhouseAfterMeenaPolish ? `${order.inhouseAfterMeenaPolish} g` : '-'}
         </td>
-        <td className="px-4 py-3 text-center whitespace-nowrap text-xs text-gray-600 truncate max-w-[150px]" title={order.inhouseRemarks || '-'}>
-          {order.inhouseRemarks || '-'}
-        </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
           {formatTargetDate(order.plannedDates?.['Meena Inhouse'], 'Meena Inhouse')}
         </td>
@@ -170,14 +168,17 @@ const MeenaInhouseHistory = ({ orders, onEditClick }) => {
           </span>
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || order.karigarName || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || order.categoryName || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-amber-600 font-semibold whitespace-nowrap">{order.metalIssueType || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || order.weight || '-'} {order.totalWeight ? 'g' : ''}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || order.customerName || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
+        
+                <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.expectedDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
       </tr>
     );
   };
@@ -196,6 +197,10 @@ const MeenaInhouseHistory = ({ orders, onEditClick }) => {
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Customer</span>
             <span className="text-gray-700 font-bold">{order.company || order.customerName || '-'}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Category</span>
+            <span className="text-gray-700 font-bold">{order.category || '-'}</span>
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>
@@ -220,10 +225,6 @@ const MeenaInhouseHistory = ({ orders, onEditClick }) => {
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">After Polish</span>
             <span className="text-gray-700 font-semibold">{order.inhouseAfterMeenaPolish ? `${order.inhouseAfterMeenaPolish} g` : '-'}</span>
-          </div>
-          <div className="col-span-2">
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Remarks</span>
-            <span className="text-gray-700">{order.inhouseRemarks || '-'}</span>
           </div>
         </div>
         <div className="pt-2 border-t border-slate-100 mt-1">

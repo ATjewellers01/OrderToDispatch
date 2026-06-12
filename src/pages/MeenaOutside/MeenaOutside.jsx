@@ -55,7 +55,10 @@ const MeenaOutside = () => {
   const basePendingOrders = useMemo(() => {
     return orders.filter(o => 
       o.ghatJamaStatus === 'Complete' && 
-      o.ghatJamaType === 'Meena Outside' &&
+      (
+        o.ghatJamaType === 'Meena Outside' || 
+        (o.ePolishStatus === 'Complete' && o.ePolishType === 'Meena Outside')
+      ) &&
       (!o.meenaOutsideStatus || o.meenaOutsideStatus === '' || o.meenaOutsideStatus === 'Pending')
     );
   }, [orders]);

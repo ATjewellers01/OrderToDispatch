@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { RotateCcw, Pencil, Layers, ShieldCheck } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import DataTable from '../../components/DataTable';
-import { formatTargetDate } from '../../utils/tatCalculator';
+import { formatTargetDate, calculatePlannedDate, calculateDelay } from '../../utils/tatCalculator';
 
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
 
@@ -110,7 +110,7 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
     });
   }, [orders, historyLogs]);
 
-  // Today's Pending logic: Filter by Call Date = Today or earlier, or never called
+  // Today's Pending logic: Filter by Call Date or Next Call Date = Today or earlier
   const todayOrders = useMemo(() => {
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -121,37 +121,47 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
       const stage = o.orderStage?.toLowerCase() || '';
       if (stage === 'delivered' || stage === 'order cancel') return false;
 
-      // Determine Karigar Delivery Date (3 days before expected delivery date if not set)
-      let kDate = null;
-      if (o.karigarDeliveryDate) {
-        kDate = parseDateString(o.karigarDeliveryDate);
-      } else {
-        const exp = parseDateString(o.expectedDeliveryDate);
-        if (exp && !isNaN(exp.getTime())) {
-          kDate = new Date(exp);
-          kDate.setDate(kDate.getDate() - 3);
+      let dateToCheck = null;
+
+      // If call is scheduled, use nextCall date - 1 day
+      if (item.latestLog) {
+        const nextCall = item.latestLog.nextDate || item.latestLog.nextCallDate;
+        if (nextCall) {
+          dateToCheck = parseDateString(nextCall);
+          if (dateToCheck && !isNaN(dateToCheck.getTime())) {
+            dateToCheck.setDate(dateToCheck.getDate() - 1);
+          }
         }
       }
 
-      // If today is before the Karigar Delivery Date, it is not pending today
-      if (kDate && !isNaN(kDate.getTime()) && today < kDate) {
-        return false;
+      // If no call scheduled, check Metal Issue to calculate Calling Date
+      if (!dateToCheck || isNaN(dateToCheck?.getTime())) {
+        const issue = metalIssueMap.get(o.id);
+        if (issue?.timestamp) {
+          const kDate = o?.karigarDeliveryDate ? parseDateString(o.karigarDeliveryDate) : (() => {
+            const exp = parseDateString(o?.expectedDeliveryDate);
+            if (exp && !isNaN(exp.getTime())) {
+              const b3 = new Date(exp);
+              b3.setDate(b3.getDate() - 3);
+              return b3;
+            }
+            return null;
+          })();
+          
+          if (kDate && !isNaN(kDate.getTime())) {
+            const cDate = new Date(kDate);
+            cDate.setDate(cDate.getDate() - 3);
+            dateToCheck = cDate;
+          }
+        }
       }
 
-      // Never called is pending
-      if (!item.latestLog) return true;
+      if (!dateToCheck || isNaN(dateToCheck.getTime())) return false;
 
-      // Has call scheduled
-      const nextCall = item.latestLog.nextDate || item.latestLog.nextCallDate;
-      if (!nextCall) return false;
-
-      const callDate = parseDateString(nextCall);
-      if (!callDate || isNaN(callDate.getTime())) return false;
-
-      // Scheduled for today or earlier
-      return callDate <= today;
+      dateToCheck.setHours(0,0,0,0);
+      return dateToCheck <= today;
     });
-  }, [ordersWithLogs]);
+  }, [ordersWithLogs, metalIssueMap]);
 
 
 
@@ -244,10 +254,9 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
-    "Target Date",
     "Calling Date", "Next Date Of Call", "Customer Name", "Category Name", "Melting", "Weight", 
-    "Total Quantity", "Total Weight", "Karigar Now", "Order Date", "Karigar Delivery Date", 
-    "Delivery Date", "New Expected Date", "Metal Issue Status", "Paid Weight", "Metal Issue Type", "Order Stage", "Flw-up Status", 
+    "Total Quantity", "Total Weight", "Karigar Now", "Order Rec. Date", "Delivery Date", 
+    "Expected Delivery Date", "Karigar Delivery Date", "Metal Issue Status", "Paid Weight", "Metal Issue Type", "Order Stage", "Flw-up Status", 
     "Order Status", "Order Type", "Remarks"
   ];
 
@@ -271,18 +280,60 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
           {o.orderNo || '-'}
         </td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs">
-          {o.currentStagePlannedDate ? (
-            <span className={`px-2 py-1 rounded font-bold border ${
-              new Date() > new Date(o.currentStagePlannedDate)
-                ? 'bg-red-100 text-red-800 border-red-200 animate-pulse'
-                : 'bg-blue-100 text-blue-800 border-blue-200'
-            }`}>
-              {formatTargetDate(o.currentStagePlannedDate)}
-            </span>
-          ) : <span className="text-gray-400">-</span>}
-        </td>
-        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap font-medium">
-          {l ? new Date(l.timestamp).toLocaleDateString('en-GB') : '-'}
+          {(() => {
+            if (!issue?.timestamp) return <span className="text-gray-400">-</span>;
+            let callingDateStr = null;
+            if (l && (l.nextDate || l.nextCallDate)) {
+              const nextD = parseDateString(l.nextDate || l.nextCallDate);
+              if (nextD && !isNaN(nextD.getTime())) {
+                const cDate = new Date(nextD);
+                cDate.setDate(cDate.getDate() - 1);
+                callingDateStr = cDate.toISOString();
+              }
+            }
+            if (!callingDateStr) {
+              const kDate = o?.karigarDeliveryDate ? parseDateString(o.karigarDeliveryDate) : (() => {
+                const exp = parseDateString(o?.expectedDeliveryDate);
+                if (exp && !isNaN(exp.getTime())) {
+                  const b3 = new Date(exp);
+                  b3.setDate(b3.getDate() - 3);
+                  return b3;
+                }
+                return null;
+              })();
+              if (kDate && !isNaN(kDate.getTime())) {
+                const cDate = new Date(kDate);
+                cDate.setDate(cDate.getDate() - 3);
+                callingDateStr = cDate.toISOString();
+              }
+            }
+            if (!callingDateStr) return <span className="text-gray-400">-</span>;
+            
+            let delayDisplay = null;
+            let isPastDue = false;
+            if (callingDateStr) {
+              const tDate = new Date();
+              tDate.setHours(0,0,0,0);
+              const cDateObj = new Date(callingDateStr);
+              cDateObj.setHours(0,0,0,0);
+              if (tDate > cDateObj) {
+                isPastDue = true;
+                const delayObj = calculateDelay(callingDateStr, new Date().toISOString());
+                if (delayObj.isDelayed) delayDisplay = delayObj.display;
+              }
+            }
+
+            return (
+              <span className={`px-2 py-1 rounded font-bold border ${
+                isPastDue
+                  ? 'bg-red-100 text-red-800 border-red-200 animate-pulse'
+                  : 'bg-blue-100 text-blue-800 border-blue-200'
+              }`}>
+                {formatTargetDate(callingDateStr)}
+                {delayDisplay && <span className="ml-1 text-[9px] text-red-600 font-black">({delayDisplay})</span>}
+              </span>
+            );
+          })()}
         </td>
         <td className="px-4 py-3 text-center text-xs text-red-600 whitespace-nowrap font-bold">
           {l ? formatDate(l.nextDate || l.nextCallDate) : 'Call Pending'}
@@ -295,6 +346,8 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{o.totalWeight || '-'} g</td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{o.karigar || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.orderRecDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-bold text-gray-800 whitespace-nowrap">{formatDate(o.expectedDeliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">
           {o.karigarDeliveryDate ? formatDate(o.karigarDeliveryDate) : (() => {
             const exp = parseDateString(o.expectedDeliveryDate);
@@ -306,8 +359,6 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
             return '-';
           })()}
         </td>
-        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(o.deliveryDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-bold text-gray-800 whitespace-nowrap">{formatDate(o.expectedDeliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">
           {issue ? (
             <span className={`px-2 py-0.5 rounded font-bold border ${issue.metalIssueStatus === 'Metal On Delivery' ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-amber-100 text-amber-800 border-amber-200'}`}>
@@ -341,6 +392,7 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
   const renderCard = (item, idx) => {
     const o = item.order;
     const l = item.latestLog;
+    const issue = metalIssueMap.get(o.id);
     
     return (
       <div key={o.id || idx} className="bg-white rounded-xl border border-amber-50 shadow-sm p-4 space-y-3 transition-all hover:shadow-md hover:border-amber-100">
@@ -360,14 +412,61 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
             <span className="text-gray-700 font-semibold">{o.karigar || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Target Date</span>
-            {o.currentStagePlannedDate ? (
-              <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
-                new Date() > new Date(o.currentStagePlannedDate)
-                  ? 'bg-red-100 text-red-800 border-red-200'
-                  : 'bg-blue-100 text-blue-800 border-blue-200'
-              }`}>{formatTargetDate(o.currentStagePlannedDate)}</span>
-            ) : <span className="text-gray-400">-</span>}
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Calling Date</span>
+            {(() => {
+              if (!issue?.timestamp) return <span className="text-gray-400">-</span>;
+              let callingDateStr = null;
+              if (l && (l.nextDate || l.nextCallDate)) {
+                const nextD = parseDateString(l.nextDate || l.nextCallDate);
+                if (nextD && !isNaN(nextD.getTime())) {
+                  const cDate = new Date(nextD);
+                  cDate.setDate(cDate.getDate() - 1);
+                  callingDateStr = cDate.toISOString();
+                }
+              }
+              if (!callingDateStr) {
+                const kDate = o?.karigarDeliveryDate ? parseDateString(o.karigarDeliveryDate) : (() => {
+                  const exp = parseDateString(o?.expectedDeliveryDate);
+                  if (exp && !isNaN(exp.getTime())) {
+                    const b3 = new Date(exp);
+                    b3.setDate(b3.getDate() - 3);
+                    return b3;
+                  }
+                  return null;
+                })();
+                if (kDate && !isNaN(kDate.getTime())) {
+                  const cDate = new Date(kDate);
+                  cDate.setDate(cDate.getDate() - 3);
+                  callingDateStr = cDate.toISOString();
+                }
+              }
+              if (!callingDateStr) return <span className="text-gray-400">-</span>;
+
+              let delayDisplay = null;
+              let isPastDue = false;
+              if (callingDateStr) {
+                const tDate = new Date();
+                tDate.setHours(0,0,0,0);
+                const cDateObj = new Date(callingDateStr);
+                cDateObj.setHours(0,0,0,0);
+                if (tDate > cDateObj) {
+                  isPastDue = true;
+                  const delayObj = calculateDelay(callingDateStr, new Date().toISOString());
+                  if (delayObj.isDelayed) delayDisplay = delayObj.display;
+                }
+              }
+
+              return (
+                <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
+                  isPastDue
+                    ? 'bg-red-100 text-red-800 border-red-200'
+                    : 'bg-blue-100 text-blue-800 border-blue-200'
+                }`}>
+                  {formatTargetDate(callingDateStr)}
+                  {delayDisplay && <span className="ml-1 text-[8px] text-red-600 font-black">({delayDisplay})</span>}
+                </span>
+              );
+            })()}
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Scheduled Call</span>
@@ -395,8 +494,18 @@ const FollowUpPendingToday = ({ orders, historyLogs, filters, metalIssues, onUpd
   return (
     <div className="space-y-4 flex flex-col h-auto md:h-full min-h-0">
       {/* Metrics Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
+        {/* Big Pending Count Card */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-center items-center min-h-[260px] relative overflow-hidden">
+          <div className="absolute -bottom-4 -right-4 p-4 opacity-5 text-amber-500">
+            <Layers size={120} />
+          </div>
+          <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 mb-2 relative z-10">Pending Today</h3>
+          <span className="text-8xl font-black text-amber-500 drop-shadow-sm relative z-10">{filteredOrders.length}</span>
+          <p className="text-xs font-bold mt-4 text-slate-500 tracking-wide relative z-10 text-center">ORDERS TO CALL</p>
+        </div>
+
         {/* Order Stage Distribution Metric Card */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col min-h-[260px]">
           <div className="flex items-center gap-2 mb-2">

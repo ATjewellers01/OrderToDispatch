@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import ModalForm from '../../components/ModalForm';
 import CustomDropdown from '../../components/CustomDropdown';
 import { preventInvalidDecimalChars } from '../../utils/numberUtils';
+import { SEEDED_MELTING } from '../Master/Melting';
 
 const MetalIssueEdit = ({ isOpen, onClose, onSave, order, issue }) => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ const MetalIssueEdit = ({ isOpen, onClose, onSave, order, issue }) => {
     metalIssueType: '',
     remarks: '',
   });
+  const [purityOptions, setPurityOptions] = useState([]);
 
   useEffect(() => {
     if (isOpen && issue) {
@@ -21,6 +23,20 @@ const MetalIssueEdit = ({ isOpen, onClose, onSave, order, issue }) => {
         remarks: issue.remarks || '',
       });
     }
+    const saved = localStorage.getItem('master_melting');
+    let meltingData = SEEDED_MELTING;
+    if (saved) {
+      try {
+        meltingData = JSON.parse(saved);
+      } catch (e) {}
+    }
+    const opts = meltingData
+      .filter(m => m.ghatMelting || m.melting)
+      .map(m => {
+        const val = m.ghatMelting || m.melting;
+        return { value: val, label: m.ghatMelting ? m.ghatMelting : m.melting };
+      });
+    setPurityOptions(opts);
   }, [isOpen, issue]);
 
   const handleInputChange = (e) => {
@@ -92,7 +108,7 @@ const MetalIssueEdit = ({ isOpen, onClose, onSave, order, issue }) => {
             <span className="text-gray-800 font-bold">{order.melting || '-'}</span>
           </div>
           <div>
-            <span className="text-gray-400 block font-medium">Product / Category</span>
+            <span className="text-gray-400 block font-medium">Category</span>
             <span className="text-gray-800 font-bold">{order.category || '-'}</span>
           </div>
           <div>
@@ -143,10 +159,7 @@ const MetalIssueEdit = ({ isOpen, onClose, onSave, order, issue }) => {
               Metal Issue Type (Purity) <span className="text-red-500">*</span>
             </label>
             <CustomDropdown
-              options={[
-                { value: '99.90', label: '99.90' },
-                { value: '99.50', label: '99.50' }
-              ]}
+              options={purityOptions}
               value={formData.metalIssueType}
               onChange={(val) => handleInputChange({ target: { name: 'metalIssueType', value: val } })}
               placeholder="Select Type"

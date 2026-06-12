@@ -54,7 +54,7 @@ export const ReceivedInStock = () => {
   // Base split without filters
   const basePendingOrders = useMemo(() => {
     return orders.filter(o => 
-      (o.huidStatus === 'Huid Complete' || o.huidStatus === 'Sent In Huid' || o.huidStatus === 'No Huid' || o.status15 === 'Complete') &&
+      (o.huidStatus === 'Huid Complete' || o.huidStatus === 'Sent In Huid' || o.huidStatus === 'No Huid' || o.huidStatus === 'No HUID' || o.status15 === 'Complete') &&
       !o.receiveInStockStatus
     );
   }, [orders]);

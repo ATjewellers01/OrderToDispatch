@@ -54,8 +54,10 @@ const MeenaInhouse = () => {
   // Base split without filters
   const basePendingOrders = useMemo(() => {
     return orders.filter(o => 
-      o.ghatJamaStatus === 'Complete' && 
-      o.ghatJamaType === 'Meena Inhouse' &&
+      (
+        (o.ghatJamaStatus === 'Complete' && o.ghatJamaType === 'Meena Inhouse') ||
+        (o.ePolishStatus === 'Complete' && o.ePolishType === 'Meena Inhouse')
+      ) &&
       (!o.meenaInhouseStatus || o.meenaInhouseStatus === '' || o.meenaInhouseStatus === 'Pending')
     );
   }, [orders]);

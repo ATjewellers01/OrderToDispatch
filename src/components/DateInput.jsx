@@ -6,7 +6,7 @@ import { Calendar } from 'lucide-react';
  * A unified date input component that formats dates as DD/MM/YYYY
  * and automatically triggers the native browser date picker on focus (Tabbing/Clicking).
  */
-const DateInput = ({ label, name, value, onChange, required, readOnly }) => {
+const DateInput = ({ label, name, value, onChange, required, readOnly, minDate }) => {
   const dateInputRef = useRef(null);
   const [isTouch, setIsTouch] = useState(false);
 
@@ -97,6 +97,7 @@ const DateInput = ({ label, name, value, onChange, required, readOnly }) => {
             required={required}
             type="date"
             value={toYYYYMMDD(value)}
+            min={toYYYYMMDD(minDate)}
             onChange={handleDateChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
@@ -130,6 +131,7 @@ const DateInput = ({ label, name, value, onChange, required, readOnly }) => {
             ref={dateInputRef}
             type="date"
             value={toYYYYMMDD(value)}
+            min={toYYYYMMDD(minDate)}
             onChange={handleDateChange}
             onClick={(e) => e.stopPropagation()}
             className="absolute bottom-0 left-0 w-full h-[1px] opacity-0 pointer-events-none"

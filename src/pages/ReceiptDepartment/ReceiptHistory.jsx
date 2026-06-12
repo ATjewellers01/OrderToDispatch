@@ -105,19 +105,22 @@ const ReceiptHistory = ({ orders, onEditClick }) => {
     { label: 'Person/Courier', className: 'text-center' },
     { label: 'Gross Weight', className: 'text-center' },
     { label: 'Remarks', className: 'text-center' },
-    { label: 'Target Date', className: 'text-center' },
+    { label: 'Planned Date', className: 'text-center' },
     { label: 'Done Date', className: 'text-center' },
     { label: 'Delay', className: 'text-center' },
     { label: 'LEFT Days', className: 'text-center' },
     { label: 'Karigar Name', className: 'text-center' },
-    { label: 'Melting', className: 'text-center' },
-    { label: 'Product', className: 'text-center' },
+    { label: 'Melting', className: 'text-center' },
     { label: "Metal Issue Type", className: 'text-center' },
     { label: 'Total Weight', className: 'text-center' },
     { label: 'Order Type', className: 'text-center' },
     { label: 'Customer Name', className: 'text-center' },
-    { label: 'Order Date', className: 'text-center' },
-    { label: 'Expected Date', className: 'text-center' }
+
+    "Category",
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date"
   ];
 
   const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -175,14 +178,17 @@ const ReceiptHistory = ({ orders, onEditClick }) => {
           </span>
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || order.karigarName || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || order.categoryName || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-amber-600 font-semibold whitespace-nowrap">{order.metalIssueType || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || order.weight || '-'} {order.totalWeight ? 'g' : ''}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || order.customerName || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
+        
+                <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.expectedDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
       </tr>
     );
   };
@@ -201,6 +207,10 @@ const ReceiptHistory = ({ orders, onEditClick }) => {
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Customer</span>
             <span className="text-gray-700 font-bold">{order.company || order.customerName || '-'}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Category</span>
+            <span className="text-gray-700 font-bold">{order.category || '-'}</span>
           </div>
           <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>

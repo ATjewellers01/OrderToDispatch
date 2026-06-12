@@ -57,8 +57,9 @@ const PolishOutside = () => {
       o.ghatJamaStatus === 'Complete' && 
       (
         o.ghatJamaType === 'Polish Outside' || 
-        (o.ghatJamaType === 'Meena Inhouse' && o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Polish Outside') ||
-        (o.ghatJamaType === 'Meena Outside' && o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Polish Outside')
+        (o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Polish Outside') ||
+        (o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Polish Outside') ||
+        (o.ePolishStatus === 'Complete' && o.ePolishType === 'Polish Outside')
       ) &&
       (!o.polishOutsideStatus || o.polishOutsideStatus === '' || o.polishOutsideStatus === 'Pending')
     );

@@ -106,38 +106,56 @@ const FollowUp = () => {
       const s = o.orderStage?.toLowerCase() || '';
       const isDeliveredOrCancelled = s === 'delivered' || s === 'order cancel';
 
-      return !isDeliveredOrCancelled && issuedIds.has(o.id);
-    });
-  }, [orders, metalIssues]);
+      const log = latestLogMap.get(o.id);
+      const latestStatus = log?.status?.toLowerCase();
+      const isFinishedOrGhat = latestStatus === 'finished jama' || latestStatus === 'ghat jama flw-up done';
 
-  // Today count: active orders with no log OR nextCallDate <= today
+      return !isDeliveredOrCancelled && !isFinishedOrGhat && issuedIds.has(o.id);
+    });
+  }, [orders, metalIssues, latestLogMap]);
+
+  // Today count: active orders matching calling date logic
   const todayCount = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return activeOrders.filter(o => {
-      // Determine Karigar Delivery Date (3 days before expected delivery date if not set)
-      let kDate = null;
-      if (o.karigarDeliveryDate) {
-        kDate = parseDateString(o.karigarDeliveryDate);
-      } else {
-        const exp = parseDateString(o.expectedDeliveryDate);
-        if (exp && !isNaN(exp.getTime())) {
-          kDate = new Date(exp);
-          kDate.setDate(kDate.getDate() - 3);
+      let dateToCheck = null;
+      const log = latestLogMap.get(o.id);
+
+      // If call is scheduled, use nextCall date - 1 day
+      if (log) {
+        const nextCall = log.nextDate || log.nextCallDate;
+        if (nextCall) {
+          dateToCheck = parseDateString(nextCall);
+          if (dateToCheck && !isNaN(dateToCheck.getTime())) {
+            dateToCheck.setDate(dateToCheck.getDate() - 1);
+          }
         }
       }
 
-      // If today is before the Karigar Delivery Date, it is not pending today
-      if (kDate && !isNaN(kDate.getTime()) && today < kDate) {
-        return false;
+      // If no call scheduled, check Metal Issue to calculate Calling Date
+      if (!dateToCheck || isNaN(dateToCheck?.getTime())) {
+        const kDate = o?.karigarDeliveryDate ? parseDateString(o.karigarDeliveryDate) : (() => {
+          const exp = parseDateString(o?.expectedDeliveryDate);
+          if (exp && !isNaN(exp.getTime())) {
+            const b3 = new Date(exp);
+            b3.setDate(b3.getDate() - 3);
+            return b3;
+          }
+          return null;
+        })();
+        
+        if (kDate && !isNaN(kDate.getTime())) {
+          const cDate = new Date(kDate);
+          cDate.setDate(cDate.getDate() - 3);
+          dateToCheck = cDate;
+        }
       }
 
-      const log = latestLogMap.get(o.id);
-      if (!log) return true;
-      const nextCall = log.nextDate || log.nextCallDate;
-      if (!nextCall) return false;
-      const d = parseDateString(nextCall);
-      return d && !isNaN(d.getTime()) && d <= today;
+      if (!dateToCheck || isNaN(dateToCheck.getTime())) return false;
+
+      dateToCheck.setHours(0, 0, 0, 0);
+      return dateToCheck <= today;
     }).length;
   }, [activeOrders, latestLogMap]);
 

@@ -19,7 +19,7 @@ const Layout = () => {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-56 2xl:ml-60 transition-all h-[100dvh]">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-64 2xl:ml-72 transition-all h-[100dvh]">
 
         {/* Header - Sticky */}
         <Header

@@ -1,5 +1,5 @@
-﻿import React, { useState, useMemo } from 'react';
-import { Edit } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Edit, Printer } from 'lucide-react';
 import DataTable from '../../components/DataTable';
 import { calculateDelay, formatTargetDate } from '../../utils/tatCalculator';
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
@@ -74,33 +74,38 @@ const getStageColor = (stage) => {
   }
 };
 
-const GhatJamaHistory = ({ orders, onEditClick }) => {
+const GhatJamaHistory = ({ orders, onEditClick, onPrintClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
-    { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
-    "Ghat Status",
+    { label: 'Print', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-24 min-w-[96px] text-center' },
+    { label: 'Order No', className: 'sticky left-[224px] bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
+    "Issue To",
+    "Subcategory",
     "Ghat Jama Weight",
+    "Ghat Melting (%)",
+    "Ghat Wastage (%)",
+    "Fine Weight",
     "Voucher No",
     "Pcs",
     "Ghat Jama Remarks",
-    "Target Date",
+    "Planned Date",
     "Done Date",
     "Delay",
     "LEFT Days",
     "Karigar Name",
     "Melting",
-    "Product",
     "Metal Issue Type",
     "Total Weight",
     "Order Type",
     "Customer Name",
     "Category",
-    "Order Date",
-    "Karigar Delivery Date",
-    "Expected Date"
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date"
   ];
 
   const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -126,7 +131,17 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
             <span>Edit</span>
           </button>
         </td>
-        <td className="px-4 py-3 font-bold text-gray-900 sticky left-32 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap">
+        <td className="px-2 py-3 sticky left-32 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap w-24 min-w-[96px]">
+          <button
+            onClick={() => onPrintClick && onPrintClick(order)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 transition-all text-xs font-bold shadow-sm"
+            title="Print Ghat Jama Slip"
+          >
+            <Printer size={12} />
+            <span>Print</span>
+          </button>
+        </td>
+        <td className="px-4 py-3 font-bold text-gray-900 sticky left-[224px] bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap">
           {order.orderNo || '-'}
         </td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs">
@@ -134,7 +149,11 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
             {order.ghatJamaType || order.ghatJamaStatus || '-'}
           </span>
         </td>
+        <td className="px-4 py-3 text-center whitespace-nowrap text-xs text-gray-700 font-bold">{order.ghatJamaSubcategory || '-'}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs font-bold text-gray-900">{order.ghatJamaWeight ? `${order.ghatJamaWeight} g` : '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap text-xs text-amber-700 font-bold">{order.ghatMelting ? `${order.ghatMelting} %` : '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap text-xs text-amber-700 font-bold">{order.ghatWastage ? `${order.ghatWastage} %` : '-'}</td>
+        <td className="px-4 py-3 text-center whitespace-nowrap text-xs font-bold text-gray-900">{order.fineWeight ? `${order.fineWeight} g` : '-'}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs text-gray-600">{order.voucherNumber || '-'}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs text-gray-600">{order.pcs || '-'}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap text-xs text-gray-600 truncate max-w-[150px]" title={order.ghatJamaRemarks || '-'}>
@@ -156,15 +175,16 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-amber-600 font-semibold whitespace-nowrap">{order.metalIssueType || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || '-'} g</td>
         <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || '-'}</td>        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
+
+        
+                <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.expectedDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate)}</td>
       </tr>
     );
   };
@@ -186,6 +206,14 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
             <span className="text-gray-700 font-bold">{order.company || '-'}</span>
           </div>
           <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Category</span>
+            <span className="text-gray-700 font-bold">{order.category || '-'}</span>
+          </div>
+          <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Subcategory</span>
+            <span className="text-gray-700 font-bold">{order.ghatJamaSubcategory || '-'}</span>
+          </div>
+          <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>
             <span className="text-gray-700 font-semibold">{order.karigar || '-'}</span>
           </div>
@@ -202,16 +230,26 @@ const GhatJamaHistory = ({ orders, onEditClick }) => {
             <span className="text-gray-700">{order.ghatJamaRemarks || '-'}</span>
           </div>
           <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Fine Weight</span>
+            <span className="text-gray-700 font-bold">{order.fineWeight || '-'} g</span>
+          </div>
+          <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Total Weight</span>
             <span className="text-gray-700 font-bold">{order.totalWeight || '-'} g</span>
           </div>
         </div>
-        <div className="pt-2 border-t border-slate-100 mt-1">
+        <div className="pt-2 border-t border-slate-100 mt-1 flex gap-2">
           <button
             onClick={() => onEditClick(order)}
-            className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10px] font-bold hover:bg-amber-100 transition-all shadow-sm"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10px] font-bold hover:bg-amber-100 transition-all shadow-sm"
           >
             <Edit size={12} /> Edit Ghat Jama
+          </button>
+          <button
+            onClick={() => onPrintClick && onPrintClick(order)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[10px] font-bold hover:bg-blue-100 transition-all shadow-sm"
+          >
+            <Printer size={12} /> Print Slip
           </button>
         </div>
       </div>

@@ -111,31 +111,41 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
   const tableHeaders = [
     { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-32 min-w-[128px]' },
     { label: 'Order No', className: 'sticky left-32 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] font-bold' },
-    "Target Date",
+    "Planned Date",
     "LEFT Days",
     "Status",
     "Karigar Name",
     "MELTING",
-    "Product",
     "Total Weight",
     "Order Type",
     "Customer Name",
     "Category",
-    "Total Order Date",
-    "Karigar Delivery Date",
-    "Expected Date"
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date"
   ];
 
   const filteredOrders = useMemo(() => {
     const officeKarigars = new Set(
       karigars.filter(k => k.type === 'Office').map(k => k.name)
     );
-    return (orders || []).filter(
+    const result = (orders || []).filter(
       (order) => 
         order.orderStage?.toLowerCase() === 'in process' &&
         order.karigar &&
         officeKarigars.has(order.karigar)
     );
+    
+    result.sort((a, b) => {
+      const leftA = calculateLeftDays(a.expectedDeliveryDate);
+      const leftB = calculateLeftDays(b.expectedDeliveryDate);
+      const valA = leftA === '-' ? Infinity : Number(leftA);
+      const valB = leftB === '-' ? Infinity : Number(leftB);
+      return valA - valB;
+    });
+    
+    return result;
   }, [orders, karigars]);
 
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
@@ -195,14 +205,15 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
           ) : '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || '-'} g</td>
         <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate)}</td>
+        
+                <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.expectedDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
-        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate)}</td>
       </tr>
     );
   };
@@ -223,6 +234,10 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
             <span className="text-gray-700 font-bold">{order.company || '-'}</span>
           </div>
           <div>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Category</span>
+            <span className="text-gray-700 font-bold">{order.category || '-'}</span>
+          </div>
+          <div>
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Karigar</span>
             <span className="text-gray-700 font-semibold flex items-center gap-1.5">
               {order.karigar || '-'}
@@ -235,7 +250,7 @@ const MetalIssuePending = ({ orders, onIssueClick }) => {
             </span>
           </div>
           <div>
-            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Target Date</span>
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Planned Date</span>
             {order.currentStagePlannedDate ? (
               <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
                 new Date() > new Date(order.currentStagePlannedDate)

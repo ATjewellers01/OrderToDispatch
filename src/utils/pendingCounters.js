@@ -79,10 +79,17 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
   // 2. Follow Up
   counts['Follow Up'] = orders.filter(o => {
     const s = o.orderStage?.toLowerCase() || '';
-    const isDeliveredOrQC = s === 'delivered' || s === 'order cancel' || s === 'qc';
+    const isDeliveredOrCancelled = s === 'delivered' || s === 'order cancel';
+    
     const log = latestFollowUpMap.get(o.id) || latestFollowUpMap.get(o.orderNo);
-    const isCompletedStatus = log?.status === 'Ghat Jama Flw-up Done' || log?.status === 'Finished Jama';
-    return !isDeliveredOrQC && issuedIds.has(o.id) && !isCompletedStatus;
+    const latestStatus = log?.status?.toLowerCase();
+    const isFinishedOrGhat = latestStatus === 'finished jama' || latestStatus === 'ghat jama flw-up done';
+    
+    if (isDeliveredOrCancelled || isFinishedOrGhat || !issuedIds.has(o.id)) {
+      return false;
+    }
+
+    return true;
   }).length;
 
   // 3. QC1
@@ -91,7 +98,7 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
     if (o.status3 === 'QC Okay' && o.qc1Type === 'Complete') return false;
     const followUpLog = latestFollowUpMap.get(o.id) || latestFollowUpMap.get(o.orderNo);
     const isGhatJamaDone = followUpLog?.status === 'Ghat Jama Flw-up Done';
-    return o.orderStage === 'QC' && isGhatJamaDone;
+    return (o.orderStage === 'QC' || o.orderStage === 'QC1') && isGhatJamaDone;
   }).length;
 
   // 4. Ghat Jama
@@ -103,15 +110,20 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
 
   // 5. Meena Inhouse
   counts['Meena Inhouse'] = orders.filter(o => 
-    o.ghatJamaStatus === 'Complete' && 
-    o.ghatJamaType === 'Meena Inhouse' &&
+    (
+      (o.ghatJamaStatus === 'Complete' && o.ghatJamaType === 'Meena Inhouse') ||
+      (o.ePolishStatus === 'Complete' && o.ePolishType === 'Meena Inhouse')
+    ) &&
     (!o.meenaInhouseStatus || o.meenaInhouseStatus === '' || o.meenaInhouseStatus === 'Pending')
   ).length;
 
   // 6. Meena Outside
   counts['Meena Outside'] = orders.filter(o => 
     o.ghatJamaStatus === 'Complete' && 
-    o.ghatJamaType === 'Meena Outside' &&
+    (
+      o.ghatJamaType === 'Meena Outside' || 
+      (o.ePolishStatus === 'Complete' && o.ePolishType === 'Meena Outside')
+    ) &&
     (!o.meenaOutsideStatus || o.meenaOutsideStatus === '' || o.meenaOutsideStatus === 'Pending')
   ).length;
 
@@ -120,8 +132,9 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
     o.ghatJamaStatus === 'Complete' && 
     (
       o.ghatJamaType === 'Polish Inhouse' || 
-      (o.ghatJamaType === 'Meena Inhouse' && o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Polish Inhouse') ||
-      (o.ghatJamaType === 'Meena Outside' && o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Polish Inhouse')
+      (o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Polish Inhouse') ||
+      (o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Polish Inhouse') ||
+      (o.ePolishStatus === 'Complete' && o.ePolishType === 'Polish Inhouse')
     ) &&
     (!o.polishInhouseStatus || o.polishInhouseStatus === '' || o.polishInhouseStatus === 'Pending')
   ).length;
@@ -131,8 +144,9 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
     o.ghatJamaStatus === 'Complete' && 
     (
       o.ghatJamaType === 'Polish Outside' || 
-      (o.ghatJamaType === 'Meena Inhouse' && o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Polish Outside') ||
-      (o.ghatJamaType === 'Meena Outside' && o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Polish Outside')
+      (o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Polish Outside') ||
+      (o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Polish Outside') ||
+      (o.ePolishStatus === 'Complete' && o.ePolishType === 'Polish Outside')
     ) &&
     (!o.polishOutsideStatus || o.polishOutsideStatus === '' || o.polishOutsideStatus === 'Pending')
   ).length;
@@ -142,8 +156,9 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
     o.ghatJamaStatus === 'Complete' && 
     (
       o.ghatJamaType === 'Bangle Polish' || 
-      (o.ghatJamaType === 'Meena Inhouse' && o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Bangle Polish') ||
-      (o.ghatJamaType === 'Meena Outside' && o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Bangle Polish')
+      (o.meenaInhouseStatus === 'Complete' && o.meenaInhouseType === 'Bangle Polish') ||
+      (o.meenaOutsideStatus === 'Complete' && o.meenaOutsideType === 'Bangle Polish') ||
+      (o.ePolishStatus === 'Complete' && o.ePolishType === 'Bangle Polish')
     ) &&
     (!o.banglePolishStatus || o.banglePolishStatus === '' || o.banglePolishStatus === 'Pending')
   ).length;
@@ -164,7 +179,7 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
      o.meenaOutsideStatus === 'Complete' ||
      o.polishOutsideStatus === 'Complete' ||
      o.banglePolishStatus === 'Complete' ||
-     o.ePolishStatus === 'Complete') &&
+     (o.ePolishStatus === 'Complete' && o.ePolishType !== 'Meena Inhouse')) &&
     o.qc2Status !== 'QC Okay' &&
     o.status12 !== 'QC Okay'
   ).length;
@@ -176,7 +191,7 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
   ).length;
 
   // 13. Receipt (RD)
-  counts['Receipt'] = orders.filter(o => {
+  counts['Receipt Department'] = orders.filter(o => {
     if (o.receiptStatus === 'Done') return false;
     const isDispatched = o.dispatchStatus === 'Done';
     const followUpLog = latestFollowUpMap.get(o.id) || latestFollowUpMap.get(o.orderNo || o.orderNo);
@@ -194,12 +209,12 @@ export const getSidebarPendingCounts = (orders, metalIssues, followUpLogs) => {
   // 15. HUID/Label
   counts['Huid/Label'] = orders.filter(o => 
     (o.qc3Status === 'QC Ok' || o.qc3Status === 'QC Okay' || o.status15 === 'Complete') &&
-    !o.huidStatus
+    (!o.huidStatus || o.huidStatus === 'Sent To Huid' || o.huidStatus === 'Sent In Huid')
   ).length;
 
   // 16. Receive In Stock
   counts['Receive In Stock'] = orders.filter(o => 
-    (o.huidStatus === 'Huid Complete' || o.huidStatus === 'Sent In Huid' || o.huidStatus === 'No Huid' || o.status15 === 'Complete') &&
+    (o.huidStatus === 'Huid Complete' || o.huidStatus === 'Sent In Huid' || o.huidStatus === 'No Huid' || o.huidStatus === 'No HUID' || o.status15 === 'Complete') &&
     !o.receiveInStockStatus
   ).length;
 

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import DataTable from '../../components/DataTable';
 import { getOrderTypeColor } from '../../utils/orderTypeUtils';
+import { formatTargetDate, calculatePlannedDate, calculateDelay } from '../../utils/tatCalculator';
 
 const parseDateString = (str) => {
   if (!str) return null;
@@ -167,9 +168,14 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
     "Done Date", "Status", "Remarks",
     "Order Type",
     "Metal Issue Status", "Paid Weight", "Metal Issue Type",
-    "Target Date",
+    "Calling Date", "Next Date Of Call",
     "Old Karigar Name", "Old Karigar Del. Date", "Old Exp. Del. Date",
-    "New Karigar Name", "Karigar Del. Date", "Exp. Del. Date"
+    "New Karigar Name", "Karigar Del. Date", "Exp. Del. Date",
+    "Category",
+    "Order Rec. Date",
+    "Delivery Date",
+    "Expected Delivery Date",
+    "Karigar Delivery Date"
   ];
 
   const renderRow = (log, idx) => {
@@ -208,8 +214,64 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
         <td className="px-4 py-3 text-center text-xs font-semibold text-amber-600 whitespace-nowrap">
           {issue?.metalIssueType || '-'}
         </td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
-          {log.nextDate ? formatDateTime(log.nextDate) : '-'}
+        <td className="px-4 py-3 text-center text-xs whitespace-nowrap">
+          {(() => {
+            if (!issue?.timestamp) return <span className="text-gray-400">-</span>;
+            let callingDateStr = null;
+            if (log && (log.nextDate || log.nextCallDate)) {
+              const nextD = parseDateString(log.nextDate || log.nextCallDate);
+              if (nextD && !isNaN(nextD.getTime())) {
+                const cDate = new Date(nextD);
+                cDate.setDate(cDate.getDate() - 1);
+                callingDateStr = cDate.toISOString();
+              }
+            }
+            if (!callingDateStr) {
+              const kDate = order?.karigarDeliveryDate ? parseDateString(order.karigarDeliveryDate) : (() => {
+                const exp = parseDateString(order?.expectedDeliveryDate);
+                if (exp && !isNaN(exp.getTime())) {
+                  const b3 = new Date(exp);
+                  b3.setDate(b3.getDate() - 3);
+                  return b3;
+                }
+                return null;
+              })();
+              if (kDate && !isNaN(kDate.getTime())) {
+                const cDate = new Date(kDate);
+                cDate.setDate(cDate.getDate() - 3);
+                callingDateStr = cDate.toISOString();
+              }
+            }
+            if (!callingDateStr) return <span className="text-gray-400">-</span>;
+
+            let delayDisplay = null;
+            let isPastDue = false;
+            if (callingDateStr) {
+              const tDate = new Date();
+              tDate.setHours(0,0,0,0);
+              const cDateObj = new Date(callingDateStr);
+              cDateObj.setHours(0,0,0,0);
+              if (tDate > cDateObj) {
+                isPastDue = true;
+                const delayObj = calculateDelay(callingDateStr, new Date().toISOString());
+                if (delayObj.isDelayed) delayDisplay = delayObj.display;
+              }
+            }
+
+            return (
+              <span className={`px-2 py-1 rounded font-bold border ${
+                isPastDue
+                  ? 'bg-red-100 text-red-800 border-red-200'
+                  : 'bg-blue-100 text-blue-800 border-blue-200'
+              }`}>
+                {formatTargetDate(callingDateStr)}
+                {delayDisplay && <span className="ml-1 text-[9px] text-red-600 font-black">({delayDisplay})</span>}
+              </span>
+            );
+          })()}
+        </td>
+        <td className="px-4 py-3 text-center text-xs text-red-600 whitespace-nowrap font-bold">
+          {log.nextDate ? formatDate(log.nextDate) : '-'}
         </td>
 
         {/* ── OLD values (before change) ── */}
@@ -257,6 +319,23 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
             <span className="text-gray-500">{log.expectedDate ? formatDate(log.expectedDate) : '-'}</span>
           )}
         </td>
+        
+        {/* NEW ADDED COLUMNS */}
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order?.category || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(order?.orderRecDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">{formatDate(order?.deliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs font-bold text-gray-800 whitespace-nowrap">{formatDate(order?.expectedDeliveryDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap">
+          {order?.karigarDeliveryDate ? formatDate(order?.karigarDeliveryDate) : (() => {
+            const exp = parseDateString(order?.expectedDeliveryDate);
+            if (exp && !isNaN(exp.getTime())) {
+              const before3Days = new Date(exp);
+              before3Days.setDate(before3Days.getDate() - 3);
+              return formatDate(before3Days);
+            }
+            return '-';
+          })()}
+        </td>
       </tr>
     );
   };
@@ -264,6 +343,7 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
   const renderCard = (log, idx) => {
     const isKarigarChange = log.status === 'Change Karigar And Dates';
     const order = orderMap.get(log.orderId) || orderMap.get(log.orderNo);
+    const issue = metalIssueMap.get(log.orderId) || metalIssueMap.get(log.orderNo);
     return (
       <div key={log.id || idx} className="bg-white rounded-xl border border-amber-50 shadow-sm p-4 space-y-3 transition-all hover:shadow-md hover:border-amber-100">
         <div className="flex justify-between items-center pb-2 border-b border-slate-50">
@@ -285,10 +365,69 @@ const FollowUpHistory = ({ historyLogs, filters, metalIssues, orders }) => {
             <span className="text-gray-400 uppercase text-[8px] tracking-tight block">Remarks</span>
             <span className="text-gray-700 font-semibold">{log.remarks || '-'}</span>
           </div>
+          {(() => {
+            if (issue?.timestamp) {
+              let callingDateStr = null;
+              if (log && (log.nextDate || log.nextCallDate)) {
+                const nextD = parseDateString(log.nextDate || log.nextCallDate);
+                if (nextD && !isNaN(nextD.getTime())) {
+                  const cDate = new Date(nextD);
+                  cDate.setDate(cDate.getDate() - 1);
+                  callingDateStr = cDate.toISOString();
+                }
+              }
+              if (!callingDateStr) {
+                const kDate = order?.karigarDeliveryDate ? parseDateString(order.karigarDeliveryDate) : (() => {
+                  const exp = parseDateString(order?.expectedDeliveryDate);
+                  if (exp && !isNaN(exp.getTime())) {
+                    const b3 = new Date(exp);
+                    b3.setDate(b3.getDate() - 3);
+                    return b3;
+                  }
+                  return null;
+                })();
+                if (kDate && !isNaN(kDate.getTime())) {
+                  const cDate = new Date(kDate);
+                  cDate.setDate(cDate.getDate() - 3);
+                  callingDateStr = cDate.toISOString();
+                }
+              }
+              if (!callingDateStr) return null;
+
+              let delayDisplay = null;
+              let isPastDue = false;
+              if (callingDateStr) {
+                const tDate = new Date();
+                tDate.setHours(0,0,0,0);
+                const cDateObj = new Date(callingDateStr);
+                cDateObj.setHours(0,0,0,0);
+                if (tDate > cDateObj) {
+                  isPastDue = true;
+                  const delayObj = calculateDelay(callingDateStr, new Date().toISOString());
+                  if (delayObj.isDelayed) delayDisplay = delayObj.display;
+                }
+              }
+
+              return (
+                <div>
+                  <span className="text-gray-400 uppercase text-[8px] block">Calling Date</span>
+                  <span className={`px-1 py-0.5 rounded text-[9px] font-bold border inline-block ${
+                    isPastDue
+                      ? 'bg-red-100 text-red-800 border-red-200'
+                      : 'bg-blue-100 text-blue-800 border-blue-200'
+                  }`}>
+                    {formatTargetDate(callingDateStr)}
+                    {delayDisplay && <span className="ml-1 text-[8px] text-red-600 font-black">({delayDisplay})</span>}
+                  </span>
+                </div>
+              );
+            }
+            return null;
+          })()}
           {log.nextDate && (
             <div>
               <span className="text-gray-400 uppercase text-[8px] block">Next Call</span>
-              <span className="text-gray-700 font-bold">{formatDate(log.nextDate)}</span>
+              <span className="text-red-600 font-bold">{formatDate(log.nextDate)}</span>
             </div>
           )}
           {isKarigarChange && (

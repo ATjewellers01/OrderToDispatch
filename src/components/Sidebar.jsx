@@ -76,7 +76,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/e-polish', icon: Zap, label: 'E-Polish' },
     { path: '/qc2', icon: BadgeCheck, label: 'QC2' },
     { path: '/dispatch', icon: Truck, label: 'Dispatch' },
-    { path: '/receipt', icon: CheckCircle, label: 'Receipt' },
+    { path: '/receipt', icon: CheckCircle, label: 'Receipt Department' },
     { path: '/qc3', icon: CheckSquare, label: 'QC3' },
     { path: '/huid-label', icon: Tags, label: 'Huid/Label' },
     { path: '/receive-in-stock', icon: Warehouse, label: 'Receive In Stock' },
@@ -103,7 +103,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/e-polish', icon: Zap, label: 'E-Polish' },
     { path: '/qc2', icon: BadgeCheck, label: 'QC2' },
     { path: '/dispatch', icon: Truck, label: 'Dispatch' },
-    { path: '/receipt', icon: CheckCircle, label: 'Receipt' },
+    { path: '/receipt', icon: CheckCircle, label: 'Receipt Department' },
     { path: '/qc3', icon: CheckSquare, label: 'QC3' },
     { path: '/huid-label', icon: Tags, label: 'Huid/Label' },
     { path: '/receive-in-stock', icon: Warehouse, label: 'Receive In Stock' },
@@ -157,7 +157,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-full w-64 sm:w-72 lg:w-56 2xl:w-60 bg-white border-r border-amber-100 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed top-0 left-0 h-full w-64 sm:w-72 lg:w-64 2xl:w-72 bg-white border-r border-amber-100 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Logo Section */}
           <div className="py-2 px-3 border-b border-amber-100 flex items-center justify-between">
