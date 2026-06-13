@@ -41,8 +41,8 @@ const SearchableDropdown = ({
   );
 
   // Find the label for the current value
-  const selectedOption = allOptions.find(opt => opt.value === value);
-  const selectedOptions = isMulti && Array.isArray(value) ? allOptions.filter(opt => value.includes(opt.value)) : [];
+  const selectedOption = allOptions.find(opt => String(opt.value).toLowerCase().trim() === String(value || '').toLowerCase().trim());
+  const selectedOptions = isMulti && Array.isArray(value) ? allOptions.filter(opt => value.map(v => String(v).toLowerCase().trim()).includes(String(opt.value).toLowerCase().trim())) : [];
   
   const getTriggerText = () => {
     if (isMulti) {

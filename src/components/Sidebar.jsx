@@ -10,6 +10,7 @@ import {
   Database,
   ClipboardList,
   CheckSquare,
+  ListChecks,
   ChevronDown,
   ChevronUp,
   ShieldCheck,
@@ -61,6 +62,8 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const adminMenuItems = [
     { path: '/dashboard', icon: LayoutGrid, label: 'Dashboard' },
+    { path: '/meena-submit', icon: ClipboardCheck, label: 'Meena Submit' },
+    { path: '/polish-submit', icon: ListChecks, label: 'Polish Submit' },
     { path: '/on-time', icon: TrendingUp, label: 'On Time Delivery' },
 
     { path: '/order-history', icon: History, label: 'Order Management' },
@@ -88,6 +91,8 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const employeeMenuItems = [
     { path: '/dashboard', icon: LayoutGrid, label: 'Dashboard' },
+    { path: '/meena-submit', icon: ClipboardCheck, label: 'Meena Submit' },
+    { path: '/polish-submit', icon: ListChecks, label: 'Polish Submit' },
     { path: '/on-time', icon: TrendingUp, label: 'On Time Delivery' },
 
     { path: '/order-history', icon: History, label: 'Order Management' },

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, Plus, Filter, Download, FileText, RotateCcw, Edit, Calendar, Eye, Briefcase, Factory } from 'lucide-react';
+import { Search, Plus, Filter, Download, Upload, FileText, RotateCcw, Edit, Calendar, Eye, Briefcase, Factory, Trash2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import OrderForm from './OrderForm';
@@ -163,6 +163,14 @@ const OrderDetails = () => {
     toast.success('Order updated successfully');
   };
 
+  const handleDeleteOrder = (orderId) => {
+    if (window.confirm('Are you sure you want to delete this order?')) {
+      const updated = orders.filter(o => o.id !== orderId);
+      saveOrders(updated);
+      toast.success('Order deleted successfully');
+    }
+  };
+
   const calculateLeftDays = (deliveryDateStr) => {
     if (!deliveryDateStr) return '-';
     const today = new Date();
@@ -300,8 +308,9 @@ const OrderDetails = () => {
   );
 
   const tableHeaders = [
-    { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-20 min-w-[80px]' },
-    { label: 'Order Number', className: 'sticky left-20 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb]' },
+    { label: 'Action', className: 'sticky left-0 bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb] w-[90px] min-w-[90px]' },
+    { label: 'Order Number', className: 'sticky left-[90px] bg-gray-50 z-20 shadow-[1px_0_0_#e5e7eb]' },
+    "Order No. Reference",
     "Timestamp",
     "Live Left Days",
     "Company Name",
@@ -363,21 +372,32 @@ const OrderDetails = () => {
     const leftDays = calculateLeftDays(order.expectedDeliveryDate);
     return (
       <tr key={order.id || idx} className="hover:bg-amber-50/30 transition-colors border-b border-gray-100 group">
-        <td className="px-4 py-3 sticky left-0 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap w-20 min-w-[80px]">
-          <button
-            onClick={() => {
-              setSelectedOrderToEdit(order);
-              setIsEditModalOpen(true);
-            }}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-md border border-amber-200 hover:bg-amber-100 transition-colors text-xs font-semibold"
-            title="Edit Order"
-          >
-            <Edit size={12} />
-            <span>Edit</span>
-          </button>
+        <td className="px-2 py-3 sticky left-0 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap w-[90px] min-w-[90px]">
+          <div className="flex items-center justify-center gap-1.5">
+            <button
+              onClick={() => {
+                setSelectedOrderToEdit(order);
+                setIsEditModalOpen(true);
+              }}
+              className="p-1.5 bg-amber-50 text-amber-700 rounded-md border border-amber-200 hover:bg-amber-100 transition-colors"
+              title="Edit Order"
+            >
+              <Edit size={14} />
+            </button>
+            <button
+              onClick={() => handleDeleteOrder(order.id)}
+              className="p-1.5 bg-red-50 text-red-600 rounded-md border border-red-200 hover:bg-red-100 transition-colors"
+              title="Delete Order"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
         </td>
-        <td className="px-4 py-3 font-bold text-gray-900 sticky left-20 bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap">
+        <td className="px-4 py-3 font-bold text-gray-900 sticky left-[90px] bg-white group-hover:bg-amber-50 z-10 shadow-[1px_0_0_#e5e7eb] text-center whitespace-nowrap">
           {order.orderNo || '-'}
+        </td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">
+          {order.orderNoReference || '-'}
         </td>
         <td className="px-4 py-3 text-center text-xs text-gray-500 whitespace-nowrap font-medium">
           {formatTimestamp(order.timestamp, order.id)}
@@ -466,7 +486,7 @@ const OrderDetails = () => {
       <div key={order.id || idx} className="bg-white rounded-xl border border-amber-50 shadow-sm p-4 space-y-3 transition-all hover:shadow-md hover:border-amber-100">
         <div className="flex justify-between items-center pb-2 border-b border-slate-50">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-gray-900 uppercase truncate max-w-[150px]">Order: {order.orderNo || '-'}</span>
+            <span className="text-xs font-bold text-gray-900 uppercase truncate max-w-[150px]">Order: {order.orderNo || '-'} {order.orderNoReference ? `(${order.orderNoReference})` : ''}</span>
           </div>
           <div className="flex gap-1">
             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase border ${getStageColor(order.orderStage)}`} title="Process Stage">
@@ -523,6 +543,13 @@ const OrderDetails = () => {
             title="Edit Order"
           >
             <Edit size={14} />
+          </button>
+          <button
+            onClick={() => handleDeleteOrder(order.id)}
+            className="flex-1 flex items-center justify-center py-1.5 bg-red-50 text-red-600 rounded-lg border border-red-200 shadow-sm active:scale-95 transition-transform hover:bg-red-100"
+            title="Delete Order"
+          >
+            <Trash2 size={14} />
           </button>
           <button
             onClick={() => setViewingImages({ orderNo: order.orderNo, images: order.images || [] })}
@@ -582,6 +609,14 @@ const OrderDetails = () => {
               title="Clear Filters"
             >
               <RotateCcw size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); navigate('/dump-order'); }}
+              className="lg:hidden flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-lg h-[32px] w-[32px] flex-shrink-0 shadow-sm active:scale-95"
+              title="Dump Order"
+            >
+              <Upload size={16} />
             </button>
             <button
               onClick={() => setIsModalOpen(true)}
@@ -661,6 +696,14 @@ const OrderDetails = () => {
             <RotateCcw size={16} />
           </button>
 
+          <button 
+            type="button"
+            onClick={(e) => { e.preventDefault(); navigate('/dump-order'); }}
+            className="hidden lg:flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold shadow-sm hover:shadow-md transition-all text-xs md:text-sm whitespace-nowrap h-[32px] md:h-[38px] flex-shrink-0 lg:ml-2"
+          >
+            <Upload size={16} />
+            Dump Order
+          </button>
           <button 
             onClick={() => setIsModalOpen(true)}
             className="hidden lg:flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold shadow-sm hover:shadow-md transition-all text-xs md:text-sm whitespace-nowrap h-[32px] md:h-[38px] flex-shrink-0 lg:ml-2"

@@ -495,16 +495,30 @@ const OrderFormEdit = ({ isOpen, onClose, onSave, order }) => {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
         {/* Row 1 */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">Order.No <span className="text-red-500">*</span></label>
-          <input
-            readOnly
-            required
-            type="text"
-            name="orderNo"
-            value={formData.orderNo}
-            className="w-full p-2 bg-gray-150 border border-gray-200 rounded-lg outline-none text-xs text-gray-500 cursor-not-allowed select-none"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Order.No <span className="text-red-500">*</span></label>
+            <input
+              readOnly
+              required
+              type="text"
+              name="orderNo"
+              value={formData.orderNo}
+              className="w-full p-2 bg-gray-150 border border-gray-200 rounded-lg outline-none text-xs text-gray-500 cursor-not-allowed select-none"
+            />
+          </div>
+          {formData.orderNoReference && (
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Order No. Reference</label>
+              <input
+                type="text"
+                name="orderNoReference"
+                value={formData.orderNoReference}
+                onChange={handleInputChange}
+                className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-xs"
+              />
+            </div>
+          )}
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

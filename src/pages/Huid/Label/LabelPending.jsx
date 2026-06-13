@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ClipboardCheck } from 'lucide-react';
 import DataTable from '../../../components/DataTable';
 import { formatTargetDate } from '../../../utils/tatCalculator';
@@ -91,6 +91,7 @@ const getQC3StatusColor = (status) => {
   }
 };
 
+
 const LabelPending = ({ orders, onActionClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
@@ -101,9 +102,14 @@ const LabelPending = ({ orders, onActionClick }) => {
     { label: 'Planned Date', className: 'text-center' },
     { label: 'QC3 Status', className: 'text-center' },
     { label: 'QC3 Remarks', className: 'text-center' },
+    { label: 'Huid Status', className: 'text-center bg-amber-50/50' },
+    { label: 'Labeling Status', className: 'text-center bg-amber-50/50' },
+    { label: 'Sent Company', className: 'text-center bg-amber-50/50' },
+    { label: 'Sent Pcs', className: 'text-center bg-amber-50/50' },
+    { label: 'Huid Remarks', className: 'text-center bg-amber-50/50' },
     { label: 'LEFT Days', className: 'text-center' },
     { label: 'Karigar Name', className: 'text-center' },
-    { label: 'Melting', className: 'text-center' },
+    { label: 'Melting', className: 'text-center' },
     { label: "Metal Issue Type", className: 'text-center' },
     { label: 'Total Weight', className: 'text-center' },
     { label: 'Order Type', className: 'text-center' },
@@ -162,20 +168,24 @@ const LabelPending = ({ orders, onActionClick }) => {
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap max-w-[150px] truncate" title={order.qc3Remarks}>
           {order.qc3Remarks || '-'}
         </td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap bg-amber-50/30 text-amber-900">{order.huidStatus || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap bg-amber-50/30 text-amber-900">{order.labelingStatus || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs whitespace-nowrap bg-amber-50/30">{order.sentCompanyName || order.partyName || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs font-bold whitespace-nowrap bg-amber-50/30">{order.sentHuidLabelPcs ?? order.labelingNo ?? '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap max-w-[150px] truncate bg-amber-50/30" title={order.huidRemarks}>{order.huidRemarks || '-'}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap font-medium text-xs">
           <span className={`px-2.5 py-1 rounded-full font-bold border ${leftDays < 0 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200'}`}>
             {leftDays} Days
           </span>
         </td>
         <td className="px-4 py-3 text-center text-xs font-semibold text-gray-700 whitespace-nowrap">{order.karigar || order.karigarName || '-'}</td>
-        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.melting || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-amber-600 font-semibold whitespace-nowrap">{order.metalIssueType || '-'}</td>
         <td className="px-4 py-3 text-center text-xs font-bold text-gray-900 whitespace-nowrap">{order.totalWeight || order.weight || '-'} {order.totalWeight ? 'g' : ''}</td>
         <td className="px-4 py-3 text-center whitespace-nowrap"><span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getOrderTypeColor(order.orderType)}`}>{order.orderType || '-'}</span></td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap font-bold">{order.company || order.customerName || '-'}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{order.category || '-'}</td>
-        
-                <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
+        <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.orderRecDate || order.orderDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.deliveryDate)}</td>
         <td className="px-4 py-3 text-center text-xs font-semibold whitespace-nowrap">{formatDate(order.expectedDeliveryDate || order.expectedDate)}</td>
         <td className="px-4 py-3 text-center text-xs text-gray-600 whitespace-nowrap">{formatDate(order.karigarDeliveryDate)}</td>
@@ -227,10 +237,22 @@ const LabelPending = ({ orders, onActionClick }) => {
             <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Total Weight</span>
             <span className="text-gray-700 font-bold">{order.totalWeight || order.weight || '-'} {order.totalWeight ? 'g' : ''}</span>
           </div>
+          <div className="text-center">
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Huid Status</span>
+            <span className="text-amber-700 font-bold">{order.huidStatus || '-'}</span>
+          </div>
+          <div className="text-center">
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Labeling</span>
+            <span className="text-amber-700 font-bold">{order.labelingStatus || '-'}</span>
+          </div>
+          <div className="text-center col-span-2">
+            <span className="text-gray-400 block uppercase text-[8px] tracking-tight">Sent Company / Pcs</span>
+            <span className="text-amber-700 font-semibold">{(order.sentCompanyName || order.partyName || '-')} ({order.sentHuidLabelPcs ?? order.labelingNo ?? '-'} Pcs)</span>
+          </div>
         </div>
-        {order.qc3Remarks && (
+        {order.huidRemarks && (
           <div className="text-[10px] text-gray-500 border-t border-slate-100 pt-1.5 truncate text-center">
-            <strong>QC3 Remarks: </strong>{order.qc3Remarks}
+            <strong>Huid Remarks: </strong>{order.huidRemarks}
           </div>
         )}
         <div className="pt-2 border-t border-slate-100 mt-1">

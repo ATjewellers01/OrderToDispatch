@@ -9,14 +9,17 @@ import Master from './pages/Master/Master';
 import Ontime from './pages/On Time/Ontime';
 import Dashboard from './pages/Dashboard/Dashboard';
 import OrderHistory from './pages/Order/OrderHistory';
+import DumpPage from './pages/Order/DumpPage';
 import MetalIssue from './pages/MetalIssue/MetalIssue';
 import FollowUp from './pages/FollowUp/FollowUp';
 import QC1 from './pages/QC1/QC1';
 import GhatJama from './pages/GhatJama/GhatJama';
 import MeenaInhouse from './pages/MeenaInhouse/MeenaInhouse';
 import MeenaOutside from './pages/MeenaOutside/MeenaOutside';
+import MeenaSubmit from './pages/MeenaCheckSubmit/MeenaSubmit';
 import PolishInhouse from './pages/PolishInhouse/PolishInhouse';
 import PolishOutside from './pages/PolishOutside/PolishOutside';
+import PolishSubmit from './pages/PolishCheckSubmit/PolishSubmit';
 import BanglePolish from './pages/BanglePolish/BanglePolish';
 import EPolish from './pages/EPolish/EPolish';
 import QC2 from './pages/QC2/QC2';
@@ -66,14 +69,17 @@ function App() {
             <Route path="master" element={<Master />} />
 
             <Route path="order-history" element={<OrderHistory />} />
+            <Route path="dump-order" element={<DumpPage />} />
             <Route path="metal-issue" element={<MetalIssue />} />
             <Route path="follow-up" element={<FollowUp />} />
             <Route path="qc1" element={<QC1 />} />
             <Route path="ghat-jama" element={<GhatJama />} />
             <Route path="meena-inhouse" element={<MeenaInhouse />} />
             <Route path="meena-outside" element={<MeenaOutside />} />
+            <Route path="meena-submit" element={<MeenaSubmit />} />
             <Route path="polish-inhouse" element={<PolishInhouse />} />
             <Route path="polish-outside" element={<PolishOutside />} />
+            <Route path="polish-submit" element={<PolishSubmit />} />
             <Route path="bangle-polish" element={<BanglePolish />} />
             <Route path="e-polish" element={<EPolish />} />
             <Route path="qc2" element={<QC2 />} />

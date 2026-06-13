@@ -32,7 +32,7 @@ const CustomDropdown = ({
   const listRef = useRef(null);
 
   const allOptions = [{ value: '', label: placeholder }, ...options];
-  const selectedOption = allOptions.find(opt => opt.value === value);
+  const selectedOption = allOptions.find(opt => String(opt.value).toLowerCase().trim() === String(value || '').toLowerCase().trim());
 
   const hasAddButton = !!onAdd;
   const totalItemCount = allOptions.length + (hasAddButton ? 1 : 0);
@@ -174,8 +174,8 @@ const CustomDropdown = ({
         onClick={handleToggle}
         className={`w-full bg-gray-50 border border-gray-200 ${rounded} px-2 py-1 flex justify-between items-center cursor-pointer hover:border-amber-500 ${height} shadow-sm group outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:border-gray-200`}
       >
-        <span className={`text-xs truncate ${selectedOption && selectedOption.value !== '' ? 'text-gray-900' : 'text-gray-400 font-medium'}`}>
-          {selectedOption ? selectedOption.label : placeholder}
+        <span className={`text-xs truncate ${((selectedOption && selectedOption.value !== '') || (value && value !== '')) ? 'text-gray-900' : 'text-gray-400 font-medium'}`}>
+          {selectedOption && selectedOption.value !== '' ? selectedOption.label : (value || placeholder)}
         </span>
         <ChevronDown
           size={14}
